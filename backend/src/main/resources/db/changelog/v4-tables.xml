@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="4-tables" author="zitoun">
+        <insert tableName="restaurant_table"><column name="number" valueNumeric="1"/><column name="seats" valueNumeric="2"/><column name="status" value="FREE"/></insert>
+        <insert tableName="restaurant_table"><column name="number" valueNumeric="2"/><column name="seats" valueNumeric="4"/><column name="status" value="FREE"/></insert>
+        <insert tableName="restaurant_table"><column name="number" valueNumeric="3"/><column name="seats" valueNumeric="4"/><column name="status" value="FREE"/></insert>
+        <insert tableName="restaurant_table"><column name="number" valueNumeric="4"/><column name="seats" valueNumeric="6"/><column name="status" value="FREE"/></insert>
+        <insert tableName="restaurant_table"><column name="number" valueNumeric="5"/><column name="seats" valueNumeric="2"/><column name="status" value="FREE"/></insert>
+        <insert tableName="restaurant_table"><column name="number" valueNumeric="6"/><column name="seats" valueNumeric="4"/><column name="status" value="FREE"/></insert>
+        <insert tableName="restaurant_table"><column name="number" valueNumeric="7"/><column name="seats" valueNumeric="4"/><column name="status" value="FREE"/></insert>
+        <insert tableName="restaurant_table"><column name="number" valueNumeric="8"/><column name="seats" valueNumeric="8"/><column name="status" value="FREE"/></insert>
+        <insert tableName="restaurant_table"><column name="number" valueNumeric="9"/><column name="seats" valueNumeric="2"/><column name="status" value="FREE"/></insert>
+        <insert tableName="restaurant_table"><column name="number" valueNumeric="10"/><column name="seats" valueNumeric="4"/><column name="status" value="FREE"/></insert>
+    </changeSet>
+
+</databaseChangeLog>
