@@ -1513,7 +1513,7 @@ button {
 const MENU = [
   // ── ENTRÉES ──
   {id:1,  name:'Brick thon à l\'oeuf',     price:4,    cat:'entree',   emoji:'🥚', avail:true},
-  {id:2,  name:'Fricassée',                price:3,    cat:'entree',   emoji:'🫓', avail:true},
+  {id:2,  name:'Fricassée',                price:3,    cat:'entree',   emoji:'🥪', avail:true},
   {id:3,  name:'Salade au choix',          price:7,    cat:'entree',   emoji:'🥗', avail:true},
   // ── SANDWICHS ──
   {id:4,  name:'Tunisien',                 price:8,    cat:'sandwich', emoji:'🥖', avail:true},
@@ -1528,35 +1528,33 @@ const MENU = [
   {id:13, name:'Mléwi Thon',               price:7,    cat:'sandwich', emoji:'🫓', avail:true},
   {id:14, name:'Mléwi Escalope',           price:8,    cat:'sandwich', emoji:'🍗', avail:true},
   {id:15, name:'Mléwi Viande Hachée',      price:9,    cat:'sandwich', emoji:'🥩', avail:true},
-  // ── PLATS ──
-  {id:16, name:'Panuozzo La Perla',        price:12,   cat:'sandwich',     emoji:'🍞', avail:true},
-  {id:17, name:'Panuozzo Mexicain',        price:13,   cat:'sandwich',     emoji:'🌶️', avail:true},
-  {id:18, name:'Libanais Escalope',        price:9,    cat:'sandwich',     emoji:'🥙', avail:true},
-  {id:19, name:'Baguette Thon',            price:9,    cat:'sandwich',     emoji:'🥖', avail:true},
-  {id:20, name:'Baguette Escalope',        price:10,   cat:'sandwich',     emoji:'🥖', avail:true},
-  {id:21, name:'Baguette Viande Hachée',   price:11,   cat:'sandwich',     emoji:'🥖', avail:true},
-  {id:22, name:'Makloub Thon',             price:9,    cat:'sandwich',     emoji:'🫔', avail:true},
-  {id:23, name:'Makloub Escalope',         price:10,   cat:'sandwich',     emoji:'🍗', avail:true},
-  {id:24, name:'Makloub Viande Hachée',    price:11,   cat:'sandwich',     emoji:'🥩', avail:true},
-  {id:25, name:'Cornet Thon',              price:10,   cat:'sandwich',     emoji:'🌮', avail:true},
-  {id:26, name:'Cornet Escalope',          price:11,   cat:'sandwich',     emoji:'🍗', avail:true},
-  {id:27, name:'Cornet Viande Hachée',     price:11,   cat:'sandwich',     emoji:'🥩', avail:true},
-  // ── DESSERTS / PIZZAS ──
-  {id:28, name:'Pizza Margarita',          price:7,    cat:'dessert',  emoji:'🍕', avail:true},
-  {id:29, name:'Pizza au Thon',            price:8,    cat:'dessert',  emoji:'🍕', avail:true},
-  {id:30, name:'Pizza Escalope',           price:9,    cat:'dessert',  emoji:'🍕', avail:true},
-  {id:31, name:'Pizza Viande Hachée',      price:10,   cat:'dessert',  emoji:'🍕', avail:true},
+  // ── NOS PAIN ET PIZZAS ──
+  {id:16, name:'Panuozzo La Perla',        price:12,   cat:'plat',    emoji:'🥪', avail:true},
+  {id:17, name:'Panuozzo Mexicain',        price:13,   cat:'plat',    emoji:'🌶️', avail:true},
+  {id:18, name:'Libanais Escalope',        price:9,    cat:'plat',    emoji:'🥙', avail:true},
+  {id:19, name:'Baguette Thon',            price:9,    cat:'plat',    emoji:'🥖', avail:true},
+  {id:20, name:'Baguette Escalope',        price:10,   cat:'plat',    emoji:'🥖', avail:true},
+  {id:21, name:'Baguette Viande Hachée',   price:11,   cat:'plat',    emoji:'🥖', avail:true},
+  {id:22, name:'Makloub Thon',             price:9,    cat:'plat',    emoji:'🫔', avail:true},
+  {id:23, name:'Makloub Escalope',         price:10,   cat:'plat',    emoji:'🍗', avail:true},
+  {id:24, name:'Makloub Viande Hachée',    price:11,   cat:'plat',    emoji:'🥩', avail:true},
+  {id:25, name:'Cornet Thon',              price:10,   cat:'plat',    emoji:'🌮', avail:true},
+  {id:26, name:'Cornet Escalope',          price:11,   cat:'plat',    emoji:'🍗', avail:true},
+  {id:27, name:'Cornet Viande Hachée',     price:11,   cat:'plat',    emoji:'🥩', avail:true},
+  {id:28, name:'Pizza Margarita',          price:7,    cat:'plat',    emoji:'🍕', avail:true},
+  {id:29, name:'Pizza au Thon',            price:8,    cat:'plat',    emoji:'🍕', avail:true},
+  {id:30, name:'Pizza Escalope',           price:9,    cat:'plat',    emoji:'🍕', avail:true},
+  {id:31, name:'Pizza Viande Hachée',      price:10,   cat:'plat',    emoji:'🍕', avail:true},
   // ── BOISSONS ──
-  {id:32, name:'Eau minérale & Sodas',     price:1.80, cat:'boisson',  emoji:'🥤', avail:true},
-  {id:33, name:'Citronnade maison',        price:4,    cat:'boisson',  emoji:'🍋', avail:true},
+  {id:32, name:'Eau minérale & Sodas',     price:1.80, cat:'boisson', emoji:'🥤', avail:true},
+  {id:33, name:'Citronnade maison',        price:4,    cat:'boisson', emoji:'🍋', avail:true},
 ];
 const CATS = [
-  {k:'all',      l:'Tout',      e:'✦'},
-  {k:'entree',   l:'Entrées',   e:'🥗'},
-  {k:'plat',     l:'Plats',     e:'🥩'},
-  {k:'sandwich', l:'Sandwichs', e:'🥙'},
-  {k:'dessert',  l:'Desserts',  e:'🍮'},
-  {k:'boisson',  l:'Boissons',  e:'🥤'},
+  {k:'all',      l:'Tout',           e:'✦'},
+  {k:'entree',   l:'Entrées',        e:'🥗'},
+  {k:'sandwich', l:'Sandwichs',      e:'🥙'},
+  {k:'plat',     l:'Pain & Pizzas',  e:'🍕'},
+  {k:'boisson',  l:'Boissons',       e:'🥤'},
 ];
 const TABLES = [
   {n:1,s:2,st:'free'},    {n:2,s:4,st:'occupied'},
