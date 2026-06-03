@@ -6,20 +6,20 @@ import { MenuItem, OrderItem, Order } from '../../models/restaurant.models';
 import { RestaurantService } from '../../services/restaurant.service';
 
 const MOCK_MENU: MenuItem[] = [
-  { id: 1, name: 'Salade César', price: 12, category: 'entree', emoji: '🥗', available: true },
-  { id: 2, name: 'Soupe à l\'oignon', price: 9, category: 'entree', emoji: '🍲', available: true },
-  { id: 3, name: 'Tartare de saumon', price: 15, category: 'entree', emoji: '🐟', available: true },
-  { id: 4, name: 'Steak frites', price: 24, category: 'plat', emoji: '🥩', available: true },
-  { id: 5, name: 'Poulet rôti', price: 19, category: 'plat', emoji: '🍗', available: true },
-  { id: 6, name: 'Pâtes carbonara', price: 17, category: 'plat', emoji: '🍝', available: true },
-  { id: 7, name: 'Saumon grillé', price: 22, category: 'plat', emoji: '🐠', available: false },
-  { id: 8, name: 'Crème brûlée', price: 8, category: 'dessert', emoji: '🍮', available: true },
-  { id: 9, name: 'Fondant chocolat', price: 9, category: 'dessert', emoji: '🍫', available: true },
-  { id: 10, name: 'Tarte tatin', price: 8, category: 'dessert', emoji: '🥧', available: true },
-  { id: 11, name: 'Eau minérale', price: 3, category: 'boisson', emoji: '💧', available: true },
-  { id: 12, name: 'Vin rouge (verre)', price: 6, category: 'boisson', emoji: '🍷', available: true },
-  { id: 13, name: 'Bière pression', price: 5, category: 'boisson', emoji: '🍺', available: true },
-  { id: 14, name: 'Café', price: 3, category: 'boisson', emoji: '☕', available: true },
+  { id: 1, name: 'Salade César', price: 12, category: 'ENTREE', emoji: '🥗', available: true },
+  { id: 2, name: 'Soupe à l\'oignon', price: 9, category: 'ENTREE', emoji: '🍲', available: true },
+  { id: 3, name: 'Tartare de saumon', price: 15, category: 'ENTREE', emoji: '🐟', available: true },
+  { id: 4, name: 'Steak frites', price: 24, category: 'PLAT', emoji: '🥩', available: true },
+  { id: 5, name: 'Poulet rôti', price: 19, category: 'PLAT', emoji: '🍗', available: true },
+  { id: 6, name: 'Pâtes carbonara', price: 17, category: 'PLAT', emoji: '🍝', available: true },
+  { id: 7, name: 'Saumon grillé', price: 22, category: 'PLAT', emoji: '🐠', available: false },
+  { id: 8, name: 'Crème brûlée', price: 8, category: 'DESSERT', emoji: '🍮', available: true },
+  { id: 9, name: 'Fondant chocolat', price: 9, category: 'DESSERT', emoji: '🍫', available: true },
+  { id: 10, name: 'Tarte tatin', price: 8, category: 'DESSERT', emoji: '🥧', available: true },
+  { id: 11, name: 'Eau minérale', price: 3, category: 'BOISSON', emoji: '💧', available: true },
+  { id: 12, name: 'Vin rouge (verre)', price: 6, category: 'BOISSON', emoji: '🍷', available: true },
+  { id: 13, name: 'Bière pression', price: 5, category: 'BOISSON', emoji: '🍺', available: true },
+  { id: 14, name: 'Café', price: 3, category: 'BOISSON', emoji: '☕', available: true },
 ];
 
 @Component({
@@ -434,10 +434,10 @@ export class ServerOrderComponent implements OnInit {
 
   categories = [
     { key: 'all', label: 'Tout', emoji: '🍽️' },
-    { key: 'entree', label: 'Entrées', emoji: '🥗' },
-    { key: 'plat', label: 'Plats', emoji: '🥩' },
-    { key: 'dessert', label: 'Desserts', emoji: '🍮' },
-    { key: 'boisson', label: 'Boissons', emoji: '🍷' },
+    { key: 'ENTREE', label: 'Entrées', emoji: '🥗' },
+    { key: 'PLAT', label: 'Plats', emoji: '🥩' },
+    { key: 'DESSERT', label: 'Desserts', emoji: '🍮' },
+    { key: 'BOISSON', label: 'Boissons', emoji: '🍷' },
   ];
 
   filteredMenu = computed(() =>
@@ -492,7 +492,7 @@ export class ServerOrderComponent implements OnInit {
     const order: Partial<Order> = {
       tableNumber: this.selectedTable,
       items: this._orderItems(),
-      status: 'sent'
+      status: 'SENT'
     };
     // In production: this.restaurantService.createOrder(order).subscribe(...)
     setTimeout(() => {
