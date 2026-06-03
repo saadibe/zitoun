@@ -1,0 +1,15 @@
+# Java
+target/
+*.class
+
+# Node
+node_modules/
+dist/
+.angular/
+
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+application-local.properties
