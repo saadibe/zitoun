@@ -11,6 +11,7 @@ services:
     name: zitoun-pos-api
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
     plan: free
     region: frankfurt
     healthCheckPath: /api/menu
@@ -32,3 +33,4 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+ 
