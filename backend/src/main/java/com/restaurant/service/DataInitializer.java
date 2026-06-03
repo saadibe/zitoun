@@ -17,37 +17,57 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        // Paramètres Zitoun par défaut
+        // Paramètres La Perla par défaut
         if (settingsRepo.count() == 0) {
             settingsRepo.save(RestaurantSettings.builder()
-                .id(1L).name("Zitoun").subtitle("Restaurant POS")
-                .city("Tunisie").icon("🫒").taxNumber("MF: 123456/A/M/000")
+                .id(1L).name("La Perla")
+                .subtitle("Saveurs Authentiques de Tunisie")
+                .city("Tunisie").icon("🌶️")
+                .taxNumber("MF: 123456/A/M/000")
                 .build());
         }
 
-        // Menu tunisien par défaut
-        if (menuRepo.count() == 0) {
-            menuRepo.saveAll(List.of(
-                MenuItem.builder().name("Salade César").price(12.0).category(MenuItem.Category.ENTREE).emoji("🥗").available(true).build(),
-                MenuItem.builder().name("Soupe à l'oignon").price(9.0).category(MenuItem.Category.ENTREE).emoji("🍲").available(true).build(),
-                MenuItem.builder().name("Tartare de saumon").price(15.0).category(MenuItem.Category.ENTREE).emoji("🐟").available(true).build(),
-                MenuItem.builder().name("Brik à l'oeuf").price(7.0).category(MenuItem.Category.ENTREE).emoji("🥚").available(true).build(),
-                MenuItem.builder().name("Chorba tunisienne").price(8.0).category(MenuItem.Category.ENTREE).emoji("🍵").available(true).build(),
-                MenuItem.builder().name("Steak frites").price(24.0).category(MenuItem.Category.PLAT).emoji("🥩").available(true).build(),
-                MenuItem.builder().name("Poulet rôti").price(19.0).category(MenuItem.Category.PLAT).emoji("🍗").available(true).build(),
-                MenuItem.builder().name("Pâtes carbonara").price(17.0).category(MenuItem.Category.PLAT).emoji("🍝").available(true).build(),
-                MenuItem.builder().name("Couscous agneau").price(22.0).category(MenuItem.Category.PLAT).emoji("🫕").available(true).build(),
-                MenuItem.builder().name("Saumon grillé").price(25.0).category(MenuItem.Category.PLAT).emoji("🐠").available(true).build(),
-                MenuItem.builder().name("Crème brûlée").price(8.0).category(MenuItem.Category.DESSERT).emoji("🍮").available(true).build(),
-                MenuItem.builder().name("Fondant chocolat").price(9.0).category(MenuItem.Category.DESSERT).emoji("🍫").available(true).build(),
-                MenuItem.builder().name("Makroudh").price(6.0).category(MenuItem.Category.DESSERT).emoji("🍯").available(true).build(),
-                MenuItem.builder().name("Eau minérale").price(2.5).category(MenuItem.Category.BOISSON).emoji("💧").available(true).build(),
-                MenuItem.builder().name("Vin rouge").price(6.0).category(MenuItem.Category.BOISSON).emoji("🍷").available(true).build(),
-                MenuItem.builder().name("Bière pression").price(5.0).category(MenuItem.Category.BOISSON).emoji("🍺").available(true).build(),
-                MenuItem.builder().name("Café").price(2.5).category(MenuItem.Category.BOISSON).emoji("☕").available(true).build(),
-                MenuItem.builder().name("Thé à la menthe").price(3.0).category(MenuItem.Category.BOISSON).emoji("🫖").available(true).build()
-            ));
-        }
+        // Supprimer l'ancien menu et recharger le menu La Perla
+        menuRepo.deleteAll();
+        menuRepo.saveAll(List.of(
+            // ── ENTRÉES ──
+            MenuItem.builder().name("Brick thon à l'oeuf").price(4.0).category(MenuItem.Category.ENTREE).emoji("🥚").available(true).build(),
+            MenuItem.builder().name("Fricassée").price(3.0).category(MenuItem.Category.ENTREE).emoji("🥪").available(true).build(),
+            MenuItem.builder().name("Salade au choix").price(7.0).category(MenuItem.Category.ENTREE).emoji("🥗").available(true).build(),
+            // ── SANDWICHS ──
+            MenuItem.builder().name("Tunisien").price(8.0).category(MenuItem.Category.SANDWICH).emoji("🥖").available(true).build(),
+            MenuItem.builder().name("Kaftaji").price(8.0).category(MenuItem.Category.SANDWICH).emoji("🫔").available(true).build(),
+            MenuItem.builder().name("Kaftaji merguez").price(11.0).category(MenuItem.Category.SANDWICH).emoji("🌭").available(true).build(),
+            MenuItem.builder().name("Chapati Thon").price(6.0).category(MenuItem.Category.SANDWICH).emoji("🫓").available(true).build(),
+            MenuItem.builder().name("Chapati Escalope").price(7.0).category(MenuItem.Category.SANDWICH).emoji("🍗").available(true).build(),
+            MenuItem.builder().name("Chapati Viande Hachée").price(8.0).category(MenuItem.Category.SANDWICH).emoji("🥩").available(true).build(),
+            MenuItem.builder().name("Tabouna Thon").price(8.0).category(MenuItem.Category.SANDWICH).emoji("🫓").available(true).build(),
+            MenuItem.builder().name("Tabouna Escalope").price(9.0).category(MenuItem.Category.SANDWICH).emoji("🍗").available(true).build(),
+            MenuItem.builder().name("Tabouna Viande Hachée").price(10.0).category(MenuItem.Category.SANDWICH).emoji("🥩").available(true).build(),
+            MenuItem.builder().name("Mléwi Thon").price(7.0).category(MenuItem.Category.SANDWICH).emoji("🫓").available(true).build(),
+            MenuItem.builder().name("Mléwi Escalope").price(8.0).category(MenuItem.Category.SANDWICH).emoji("🍗").available(true).build(),
+            MenuItem.builder().name("Mléwi Viande Hachée").price(9.0).category(MenuItem.Category.SANDWICH).emoji("🥩").available(true).build(),
+            // ── PAIN & PIZZAS ──
+            MenuItem.builder().name("Panuozzo La Perla").price(12.0).category(MenuItem.Category.PLAT).emoji("🥪").available(true).build(),
+            MenuItem.builder().name("Panuozzo Mexicain").price(13.0).category(MenuItem.Category.PLAT).emoji("🌶️").available(true).build(),
+            MenuItem.builder().name("Libanais Escalope").price(9.0).category(MenuItem.Category.PLAT).emoji("🥙").available(true).build(),
+            MenuItem.builder().name("Baguette Thon").price(9.0).category(MenuItem.Category.PLAT).emoji("🥖").available(true).build(),
+            MenuItem.builder().name("Baguette Escalope").price(10.0).category(MenuItem.Category.PLAT).emoji("🥖").available(true).build(),
+            MenuItem.builder().name("Baguette Viande Hachée").price(11.0).category(MenuItem.Category.PLAT).emoji("🥖").available(true).build(),
+            MenuItem.builder().name("Makloub Thon").price(9.0).category(MenuItem.Category.PLAT).emoji("🫔").available(true).build(),
+            MenuItem.builder().name("Makloub Escalope").price(10.0).category(MenuItem.Category.PLAT).emoji("🍗").available(true).build(),
+            MenuItem.builder().name("Makloub Viande Hachée").price(11.0).category(MenuItem.Category.PLAT).emoji("🥩").available(true).build(),
+            MenuItem.builder().name("Cornet Thon").price(10.0).category(MenuItem.Category.PLAT).emoji("🌮").available(true).build(),
+            MenuItem.builder().name("Cornet Escalope").price(11.0).category(MenuItem.Category.PLAT).emoji("🍗").available(true).build(),
+            MenuItem.builder().name("Cornet Viande Hachée").price(11.0).category(MenuItem.Category.PLAT).emoji("🥩").available(true).build(),
+            MenuItem.builder().name("Pizza Margarita").price(7.0).category(MenuItem.Category.PLAT).emoji("🍕").available(true).build(),
+            MenuItem.builder().name("Pizza au Thon").price(8.0).category(MenuItem.Category.PLAT).emoji("🍕").available(true).build(),
+            MenuItem.builder().name("Pizza Escalope").price(9.0).category(MenuItem.Category.PLAT).emoji("🍕").available(true).build(),
+            MenuItem.builder().name("Pizza Viande Hachée").price(10.0).category(MenuItem.Category.PLAT).emoji("🍕").available(true).build(),
+            // ── BOISSONS ──
+            MenuItem.builder().name("Eau minérale & Sodas").price(1.80).category(MenuItem.Category.BOISSON).emoji("🥤").available(true).build(),
+            MenuItem.builder().name("Citronnade maison").price(4.0).category(MenuItem.Category.BOISSON).emoji("🍋").available(true).build()
+        ));
 
         // Tables par défaut
         if (tableRepo.count() == 0) {
