@@ -10,4 +10,5 @@ export const routes: Routes = [
     path: 'kitchen',
     loadComponent: () => import('./components/kitchen/kitchen.component').then(m => m.KitchenComponent)
   },
+  { path: '**', redirectTo: 'server' }
 ];
