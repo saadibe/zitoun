@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#3d7a47">
+<title>Zitoun POS — Restaurant Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Zitoun — thème actif (modifié par JS) */
+  --sky:        #3d7a47;
+  --sky2:       #4e9658;
+  --sky-light:  #c8e6cd;
+  --sky-dim:    #3d7a4722;
+  --sky-pale:   #edf7ef;
+  --white:      #ffffff;
+  --ivory:      #faf9f6;
+  --cream:      #f2ede3;
+  --sand:       #e2d8c6;
+  --terracotta: #b85c38;
+  --terra-dim:  #b85c3820;
+  --terra-light:#fce8dc;
+  --green:      #2e7d52;
+  --green-dim:  #2e7d5220;
+  --yellow:     #c49a1a;
+  --yellow-dim: #c49a1a20;
+  --ink:        #1a2618;
+  --ink2:       #3a5236;
+  --ink3:       #7a9476;
+  --ink4:       #b0c4ac;
+  --border:     #d4dfd2;
+  --shadow:     0 2px 12px rgba(61,122,71,.10), 0 8px 32px rgba(0,0,0,.06);
+  --shadow2:    0 4px 20px rgba(61,122,71,.20), 0 12px 40px rgba(0,0,0,.10);
+  --sidebar-strip: repeating-linear-gradient(90deg,#2d6b38 0,#2d6b38 12px,#c49a1a 12px,#c49a1a 24px,#fff 24px,#fff 36px,#4e9658 36px,#4e9658 48px);
+}
+
+/* ── SKIN : Bleu ── */
+body.skin-bleu {
+  --sky:        #1a6eb5;
+  --sky2:       #2a85d8;
+  --sky-light:  #d6eaf8;
+  --sky-dim:    #1a6eb522;
+  --sky-pale:   #eaf4fb;
+  --ivory:      #f8fbff;
+  --cream:      #f0f5fb;
+  --sand:       #d8e7f5;
+  --ink:        #1c2a3a;
+  --ink2:       #3d5166;
+  --ink3:       #7a92a8;
+  --ink4:       #b0c4d4;
+  --border:     #d0dde8;
+  --shadow:     0 2px 12px rgba(26,110,181,.10),0 8px 32px rgba(0,0,0,.06);
+  --shadow2:    0 4px 20px rgba(26,110,181,.18),0 12px 40px rgba(0,0,0,.10);
+  --sidebar-strip: repeating-linear-gradient(90deg,#1255a0 0,#1255a0 12px,#f59e0b 12px,#f59e0b 24px,#fff 24px,#fff 36px,#2a85d8 36px,#2a85d8 48px);
+}
+
+/* ── SKIN : Vert ── */
+body.skin-vert {
+  --sky:        #3d7a47;
+  --sky2:       #4e9658;
+  --sky-light:  #c8e6cd;
+  --sky-dim:    #3d7a4722;
+  --sky-pale:   #edf7ef;
+  --ivory:      #f6faf6;
+  --cream:      #ebf4ec;
+  --sand:       #d0e8d3;
+  --ink:        #1a2618;
+  --ink2:       #3a5236;
+  --ink3:       #7a9476;
+  --ink4:       #b0c4ac;
+  --border:     #cce0ce;
+  --shadow:     0 2px 12px rgba(61,122,71,.10),0 8px 32px rgba(0,0,0,.06);
+  --shadow2:    0 4px 20px rgba(61,122,71,.20),0 12px 40px rgba(0,0,0,.10);
+  --sidebar-strip: repeating-linear-gradient(90deg,#2d6b38 0,#2d6b38 12px,#c49a1a 12px,#c49a1a 24px,#fff 24px,#fff 36px,#4e9658 36px,#4e9658 48px);
+}
+
+/* ── SKIN : Blanc (light minimal) ── */
+body.skin-blanc {
+  --sky:        #555555;
+  --sky2:       #777777;
+  --sky-light:  #e0e0e0;
+  --sky-dim:    #55555522;
+  --sky-pale:   #f5f5f5;
+  --ivory:      #ffffff;
+  --cream:      #f8f8f8;
+  --sand:       #ebebeb;
+  --ink:        #111111;
+  --ink2:       #333333;
+  --ink3:       #888888;
+  --ink4:       #bbbbbb;
+  --border:     #e0e0e0;
+  --shadow:     0 2px 12px rgba(0,0,0,.07),0 8px 32px rgba(0,0,0,.04);
+  --shadow2:    0 4px 20px rgba(0,0,0,.12),0 12px 40px rgba(0,0,0,.08);
+  --sidebar-strip: repeating-linear-gradient(90deg,#333 0,#333 12px,#999 12px,#999 24px,#ddd 24px,#ddd 36px,#555 36px,#555 48px);
+}
+
+/* ── SKIN : Noir (dark mode) ── */
+body.skin-noir {
+  --sky:        #e8c97a;
+  --sky2:       #f0d898;
+  --sky-light:  #4a3e1a;
+  --sky-dim:    #e8c97a22;
+  --sky-pale:   #2a2318;
+  --white:      #1e1e1e;
+  --ivory:      #161616;
+  --cream:      #1e1e1e;
+  --sand:       #2a2a2a;
+  --terracotta: #e07050;
+  --terra-dim:  #e0705022;
+  --terra-light:#2e1f18;
+  --green:      #5aaa78;
+  --green-dim:  #5aaa7822;
+  --yellow:     #e8c97a;
+  --yellow-dim: #e8c97a22;
+  --ink:        #f0ece0;
+  --ink2:       #c8c0a8;
+  --ink3:       #888068;
+  --ink4:       #504840;
+  --border:     #2e2e2e;
+  --shadow:     0 2px 12px rgba(0,0,0,.4),0 8px 32px rgba(0,0,0,.3);
+  --shadow2:    0 4px 20px rgba(0,0,0,.5),0 12px 40px rgba(0,0,0,.35);
+  --sidebar-strip: repeating-linear-gradient(90deg,#e8c97a 0,#e8c97a 12px,#e07050 12px,#e07050 24px,#444 24px,#444 36px,#c0a050 36px,#c0a050 48px);
+}
+/* dark mode sidebar text stays white */
+body.skin-noir .sidebar { background: #111; }
+body.skin-noir .topbar { background: #1e1e1e; border-bottom-color: var(--sky); }
+body.skin-noir .menu-bar { background: #1e1e1e; }
+body.skin-noir .m-card { background: #1e1e1e; }
+body.skin-noir .m-card:hover:not(.unavail) { background: #252525; }
+body.skin-noir .o-head { background: #1e1e1e; }
+body.skin-noir .o-foot { background: #1e1e1e; }
+body.skin-noir .o-item { background: #252525; }
+body.skin-noir .order-panel { background: #1a1a1a; }
+body.skin-noir .k-bar { background: #1e1e1e; }
+body.skin-noir .k-col { background: #161616; }
+body.skin-noir .kcard { background: #1e1e1e; }
+body.skin-noir .admin-col-head { background: #1e1e1e; }
+body.skin-noir .admin-item { background: #1e1e1e; }
+body.skin-noir .modal-box { background: #1e1e1e; }
+body.skin-noir .adm-input, body.skin-noir .adm-select { background: #252525; color: var(--ink); border-color: var(--border); }
+body.skin-noir .settings-input { background: #252525; color: var(--ink); border-color: var(--border); }
+body.skin-noir .receipt { background: #1e1e1e; color: #ddd; }
+
+html, body {
+  height: 100%; overflow: hidden;
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: 'Cairo', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  line-height: 1.1;
+  font-family: 'Cairo', sans-serif;
+}
+
+/* ═══════════════════════════════
+   ZELLIGE PATTERN (ceramic tiles)
+═══════════════════════════════ */
+.zellige {
+  background-color: var(--sky);
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.07) 0, rgba(255,255,255,.07) 1px, transparent 0, transparent 50%),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.07) 0, rgba(255,255,255,.07) 1px, transparent 0, transparent 50%);
+  background-size: 20px 20px;
+}
+
+/* ═══════════════════════════════
+   SHELL
+═══════════════════════════════ */
+.shell { display: flex; height: 100vh; }
+
+/* ═══════════════════════════════
+   SIDEBAR — blue Sidi Bou door
+═══════════════════════════════ */
+.sidebar {
+  width: 240px; min-width: 240px;
+  background: var(--sky);
+  display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+}
+
+/* arch decoration top */
+.sidebar::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 6px;
+  background: var(--sidebar-strip);
+}
+
+.s-inner { display: flex; flex-direction: column; height: 100%; padding: 20px 16px 20px; margin-top: 6px; }
+
+.brand {
+  display: flex; align-items: center; gap: 13px;
+  padding: 14px 12px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.2);
+  margin-bottom: 20px;
+}
+.brand-icon {
+  width: 44px; height: 44px; border-radius: 14px;
+  background: rgba(255,255,255,.15);
+  border: 2px solid rgba(255,255,255,.35);
+  display: flex; align-items: center; justify-content: center; font-size: 22px;
+  backdrop-filter: blur(4px);
+}
+.brand-name { font-family: 'Tajawal', sans-serif; font-size: 17px; font-weight: 800; color: #fff; line-height: 1.1; }
+.brand-sub { font-size: 11px; color: rgba(255,255,255,.6); font-weight: 400; letter-spacing: .5px; margin-top: 2px; }
+
+.nav { list-style: none; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+
+.nav-btn {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; padding: 10px 14px;
+  border-radius: 14px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: rgba(255,255,255,.7);
+  font-size: 13.5px; font-weight: 600; line-height: 1.1;
+  cursor: pointer; transition: all .18s;
+  font-family: 'Cairo', sans-serif;
+  text-align: left;
+  position: relative;
+}
+.nav-btn:hover { background: rgba(255,255,255,.12); color: #fff; }
+.nav-btn.active {
+  background: rgba(255,255,255,.20);
+  border-color: rgba(255,255,255,.35);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,.15);
+}
+.nav-ico { font-size: 20px; width: 28px; text-align: center; }
+.nav-lbl { flex: 1; }
+.nav-badge {
+  background: var(--terracotta); color: #fff;
+  font-size: 10px; font-weight: 800; border-radius: 20px;
+  padding: 2px 7px; min-width: 20px; text-align: center;
+  box-shadow: 0 2px 8px rgba(192,82,42,.4);
+}
+
+.s-sep { height: 1px; background: rgba(255,255,255,.15); margin: 12px 0; }
+.s-footer {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 14px;
+  color: rgba(255,255,255,.5); font-size: 12px;
+}
+.s-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #7fffb0;
+  box-shadow: 0 0 8px rgba(127,255,176,.7);
+  animation: blink 2.5s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* ═══════════════════════════════
+   MAIN
+═══════════════════════════════ */
+.main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.page { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+.page.active { display: flex; }
+
+/* ═══════════════════════════════
+   TOPBAR — white with blue accent
+═══════════════════════════════ */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 28px;
+  background: var(--white);
+  border-bottom: 3px solid var(--sky);
+  flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(26,110,181,.08);
+}
+.tp-left {}
+.tp-title {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 20px; font-weight: 800; color: var(--ink);
+}
+.tp-sub { font-size: 12px; color: var(--ink3); margin-top: 2px; }
+.tp-right { display: flex; gap: 10px; align-items: center; }
+.time-badge {
+  background: var(--sky-pale);
+  border: 1.5px solid var(--sky-light);
+  border-radius: 10px; padding: 6px 14px;
+  font-size: 13px; font-weight: 700; color: var(--sky);
+  font-family: 'Tajawal', sans-serif;
+}
+
+/* ═══════════════════════════════
+   SERVER PAGE
+═══════════════════════════════ */
+.srv-grid { display: grid; grid-template-columns: 1fr 390px; flex: 1; overflow: hidden; }
+
+/* — Menu panel — */
+.menu-panel { display: flex; flex-direction: column; overflow: hidden; border-right: 2px solid var(--border); }
+
+.menu-bar {
+  padding: 14px 22px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.tbl-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tbl-lbl {
+  font-size: 11px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--ink3); white-space: nowrap;
+}
+.tbl-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.tbl-btn {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: var(--sky-pale);
+  border: 2px solid var(--sky-light);
+  color: var(--sky); font-size: 13px; font-weight: 800;
+  cursor: pointer; transition: all .15s;
+  font-family: 'Cairo', sans-serif;
+}
+.tbl-btn:hover { background: var(--sky); color: #fff; border-color: var(--sky); }
+.tbl-btn.sel {
+  background: var(--sky); color: #fff; border-color: var(--sky);
+  box-shadow: 0 4px 12px rgba(26,110,181,.35);
+  transform: scale(1.05);
+}
+
+.cats { display: flex; gap: 6px; flex-wrap: wrap; }
+.cat-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 7px 15px; border-radius: 22px;
+  background: var(--cream);
+  border: 2px solid var(--sand);
+  color: var(--ink2); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+  font-family: 'Cairo', sans-serif;
+}
+.cat-btn:hover { border-color: var(--sky); color: var(--sky); background: var(--sky-pale); }
+.cat-btn.active { background: var(--sky); border-color: var(--sky); color: #fff; }
+
+.menu-items {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(148px,1fr));
+  grid-auto-rows: max-content;
+  gap: 12px; padding: 18px 22px; overflow-y: auto; flex: 1;
+  align-content: start;
+  background: var(--ivory);
+}
+
+/* Zellige-inspired menu card */
+.m-card {
+  position: relative; display: flex; flex-direction: column;
+  padding: 14px 13px 12px;
+  border-radius: 14px;
+  background: var(--white);
+  border: 2px solid var(--border);
+  cursor: pointer; transition: all .18s;
+  overflow: hidden;
+  height: fit-content;
+}
+.m-card::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--sky), var(--terracotta));
+  opacity: 0; transition: opacity .18s;
+}
+.m-card:hover:not(.unavail) {
+  border-color: var(--sky);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow2);
+}
+.m-card:hover:not(.unavail)::after { opacity: 1; }
+.m-card:active:not(.unavail) { transform: scale(.97); }
+.m-card.unavail { opacity: .35; cursor: not-allowed; }
+.mc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.mc-em { font-size: 32px; filter: drop-shadow(0 2px 6px rgba(0,0,0,.1)); }
+.mc-tag {
+  font-size: 9px; font-weight: 800; letter-spacing: .3px;
+  background: var(--terra-light); color: var(--terracotta);
+  border: 1px solid var(--terracotta); opacity: .8;
+  padding: 2px 7px; border-radius: 6px;
+}
+.mc-nm { font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.mc-pr {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 16px; font-weight: 800; color: var(--sky); margin-top: 8px;
+}
+
+/* ═══════════════════════════════
+   ORDER PANEL — white & clean
+═══════════════════════════════ */
+.order-panel {
+  display: flex; flex-direction: column;
+  background: var(--white);
+}
+
+/* zellige strip top */
+.order-panel::before {
+  content: '';
+  display: block; height: 5px; flex-shrink: 0;
+  background: var(--sidebar-strip);
+}
+
+.o-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.oh-title {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 17px; font-weight: 800; color: var(--ink);
+}
+.oh-sub { font-size: 12px; color: var(--ink3); margin-top: 2px; }
+.clr-btn {
+  padding: 5px 12px; border-radius: 8px;
+  background: var(--terra-light);
+  border: 2px solid var(--terracotta);
+  color: var(--terracotta); font-size: 11.5px; font-weight: 700; line-height: 1.1;
+  cursor: pointer; font-family: 'Cairo', sans-serif; transition: all .15s;
+}
+.clr-btn:hover:not(:disabled) { background: var(--terracotta); color: #fff; }
+.clr-btn:disabled { opacity: .25; cursor: not-allowed; }
+
+.o-list {
+  flex: 1; overflow-y: auto;
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;
+  background: var(--ivory);
+}
+.o-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; gap: 14px; color: var(--ink4);
+}
+.o-empty-ico { font-size: 52px; opacity: .3; }
+.o-empty-txt { font-size: 13px; color: var(--ink3); text-align: center; line-height: 1.7; }
+
+.o-item {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-left: 4px solid var(--sky);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+  animation: slide-in .18s ease;
+  transition: border-color .15s;
+}
+.o-item:hover { border-color: var(--sky); border-left-color: var(--terracotta); }
+@keyframes slide-in { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
+.oi-top { display: flex; align-items: flex-start; gap: 10px; }
+.oi-em { font-size: 24px; flex-shrink: 0; }
+.oi-bd { flex: 1; }
+.oi-nm { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.oi-nt {
+  width: 100%; background: transparent; border: none;
+  border-bottom: 1.5px dashed var(--border);
+  color: var(--ink3); font-size: 11.5px; padding: 4px 0;
+  outline: none; font-family: 'Cairo', sans-serif; margin-top: 5px;
+}
+.oi-nt::placeholder { color: var(--ink4); }
+.oi-bot { display: flex; align-items: center; gap: 8px; }
+.q-btn {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: var(--sky-pale); border: 2px solid var(--sky-light);
+  color: var(--sky); font-size: 17px; font-weight: 800;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .12s; line-height: 1;
+}
+.q-btn:hover { background: var(--sky); color: #fff; border-color: var(--sky); }
+.q-num { font-size: 15px; font-weight: 800; color: var(--ink); min-width: 22px; text-align: center; font-family: 'Tajawal', sans-serif; }
+.oi-price {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 15px; font-weight: 800; color: var(--sky); margin-left: auto;
+}
+
+.o-foot {
+  padding: 14px 16px 18px;
+  border-top: 2px solid var(--border);
+  background: var(--white);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.o-total { display: flex; justify-content: space-between; align-items: baseline; }
+.o-tlbl { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--ink3); }
+.o-tval {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 28px; font-weight: 900; color: var(--sky);
+}
+.o-tval span { font-size: 15px; color: var(--ink3); font-weight: 600; margin-left: 2px; }
+.suc-flash {
+  background: var(--green-dim);
+  border: 2px solid var(--green);
+  border-radius: 10px; padding: 10px 14px;
+  font-size: 13px; font-weight: 700; color: var(--green); text-align: center;
+  animation: pop .2s ease;
+}
+@keyframes pop { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+.o-acts { display: flex; gap: 7px; }
+.act-btn {
+  flex: 1; padding: 7px 8px; border-radius: 10px;
+  font-size: 12px; font-weight: 700; line-height: 1.1;
+  cursor: pointer; font-family: 'Cairo', sans-serif; transition: all .18s;
+  border: 2px solid transparent; white-space: nowrap;
+}
+.act-btn:disabled { opacity: .3; cursor: not-allowed; transform: none !important; }
+.act-print {
+  background: var(--cream); color: var(--ink2);
+  border-color: var(--sand);
+}
+.act-print:hover:not(:disabled) { background: var(--sand); color: var(--ink); }
+.act-send {
+  background: var(--sky); color: #fff;
+  box-shadow: 0 4px 16px rgba(26,110,181,.35);
+}
+.act-send:hover:not(:disabled) { background: var(--sky2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,110,181,.45); }
+
+/* ═══════════════════════════════
+   KITCHEN
+═══════════════════════════════ */
+.k-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px;
+  background: var(--white);
+  border-bottom: 3px solid var(--sky);
+  flex-shrink: 0;
+}
+.k-stats { display: flex; gap: 8px; }
+.k-stat {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--sky-pale); border: 2px solid var(--sky-light);
+  border-radius: 10px; padding: 6px 13px;
+  font-size: 12.5px; font-weight: 700; color: var(--sky);
+}
+.k-dot { width: 8px; height: 8px; border-radius: 50%; }
+.k-clock {
+  font-family: 'Tajawal', sans-serif; font-size: 24px; font-weight: 800;
+  color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -.5px;
+}
+.k-cols { display: grid; grid-template-columns: 1fr 1fr 1fr; flex: 1; overflow: hidden; gap: 1px; background: var(--border); }
+.k-col { background: var(--ivory); display: flex; flex-direction: column; overflow: hidden; }
+.k-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 13px 18px;
+  font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+  border-bottom: 3px solid; flex-shrink: 0;
+}
+.kh-new { color: var(--terracotta); border-color: var(--terracotta); background: var(--terra-light); }
+.kh-prep { color: #a06000; border-color: var(--yellow); background: var(--yellow-dim); }
+.kh-ready { color: var(--green); border-color: var(--green); background: var(--green-dim); }
+.k-blink { width: 8px; height: 8px; border-radius: 50%; animation: blink 1.3s infinite; }
+.kh-new .k-blink { background: var(--terracotta); }
+.kh-prep .k-blink { background: var(--yellow); }
+.kh-ready .k-blink { background: var(--green); animation: none; }
+.k-cnt {
+  margin-left: auto; background: rgba(255,255,255,.7);
+  border-radius: 20px; padding: 2px 9px; font-size: 11px; font-weight: 800;
+}
+.k-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.k-nil { color: var(--ink4); font-size: 13px; text-align: center; padding: 32px 0; font-style: italic; }
+
+.kcard {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 16px; padding: 14px;
+  box-shadow: 0 1px 6px rgba(0,0,0,.04);
+  animation: kci .2s ease;
+}
+@keyframes kci { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.kcard.k-urg { border-color: var(--terracotta); border-left-width: 4px; }
+.kcard.k-glow { border-color: var(--green); border-left-width: 4px; }
+.kc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 8px; }
+.kc-table { font-family: 'Tajawal', sans-serif; font-size: 20px; font-weight: 900; color: var(--ink); }
+.kc-time { font-size: 11px; color: var(--ink3); margin-top: 2px; }
+.kc-time.ready { color: var(--green); font-weight: 800; }
+.k-prog { height: 4px; background: var(--cream); border-radius: 2px; margin-bottom: 10px; overflow: hidden; }
+.k-pf { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--sky), var(--terracotta)); transition: width 1s; }
+.kc-items { display: flex; flex-direction: column; gap: 6px; }
+.k-line { display: flex; align-items: flex-start; gap: 8px; font-size: 13.5px; color: var(--ink2); }
+.k-qt {
+  font-size: 11px; font-weight: 800;
+  background: var(--sky-pale); color: var(--sky);
+  border: 1.5px solid var(--sky-light);
+  padding: 1px 7px; border-radius: 6px; flex-shrink: 0; margin-top: 2px;
+}
+.k-note { font-size: 11px; color: var(--ink3); font-style: italic; display: block; margin-top: 2px; }
+.kb {
+  padding: 4px 10px; border-radius: 7px;
+  font-size: 11px; font-weight: 700; line-height: 1.1;
+  cursor: pointer; white-space: nowrap;
+  font-family: 'Cairo', sans-serif; transition: all .15s;
+}
+.kb-acc { background: var(--terra-light); color: var(--terracotta); border: 2px solid var(--terracotta); }
+.kb-acc:hover { background: var(--terracotta); color: #fff; }
+.kb-rdy { background: var(--yellow-dim); color: #a06000; border: 2px solid var(--yellow); }
+.kb-rdy:hover { background: var(--yellow); color: #000; }
+.kb-srv { background: var(--green-dim); color: var(--green); border: 2px solid var(--green); }
+.kb-srv:hover { background: var(--green); color: #fff; }
+
+/* ═══════════════════════════════
+   TABLES
+═══════════════════════════════ */
+.tables-wrap { padding: 28px; overflow-y: auto; flex: 1; }
+.t-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(178px,1fr)); gap: 14px; }
+
+.tcard {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  padding: 20px 16px 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  transition: all .18s; position: relative; overflow: hidden;
+}
+/* zellige top strip per status */
+.tcard::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+.tcard.free::before { background: repeating-linear-gradient(90deg, var(--green) 0, var(--green) 8px, #fff 8px, #fff 10px); }
+.tcard.occupied::before { background: repeating-linear-gradient(90deg, var(--terracotta) 0, var(--terracotta) 8px, #fff 8px, #fff 10px); }
+.tcard.reserved::before { background: repeating-linear-gradient(90deg, var(--sky) 0, var(--sky) 8px, #fff 8px, #fff 10px); }
+.tcard:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.tc-num { font-family: 'Tajawal', sans-serif; font-size: 44px; font-weight: 900; color: var(--ink); line-height: 1; margin-top: 6px; }
+.tc-badge { font-size: 11px; font-weight: 800; padding: 4px 14px; border-radius: 20px; letter-spacing: .3px; }
+.tcard.free .tc-badge { background: var(--green-dim); color: var(--green); border: 2px solid var(--green); }
+.tcard.occupied .tc-badge { background: var(--terra-light); color: var(--terracotta); border: 2px solid var(--terracotta); }
+.tcard.reserved .tc-badge { background: var(--sky-pale); color: var(--sky); border: 2px solid var(--sky-light); }
+.tc-seats { font-size: 12px; color: var(--ink3); font-weight: 500; }
+.tc-acts { display: flex; gap: 5px; width: 100%; margin-top: 6px; }
+.tc-btn {
+  flex: 1; padding: 5px 3px; border-radius: 7px;
+  font-size: 10.5px; font-weight: 700; line-height: 1.1;
+  cursor: pointer; font-family: 'Cairo', sans-serif; transition: all .15s;
+  white-space: nowrap;
+}
+.tc-ord { background: var(--sky-pale); color: var(--sky); border: 2px solid var(--sky-light); }
+.tc-ord:hover { background: var(--sky); color: #fff; border-color: var(--sky); }
+.tc-rsv { background: var(--cream); color: var(--ink2); border: 2px solid var(--sand); }
+.tc-rsv:hover { background: var(--sand); color: var(--ink); }
+.tc-free { background: var(--terra-light); color: var(--terracotta); border: 2px solid var(--terracotta); }
+.tc-free:hover { background: var(--terracotta); color: #fff; }
+
+/* ═══════════════════════════════
+   MODALS
+═══════════════════════════════ */
+.modal-ov {
+  display: none; position: fixed; inset: 0;
+  background: rgba(26, 58, 90, .55);
+  backdrop-filter: blur(6px);
+  z-index: 300; align-items: center; justify-content: center;
+}
+.modal-ov.open { display: flex; }
+
+/* Free table modal */
+.modal-box {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-top: 5px solid var(--sky);
+  border-radius: 22px; padding: 32px; max-width: 380px; width: 90%;
+  box-shadow: 0 32px 80px rgba(0,0,0,.2);
+  animation: modal-in .22s cubic-bezier(.34,1.4,.64,1);
+}
+@keyframes modal-in { from{opacity:0;transform:scale(.9)translateY(16px)} to{opacity:1;transform:scale(1)translateY(0)} }
+.mb-ico { font-size: 44px; text-align: center; display: block; margin-bottom: 14px; }
+.mb-title { font-family: 'Tajawal', sans-serif; font-size: 20px; font-weight: 800; text-align: center; color: var(--ink); margin-bottom: 8px; }
+.mb-sub { font-size: 13px; color: var(--ink3); text-align: center; line-height: 1.6; margin-bottom: 24px; }
+.mb-btns { display: flex; gap: 9px; }
+.mb-btn {
+  flex: 1; padding: 8px; border-radius: 9px;
+  font-size: 12.5px; font-weight: 700; line-height: 1.1; cursor: pointer;
+  font-family: 'Cairo', sans-serif; transition: all .16s;
+}
+.mb-cancel { background: var(--cream); color: var(--ink2); border: 2px solid var(--sand); }
+.mb-cancel:hover { background: var(--sand); color: var(--ink); }
+.mb-ok { background: var(--sky); color: #fff; border: 2px solid var(--sky); box-shadow: 0 4px 14px rgba(26,110,181,.35); }
+.mb-ok:hover { background: var(--sky2); transform: translateY(-1px); }
+
+/* Ticket modal */
+#ticketModal .modal-box {
+  max-width: 460px; padding: 0; overflow: hidden;
+  border-top: none;
+}
+.tk-header {
+  background: var(--sky); padding: 20px 24px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.tk-title { font-family: 'Tajawal', sans-serif; font-size: 17px; font-weight: 800; color: #fff; }
+.tk-sub { font-size: 12px; color: rgba(255,255,255,.7); margin-top: 2px; }
+.tk-x {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: rgba(255,255,255,.2); border: none; color: #fff;
+  font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.tk-x:hover { background: rgba(255,255,255,.35); }
+/* zellige divider */
+.tk-zellige {
+  height: 8px;
+  background: repeating-linear-gradient(90deg,
+    var(--terracotta) 0, var(--terracotta) 14px,
+    var(--yellow) 14px, var(--yellow) 28px,
+    var(--white) 28px, var(--white) 42px,
+    var(--green) 42px, var(--green) 56px);
+}
+.tk-body { padding: 0 24px 20px; background: var(--ivory); }
+.receipt {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px 20px 14px;
+  font-family: 'Courier New', monospace;
+  color: #111; margin-top: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+.rc-logo { text-align: center; margin-bottom: 10px; }
+.rc-name { font-size: 17px; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; }
+.rc-tag { font-size: 10px; color: #888; letter-spacing: 2px; margin-top: 2px; }
+.rc-div { border: none; border-top: 1px dashed #ccc; margin: 10px 0; }
+.rc-meta { font-size: 11px; color: #666; text-align: center; margin: 3px 0; }
+.rc-row { display: flex; justify-content: space-between; font-size: 13px; padding: 2px 0; }
+.rc-note { font-size: 10px; color: #888; padding-left: 16px; font-style: italic; margin-bottom: 3px; }
+.rc-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: bold; padding: 4px 0; }
+.rc-footer { text-align: center; font-size: 10px; color: #aaa; margin-top: 14px; padding-top: 10px; border-top: 1px dashed #eee; line-height: 1.7; }
+.tk-acts {
+  display: flex; gap: 8px; padding: 12px 20px 16px;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+}
+.tk-btn {
+  flex: 1; padding: 8px; border-radius: 9px;
+  font-size: 12px; font-weight: 700; line-height: 1.1; cursor: pointer;
+  font-family: 'Cairo', sans-serif; transition: all .15s;
+}
+.tk-close { background: var(--cream); color: var(--ink2); border: 2px solid var(--sand); }
+.tk-close:hover { background: var(--sand); }
+.tk-print { background: var(--sky); color: #fff; border: 2px solid var(--sky); box-shadow: 0 4px 14px rgba(26,110,181,.35); }
+.tk-print:hover { background: var(--sky2); transform: translateY(-1px); }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--sand); border-radius: 3px; }
+
+/* ═══════════════════════════════
+   ADMIN PAGE
+═══════════════════════════════ */
+.admin-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 0; flex: 1; overflow: hidden; }
+.admin-col { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
+.admin-col:last-child { border-right: none; }
+.admin-col-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 22px; border-bottom: 1px solid var(--border);
+  background: var(--white); flex-shrink: 0;
+}
+.admin-col-title { font-family: 'Tajawal', sans-serif; font-size: 16px; font-weight: 800; color: var(--ink); }
+.admin-col-sub { font-size: 11.5px; color: var(--ink3); margin-top: 2px; }
+.admin-add-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 9px;
+  background: var(--sky); color: #fff; border: none;
+  font-size: 12.5px; font-weight: 700; cursor: pointer;
+  font-family: 'Cairo', sans-serif; transition: all .15s; line-height: 1.1;
+}
+.admin-add-btn:hover { background: var(--sky2); transform: translateY(-1px); }
+
+/* Menu list */
+.admin-list { flex: 1; overflow-y: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; background: var(--ivory); }
+.admin-item {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--white); border: 2px solid var(--border);
+  border-radius: 12px; padding: 11px 14px;
+  transition: border-color .15s;
+}
+.admin-item:hover { border-color: var(--sky-light); }
+.admin-item-em { font-size: 22px; flex-shrink: 0; }
+.admin-item-info { flex: 1; min-width: 0; }
+.admin-item-name { font-size: 13.5px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.admin-item-meta { font-size: 11.5px; color: var(--ink3); margin-top: 2px; }
+.admin-item-price { font-family: 'Tajawal', sans-serif; font-size: 15px; font-weight: 800; color: var(--sky); margin-right: 4px; flex-shrink: 0; }
+.admin-avail-toggle {
+  width: 36px; height: 20px; border-radius: 10px; border: none;
+  cursor: pointer; transition: all .18s; flex-shrink: 0; position: relative;
+}
+.admin-avail-toggle.on { background: var(--green); }
+.admin-avail-toggle.off { background: var(--border); }
+.admin-avail-toggle::after {
+  content: ''; position: absolute; top: 3px; width: 14px; height: 14px;
+  border-radius: 50%; background: #fff; transition: left .18s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.admin-avail-toggle.on::after { left: 18px; }
+.admin-avail-toggle.off::after { left: 3px; }
+.admin-edit-btn, .admin-del-btn {
+  width: 30px; height: 30px; border-radius: 7px; border: none;
+  font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .15s; flex-shrink: 0; line-height: 1;
+}
+.admin-edit-btn { background: var(--sky-pale); color: var(--sky); border: 1.5px solid var(--sky-light); }
+.admin-edit-btn:hover { background: var(--sky); color: #fff; }
+.admin-del-btn { background: var(--terra-light); color: var(--terracotta); border: 1.5px solid var(--terracotta); }
+.admin-del-btn:hover { background: var(--terracotta); color: #fff; }
+
+/* Table admin grid */
+.admin-tables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; padding: 16px 18px; overflow-y: auto; flex: 1; align-content: start; background: var(--ivory); }
+.admin-tcard {
+  background: var(--white); border: 2px solid var(--border); border-radius: 14px;
+  padding: 14px 10px 12px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  position: relative; transition: border-color .15s;
+}
+.admin-tcard:hover { border-color: var(--sky-light); }
+.admin-tcard-num { font-family: 'Tajawal', sans-serif; font-size: 34px; font-weight: 900; color: var(--ink); line-height: 1; }
+.admin-tcard-seats { font-size: 11px; color: var(--ink3); }
+.admin-tcard-del {
+  position: absolute; top: 6px; right: 6px;
+  width: 22px; height: 22px; border-radius: 6px;
+  background: var(--terra-light); color: var(--terracotta);
+  border: 1px solid var(--terracotta); font-size: 12px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  line-height: 1; transition: all .15s;
+}
+.admin-tcard-del:hover { background: var(--terracotta); color: #fff; }
+
+/* Admin form modals */
+.adm-form { display: flex; flex-direction: column; gap: 14px; padding: 20px 28px 24px; }
+.adm-field { display: flex; flex-direction: column; gap: 5px; }
+.adm-label { font-size: 11.5px; font-weight: 700; color: var(--ink2); text-transform: uppercase; letter-spacing: .8px; }
+.adm-input, .adm-select {
+  padding: 9px 12px; border-radius: 9px;
+  border: 2px solid var(--border); background: var(--ivory);
+  font-size: 13.5px; font-family: 'Cairo', sans-serif; color: var(--ink);
+  outline: none; transition: border-color .15s; line-height: 1.2;
+}
+.adm-input:focus, .adm-select:focus { border-color: var(--sky); background: var(--white); }
+.adm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.adm-emoji-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.adm-emoji-btn {
+  width: 38px; height: 38px; border-radius: 9px;
+  border: 2px solid var(--border); background: var(--cream);
+  font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .12s; line-height: 1;
+}
+.adm-emoji-btn:hover { border-color: var(--sky); transform: scale(1.1); }
+.adm-emoji-btn.picked { border-color: var(--sky); background: var(--sky-pale); box-shadow: 0 2px 8px rgba(26,110,181,.2); }
+.adm-form-btns { display: flex; gap: 8px; padding: 0 28px 24px; }
+.adm-cancel { flex: 1; padding: 10px; border-radius: 10px; background: var(--cream); color: var(--ink2); border: 2px solid var(--sand); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif; line-height: 1.1; }
+.adm-cancel:hover { background: var(--sand); }
+.adm-save { flex: 2; padding: 10px; border-radius: 10px; background: var(--sky); color: #fff; border: 2px solid var(--sky); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif; line-height: 1.1; transition: all .15s; }
+.adm-save:hover { background: var(--sky2); }
+
+/* admin confirm delete */
+.adm-confirm { padding: 20px 28px 24px; text-align: center; }
+.adm-confirm-ico { font-size: 40px; margin-bottom: 10px; }
+.adm-confirm-title { font-family: 'Tajawal', sans-serif; font-size: 18px; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
+.adm-confirm-sub { font-size: 13px; color: var(--ink3); margin-bottom: 20px; line-height: 1.5; }
+.adm-confirm-btns { display: flex; gap: 8px; }
+
+/* ═══ SETTINGS ═══ */
+.admin-settings-bar {
+  background: var(--white); border-bottom: 2px solid var(--sky);
+  padding: 16px 24px; display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.settings-group { display: flex; flex-direction: column; gap: 4px; }
+.settings-lbl { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--ink3); }
+.settings-input {
+  padding: 8px 12px; border-radius: 9px; border: 2px solid var(--border);
+  background: var(--ivory); font-size: 13.5px; font-family: 'Cairo', sans-serif;
+  color: var(--ink); outline: none; transition: border-color .15s; line-height: 1.1; min-width: 170px;
+}
+.settings-input:focus { border-color: var(--sky); background: var(--white); }
+.settings-em-wrap { display: flex; gap: 5px; flex-wrap: wrap; max-width: 240px; }
+.s-em { width: 34px; height: 34px; border-radius: 8px; border: 2px solid var(--border); background: var(--cream); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; line-height: 1; }
+.s-em:hover { border-color: var(--sky); transform: scale(1.08); }
+.s-em.on { border-color: var(--sky); background: var(--sky-pale); }
+.settings-save { padding: 9px 20px; border-radius: 9px; background: var(--sky); color: #fff; border: none; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all .15s; line-height: 1.1; white-space: nowrap; align-self: flex-end; }
+.settings-save:hover { background: var(--sky2); transform: translateY(-1px); }
+.settings-saved { font-size: 12px; font-weight: 700; color: var(--green); background: var(--green-dim); border: 1.5px solid var(--green); padding: 6px 14px; border-radius: 8px; display: none; align-self: flex-end; animation: pop .2s ease; }
+.admin-cols-wrap { display: grid; grid-template-columns: 1fr 1fr; flex: 1; overflow: hidden; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE TABLETTE
+   - Paysage (landscape) : sidebar compacte
+   - Portrait  : sidebar cachée + nav bas
+═══════════════════════════════════════════ */
+
+/* ── Touch : supprimer délai 300ms ── */
+* { touch-action: manipulation; }
+
+/* ── Scrolling tactile fluide ── */
+.menu-items, .o-list, .k-body, .admin-list,
+.admin-tables-grid, .tables-wrap { -webkit-overflow-scrolling: touch; }
+
+/* ════════════════════════════════
+   TABLETTE PAYSAGE (>= 768px width, orientation landscape)
+   Sidebar réduite à icônes seulement
+════════════════════════════════ */
+@media screen and (max-width: 1024px) and (orientation: landscape) {
+
+  .sidebar {
+    width: 68px; min-width: 68px;
+    align-items: center;
+    padding: 0;
+  }
+  .s-inner { padding: 16px 8px; align-items: center; }
+  .brand { padding: 8px; margin-bottom: 14px; justify-content: center; }
+  .brand-icon { width: 38px; height: 38px; font-size: 18px; flex-shrink: 0; }
+  .brand-name, .brand-sub { display: none; }
+  .nav { width: 100%; align-items: center; }
+  .nav-btn { padding: 12px 0; justify-content: center; border-radius: 12px; width: 48px; }
+  .nav-ico { width: auto; font-size: 22px; }
+  .nav-lbl { display: none; }
+  .nav-badge { position: absolute; top: 4px; right: 4px; min-width: 16px; padding: 1px 4px; font-size: 9px; }
+  .s-sep { width: 36px; }
+  .s-footer { padding: 8px 0; justify-content: center; }
+  .s-footer span:last-child { display: none; }
+
+  /* Menu cards plus petites */
+  .menu-items { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; padding: 14px 16px; }
+  .mc-em { font-size: 26px; }
+  .mc-nm { font-size: 12px; }
+  .mc-pr { font-size: 13px; }
+
+  /* Order panel plus compact */
+  .srv-grid { grid-template-columns: 1fr 320px; }
+  .o-total { padding: 0; }
+  .o-tval { font-size: 22px; }
+}
+
+/* ════════════════════════════════
+   TABLETTE PORTRAIT (< 900px width ou orientation portrait)
+   Sidebar cachée + barre nav en bas
+════════════════════════════════ */
+@media screen and (max-width: 900px), screen and (orientation: portrait) and (max-width: 1200px) {
+
+  /* Cacher la sidebar */
+  .sidebar { display: none; }
+
+  /* Barre navigation bas */
+  .bottom-nav {
+    display: flex !important;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 64px;
+    background: var(--sky);
+    border-top: 1px solid rgba(255,255,255,.2);
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .bn-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 3px;
+    background: transparent; border: none;
+    color: rgba(255,255,255,.65); cursor: pointer;
+    font-size: 9.5px; font-weight: 700; font-family: 'Cairo', sans-serif;
+    letter-spacing: .3px; padding: 8px 4px;
+    transition: all .15s; position: relative;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bn-btn.active { color: #fff; }
+  .bn-btn.active::before {
+    content: ''; position: absolute; top: 0; left: 20%; right: 20%;
+    height: 3px; background: #fff; border-radius: 0 0 4px 4px;
+  }
+  .bn-ico { font-size: 22px; line-height: 1; }
+  .bn-badge {
+    position: absolute; top: 6px;
+    right: calc(50% - 22px);
+    background: var(--terracotta); color: #fff;
+    font-size: 9px; font-weight: 800;
+    border-radius: 20px; padding: 1px 5px; min-width: 16px;
+    text-align: center; border: 2px solid var(--sky);
+  }
+
+  /* Compenser la nav bar en bas */
+  .main { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+
+  /* Layout plein écran */
+  .srv-grid { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+
+  /* En portrait : empiler menu + commande verticalement */
+  .menu-panel { border-right: none; border-bottom: 1px solid var(--border); }
+  .order-panel { max-height: 42vh; }
+  .srv-grid { display: flex; flex-direction: column; overflow: hidden; }
+  .menu-panel { flex: 1; min-height: 0; }
+  .order-panel { height: 42vh; flex-shrink: 0; }
+
+  /* Menu items compact */
+  .menu-items { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 9px; padding: 12px 14px; }
+  .mc-em { font-size: 24px; margin-bottom: 6px; }
+  .mc-nm { font-size: 12px; }
+  .mc-pr { font-size: 13px; margin-top: 5px; }
+  .m-card { padding: 12px 10px 10px; border-radius: 12px; }
+
+  /* Toolbar compact */
+  .menu-bar { padding: 10px 14px; gap: 9px; }
+  .tbl-btns { gap: 4px; }
+  .tbl-btn { width: 34px; height: 34px; font-size: 12px; }
+  .cat-btn { padding: 6px 11px; font-size: 12px; }
+  .topbar { padding: 12px 16px; }
+  .tp-title { font-size: 16px; }
+
+  /* Order compact */
+  .o-head { padding: 10px 14px 8px; }
+  .oh-title { font-size: 15px; }
+  .o-list { padding: 8px 12px; gap: 6px; }
+  .o-foot { padding: 10px 14px 12px; gap: 9px; }
+  .o-tval { font-size: 22px; }
+  .o-item { padding: 10px 11px; }
+  .oi-nm { font-size: 12.5px; }
+
+  /* Cuisine kanban en colonnes */
+  .k-cols { grid-template-columns: 1fr 1fr 1fr; }
+  .k-bar { padding: 10px 16px; }
+  .k-stats { gap: 5px; }
+  .k-stat { padding: 5px 9px; font-size: 11px; }
+  .k-clock { font-size: 18px; }
+
+  /* Tables grid */
+  .tgrid, .t-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .tables-wrap { padding: 16px; }
+
+  /* Admin */
+  .admin-settings-bar { flex-wrap: wrap; gap: 10px; padding: 12px 16px; }
+  .settings-input { min-width: 140px !important; }
+  .admin-cols-wrap { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+}
+
+/* ── Petite tablette portrait (iPad mini, etc.) ── */
+@media screen and (max-width: 600px) {
+  .k-cols { grid-template-columns: 1fr; }
+  .k-head { padding: 10px 14px; }
+  .k-body { padding: 10px; }
+  .menu-items { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+  .srv-grid { flex-direction: column; }
+  .order-panel { height: 45vh; }
+}
+
+/* ── Cacher bottom-nav sur desktop ── */
+.bottom-nav { display: none; }
+
+/* ── SKIN PICKER ── */
+.skin-picker-wrap { display: flex; flex-direction: column; gap: 5px; }
+.skin-swatches { display: flex; gap: 7px; }
+.skin-swatch {
+  width: 38px; height: 38px; border-radius: 10px;
+  border: 2.5px solid transparent;
+  cursor: pointer; transition: all .18s;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: #fff;
+  position: relative; overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,.12);
+}
+.skin-swatch:hover { transform: translateY(-2px) scale(1.08); box-shadow: 0 6px 16px rgba(0,0,0,.18); }
+.skin-swatch.active { border-color: var(--ink); box-shadow: 0 0 0 3px var(--sky), 0 4px 12px rgba(0,0,0,.2); transform: scale(1.08); }
+.skin-swatch .check { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; background: rgba(0,0,0,.28); font-size: 16px; }
+.skin-swatch.active .check { display: flex; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ══ SIDEBAR ══ -->
+  <nav class="sidebar">
+    <div class="s-inner">
+      <div class="brand">
+        <div class="brand-icon" id="brandIcon" style="background:linear-gradient(135deg,#4e9658,#2d6b38);font-size:20px">🫒</div>
+        <div>
+          <div class="brand-name" id="brandName">Zitoun</div>
+          <div class="brand-sub" id="brandSub">Restaurant POS</div>
+        </div>
+      </div>
+      <ul class="nav">
+        <li>
+          <button class="nav-btn active" onclick="showPage('server', this)">
+            <span class="nav-ico">📋</span>
+            <span class="nav-lbl">Commandes</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" onclick="showPage('kitchen', this)">
+            <span class="nav-ico">🍳</span>
+            <span class="nav-lbl">Cuisine</span>
+            <span class="nav-badge" id="kitchenBadge" style="display:none">0</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" onclick="showPage('tables', this)">
+            <span class="nav-ico">🪑</span>
+            <span class="nav-lbl">Tables</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" onclick="showPage('admin', this)">
+            <span class="nav-ico">⚙️</span>
+            <span class="nav-lbl">Admin</span>
+          </button>
+        </li>
+      </ul>
+      <div class="s-sep"></div>
+      <div class="s-footer">
+        <span class="s-dot"></span>
+        <span>Zitoun POS · v1.0</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main">
+
+    <!-- ═══════════════════════
+         COMMANDES
+    ═══════════════════════ -->
+    <div class="page active" id="page-server">
+      <div class="srv-grid">
+
+        <!-- Menu -->
+        <div class="menu-panel">
+          <div class="topbar">
+            <div>
+              <div class="tp-title">📋 Nouvelle Commande</div>
+              <div class="tp-sub">Zitoun POS — Sélectionnez une table puis ajoutez les articles</div>
+            </div>
+            <div class="tp-right">
+              <div class="time-badge" id="timeBadge">--:--</div>
+            </div>
+          </div>
+          <div class="menu-bar">
+            <div class="tbl-row">
+              <span class="tbl-lbl">Table :</span>
+              <div class="tbl-btns" id="tblBtns"></div>
+            </div>
+            <div class="cats" id="catBtns"></div>
+          </div>
+          <div class="menu-items" id="menuItems"></div>
+        </div>
+
+        <!-- Order panel -->
+        <div class="order-panel">
+          <div class="o-head">
+            <div>
+              <div class="oh-title">Récapitulatif</div>
+              <div class="oh-sub" id="ohSub">Aucune table sélectionnée</div>
+            </div>
+            <button class="clr-btn" id="clrBtn" disabled onclick="clearOrder()">🗑 Vider</button>
+          </div>
+          <div class="o-list" id="oList">
+            <div class="o-empty">
+              <div class="o-empty-ico">🧺</div>
+              <div class="o-empty-txt">Sélectionnez une table<br>puis ajoutez des articles</div>
+            </div>
+          </div>
+          <div class="o-foot">
+            <div class="o-total">
+              <span class="o-tlbl">Total</span>
+              <span class="o-tval" id="oTotal">0 <span>DT</span></span>
+            </div>
+            <div id="sucSlot"></div>
+            <div class="o-acts">
+              <button class="act-btn act-print" id="printBtn" disabled onclick="openTicket()">🖨 Ticket</button>
+              <button class="act-btn act-send" id="sendBtn" disabled onclick="sendKitchen()">Envoyer en cuisine →</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════════
+         CUISINE
+    ═══════════════════════ -->
+    <div class="page" id="page-kitchen">
+      <div class="k-bar">
+        <div>
+          <div class="tp-title">🍳 Cuisine en Direct</div>
+          <div class="tp-sub" id="kSub">Zitoun POS · 0 commande active</div>
+        </div>
+        <div class="k-stats">
+          <div class="k-stat"><span class="k-dot" style="background:var(--terracotta)"></span><span id="sN">0</span> nouvelle(s)</div>
+          <div class="k-stat"><span class="k-dot" style="background:var(--yellow)"></span><span id="sP">0</span> en cours</div>
+          <div class="k-stat"><span class="k-dot" style="background:var(--green)"></span><span id="sR">0</span> prête(s)</div>
+        </div>
+        <div class="k-clock" id="clock">00:00:00</div>
+      </div>
+      <div class="k-cols">
+        <div class="k-col">
+          <div class="k-head kh-new"><span class="k-blink"></span>Nouvelles<span class="k-cnt" id="cN">0</span></div>
+          <div class="k-body" id="colNew"></div>
+        </div>
+        <div class="k-col">
+          <div class="k-head kh-prep"><span class="k-blink"></span>En préparation<span class="k-cnt" id="cP">0</span></div>
+          <div class="k-body" id="colPrep"></div>
+        </div>
+        <div class="k-col">
+          <div class="k-head kh-ready"><span class="k-blink"></span>Prêtes à servir<span class="k-cnt" id="cR">0</span></div>
+          <div class="k-body" id="colReady"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════
+         TABLES
+    ═══════════════════════ -->
+    <div class="page" id="page-tables">
+      <div class="topbar">
+        <div>
+          <div class="tp-title">🪑 Plan de Salle</div>
+          <div class="tp-sub">Statut en temps réel — cliquez pour agir</div>
+        </div>
+      </div>
+      <div class="tables-wrap">
+        <div class="t-grid" id="tGrid"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════
+         ADMIN
+    ═══════════════════════ -->
+    <div class="page" id="page-admin">
+      <div class="topbar">
+        <div>
+          <div class="tp-title">⚙️ Administration</div>
+          <div class="tp-sub">Zitoun POS · Paramètres, menu et tables</div>
+        </div>
+      </div>
+
+      <!-- ── Paramètres du restaurant ── -->
+      <div class="admin-settings-bar">
+        <div class="settings-group skin-picker-wrap">
+          <span class="settings-lbl">Thème</span>
+          <div class="skin-swatches">
+            <div class="skin-swatch active" id="skin-vert"   style="background:linear-gradient(135deg,#3d7a47,#2d6b38)" onclick="applySkin('vert')"  title="Vert olivier"><span class="check">✓</span></div>
+            <div class="skin-swatch"        id="skin-bleu"   style="background:linear-gradient(135deg,#1a6eb5,#1255a0)" onclick="applySkin('bleu')"  title="Bleu"><span class="check">✓</span></div>
+            <div class="skin-swatch"        id="skin-blanc"  style="background:linear-gradient(135deg,#e0e0e0,#c0c0c0);color:#555" onclick="applySkin('blanc')" title="Blanc"><span class="check" style="color:#333">✓</span></div>
+            <div class="skin-swatch"        id="skin-noir"   style="background:linear-gradient(135deg,#1a1a1a,#0a0a0a)" onclick="applySkin('noir')"  title="Noir"><span class="check">✓</span></div>
+          </div>
+        </div>
+        <div class="settings-group">
+          <span class="settings-lbl">Icône</span>
+          <div class="settings-em-wrap" id="settingsEmojiPicker"></div>
+        </div>
+        <div class="settings-group">
+          <span class="settings-lbl">Nom du restaurant</span>
+          <input class="settings-input" id="settingsName" placeholder="Ex: Mon Restaurant" style="min-width:200px">
+        </div>
+        <div class="settings-group">
+          <span class="settings-lbl">Sous-titre</span>
+          <input class="settings-input" id="settingsSub" placeholder="Ex: Restaurant & Terrasse" style="min-width:190px">
+        </div>
+        <div class="settings-group">
+          <span class="settings-lbl">Ville</span>
+          <input class="settings-input" id="settingsCity" placeholder="Ex: Tunis" style="min-width:150px">
+        </div>
+        <button class="settings-save" onclick="saveSettings()">💾 Enregistrer</button>
+        <div class="settings-saved" id="settingsSaved">✓ Enregistré !</div>
+      </div>
+
+      <!-- ── Menu + Tables ── -->
+      <div class="admin-cols-wrap">
+        <div class="admin-col">
+          <div class="admin-col-head">
+            <div>
+              <div class="admin-col-title">🍽️ Menu</div>
+              <div class="admin-col-sub" id="adminMenuCount">0 articles</div>
+            </div>
+            <button class="admin-add-btn" onclick="openAddArticle()">+ Ajouter</button>
+          </div>
+          <div class="admin-list" id="adminMenuList"></div>
+        </div>
+        <div class="admin-col">
+          <div class="admin-col-head">
+            <div>
+              <div class="admin-col-title">🪑 Tables</div>
+              <div class="admin-col-sub" id="adminTableCount">0 tables</div>
+            </div>
+            <button class="admin-add-btn" onclick="openAddTable()">+ Ajouter</button>
+          </div>
+          <div class="admin-tables-grid" id="adminTableGrid"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ BARRE NAV BAS — tablette portrait ══ -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bn-btn active" id="bn-server" onclick="showPage('server',this);syncBottomNav('server')">
+    <span class="bn-ico">📋</span><span>Commandes</span>
+  </button>
+  <button class="bn-btn" id="bn-kitchen" onclick="showPage('kitchen',this);syncBottomNav('kitchen')" style="position:relative">
+    <span class="bn-ico">🍳</span><span>Cuisine</span>
+    <span class="bn-badge" id="bnBadge" style="display:none">0</span>
+  </button>
+  <button class="bn-btn" id="bn-tables" onclick="showPage('tables',this);syncBottomNav('tables')">
+    <span class="bn-ico">🪑</span><span>Tables</span>
+  </button>
+  <button class="bn-btn" id="bn-admin" onclick="showPage('admin',this);syncBottomNav('admin')">
+    <span class="bn-ico">⚙️</span><span>Admin</span>
+  </button>
+</nav>
+<div class="modal-ov" id="articleModal">
+  <div class="modal-box" style="max-width:480px;padding:0;overflow:hidden;border-top:5px solid var(--sky)">
+    <div style="padding:20px 28px 0">
+      <div class="mb-title" id="articleModalTitle">Ajouter un article</div>
+      <div class="mb-sub" style="margin-bottom:0">Remplissez les informations du plat</div>
+    </div>
+    <div class="adm-form">
+      <div class="adm-field">
+        <label class="adm-label">Nom du plat</label>
+        <input class="adm-input" id="artName" placeholder="Ex: Couscous royal...">
+      </div>
+      <div class="adm-row">
+        <div class="adm-field">
+          <label class="adm-label">Prix (DT)</label>
+          <input class="adm-input" id="artPrice" type="number" min="0" step="0.5" placeholder="0.000">
+        </div>
+        <div class="adm-field">
+          <label class="adm-label">Catégorie</label>
+          <select class="adm-select" id="artCat">
+            <option value="entree">🥗 Entrée</option>
+            <option value="plat">🥩 Plat</option>
+            <option value="dessert">🍮 Dessert</option>
+            <option value="boisson">🍷 Boisson</option>
+          </select>
+        </div>
+      </div>
+      <div class="adm-field">
+        <label class="adm-label">Emoji <span id="artEmojiSelected" style="font-size:18px;margin-left:6px"></span></label>
+        <div class="adm-emoji-grid" id="emojiGrid"></div>
+      </div>
+      <div id="artError" style="color:var(--terracotta);font-size:12px;font-weight:600;display:none"></div>
+    </div>
+    <div class="adm-form-btns">
+      <button class="adm-cancel" onclick="closeModal('articleModal')">Annuler</button>
+      <button class="adm-save" onclick="saveArticle()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL TABLE ══ -->
+<div class="modal-ov" id="tableModal">
+  <div class="modal-box" style="max-width:360px;padding:0;overflow:hidden;border-top:5px solid var(--sky)">
+    <div style="padding:20px 28px 0">
+      <div class="mb-title" id="tableModalTitle">Ajouter une table</div>
+      <div class="mb-sub" style="margin-bottom:0">Définissez le numéro et le nombre de places</div>
+    </div>
+    <div class="adm-form">
+      <div class="adm-row">
+        <div class="adm-field">
+          <label class="adm-label">Numéro</label>
+          <input class="adm-input" id="tblNum" type="number" min="1" max="99" placeholder="Ex: 11">
+        </div>
+        <div class="adm-field">
+          <label class="adm-label">Places</label>
+          <input class="adm-input" id="tblSeats" type="number" min="1" max="20" placeholder="Ex: 4">
+        </div>
+      </div>
+      <div id="tblError" style="color:var(--terracotta);font-size:12px;font-weight:600;display:none"></div>
+    </div>
+    <div class="adm-form-btns">
+      <button class="adm-cancel" onclick="closeModal('tableModal')">Annuler</button>
+      <button class="adm-save" onclick="saveTable()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL CONFIRMER SUPPRESSION ══ -->
+<div class="modal-ov" id="deleteModal">
+  <div class="modal-box" style="max-width:360px">
+    <div class="adm-confirm">
+      <div class="adm-confirm-ico">🗑️</div>
+      <div class="adm-confirm-title" id="delTitle">Supprimer ?</div>
+      <div class="adm-confirm-sub" id="delSub">Cette action est irréversible.</div>
+      <div class="adm-confirm-btns">
+        <button class="adm-cancel" style="flex:1;padding:10px;border-radius:10px;border:2px solid var(--sand)" onclick="closeModal('deleteModal')">Annuler</button>
+        <button class="adm-save" style="flex:1;padding:10px;border-radius:10px;background:var(--terracotta);border-color:var(--terracotta)" id="delConfirmBtn" onclick="confirmDelete()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-ov" id="freeModal">
+  <div class="modal-box">
+    <span class="mb-ico">🔓</span>
+    <div class="mb-title" id="mbTitle">Libérer la table ?</div>
+    <div class="mb-sub" id="mbSub">Cette action remettra la table disponible.</div>
+    <div class="mb-btns">
+      <button class="mb-btn mb-cancel" onclick="closeModal('freeModal')">Annuler</button>
+      <button class="mb-btn mb-ok" onclick="confirmFree()">✓ Libérer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TICKET -->
+<div class="modal-ov" id="ticketModal">
+  <div class="modal-box">
+    <div class="tk-header">
+      <div>
+        <div class="tk-title">🖨 Aperçu du Ticket</div>
+        <div class="tk-sub" id="tkSub">Table — · —</div>
+      </div>
+      <button class="tk-x" onclick="closeModal('ticketModal')">✕</button>
+    </div>
+    <div class="tk-zellige"></div>
+    <div class="tk-body">
+      <div class="receipt" id="rcPreview"></div>
+    </div>
+    <div class="tk-acts">
+      <button class="tk-btn tk-close" onclick="closeModal('ticketModal')">Fermer</button>
+      <button class="tk-btn tk-print" onclick="printTicket()">🖨 Imprimer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ DATA ═══
+const MENU = [
+  {id:1, name:'Salade César',      price:12, cat:'entree',  emoji:'🥗', avail:true},
+  {id:2, name:"Soupe à l'oignon",  price:9,  cat:'entree',  emoji:'🍲', avail:true},
+  {id:3, name:'Tartare de saumon', price:15, cat:'entree',  emoji:'🐟', avail:true},
+  {id:4, name:'Steak frites',      price:24, cat:'plat',    emoji:'🥩', avail:true},
+  {id:5, name:'Poulet rôti',       price:19, cat:'plat',    emoji:'🍗', avail:true},
+  {id:6, name:'Pâtes carbonara',   price:17, cat:'plat',    emoji:'🍝', avail:true},
+  {id:7, name:'Saumon grillé',     price:22, cat:'plat',    emoji:'🐠', avail:false},
+  {id:8, name:'Crème brûlée',      price:8,  cat:'dessert', emoji:'🍮', avail:true},
+  {id:9, name:'Fondant chocolat',  price:9,  cat:'dessert', emoji:'🍫', avail:true},
+  {id:10,name:'Tarte tatin',       price:8,  cat:'dessert', emoji:'🥧', avail:true},
+  {id:11,name:'Eau minérale',      price:3,  cat:'boisson', emoji:'💧', avail:true},
+  {id:12,name:'Vin rouge (verre)', price:6,  cat:'boisson', emoji:'🍷', avail:true},
+  {id:13,name:'Bière pression',    price:5,  cat:'boisson', emoji:'🍺', avail:true},
+  {id:14,name:'Café',              price:3,  cat:'boisson', emoji:'☕', avail:true},
+];
+const CATS = [
+  {k:'all',     l:'Tout',     e:'✦'},
+  {k:'entree',  l:'Entrées',  e:'🥗'},
+  {k:'plat',    l:'Plats',    e:'🥩'},
+  {k:'dessert', l:'Desserts', e:'🍮'},
+  {k:'boisson', l:'Boissons', e:'🍷'},
+];
+const TABLES = [
+  {n:1,s:2,st:'free'},    {n:2,s:4,st:'occupied'},
+  {n:3,s:4,st:'occupied'},{n:4,s:6,st:'reserved'},
+  {n:5,s:2,st:'free'},    {n:6,s:4,st:'free'},
+  {n:7,s:4,st:'occupied'},{n:8,s:8,st:'free'},
+  {n:9,s:2,st:'reserved'},{n:10,s:4,st:'free'},
+];
+
+// ═══ STATE ═══
+let selTable = null, activeCat = 'all', oItems = [], kOrders = [], nid = 1;
+
+// ═══ INIT ═══
+function init() {
+  buildTableBtns();
+  buildCatBtns();
+  buildMenuItems();
+  buildTables();
+  updateClock();
+  setInterval(updateClock, 1000);
+  setInterval(renderKitchen, 8000);
+  setInterval(function() {
+    var el = document.getElementById('timeBadge');
+    if (el) el.textContent = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  }, 1000);
+}
+
+// ═══ NAVIGATION ═══
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+  syncBottomNav(name);
+  if (name === 'kitchen') renderKitchen();
+  if (name === 'tables') buildTables();
+  if (name === 'admin') { buildAdminMenu(); buildAdminTables(); initSettings(); }
+}
+
+// ═══ TABLE BUTTONS ═══
+function buildTableBtns() {
+  var c = document.getElementById('tblBtns');
+  c.innerHTML = '';
+  for (var i = 1; i <= 10; i++) {
+    (function(num) {
+      var b = document.createElement('button');
+      b.className = 'tbl-btn' + (selTable === num ? ' sel' : '');
+      b.textContent = num;
+      b.onclick = function() { pickTable(num); };
+      c.appendChild(b);
+    })(i);
+  }
+}
+
+function pickTable(n) {
+  selTable = n;
+  buildTableBtns();
+  document.getElementById('ohSub').textContent = 'Table ' + n + ' · ' + new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  updateBtns();
+}
+
+// ═══ CATEGORY BUTTONS ═══
+function buildCatBtns() {
+  var c = document.getElementById('catBtns');
+  c.innerHTML = '';
+  CATS.forEach(function(cat) {
+    var b = document.createElement('button');
+    b.className = 'cat-btn' + (activeCat === cat.k ? ' active' : '');
+    b.innerHTML = '<span>' + cat.e + '</span> ' + cat.l;
+    b.onclick = function() { activeCat = cat.k; buildCatBtns(); buildMenuItems(); };
+    c.appendChild(b);
+  });
+}
+
+// ═══ MENU ITEMS ═══
+function buildMenuItems() {
+  var items = activeCat === 'all' ? MENU : MENU.filter(function(m) { return m.cat === activeCat; });
+  var g = document.getElementById('menuItems');
+  g.innerHTML = '';
+  items.forEach(function(item) {
+    var d = document.createElement('div');
+    d.className = 'm-card' + (item.avail ? '' : ' unavail');
+    d.innerHTML =
+      '<div class="mc-top"><span class="mc-em">' + item.emoji + '</span>' +
+      (item.avail ? '' : '<span class="mc-tag">Épuisé</span>') + '</div>' +
+      '<span class="mc-nm">' + item.name + '</span>' +
+      '<span class="mc-pr">' + item.price + ' DT</span>';
+    if (item.avail) {
+      d.onclick = (function(it) { return function() { addItem(it); }; })(item);
+    }
+    g.appendChild(d);
+  });
+}
+
+// ═══ ORDER ═══
+function addItem(item) {
+  var ex = oItems.find(function(o) { return o.item.id === item.id; });
+  if (ex) { ex.qty++; } else { oItems.push({item: item, qty: 1, note: ''}); }
+  renderOrder();
+}
+
+function renderOrder() {
+  var c = document.getElementById('oList');
+  if (oItems.length === 0) {
+    c.innerHTML = '<div class="o-empty"><div class="o-empty-ico">🧺</div><div class="o-empty-txt">Sélectionnez une table<br>puis ajoutez des articles</div></div>';
+    document.getElementById('clrBtn').disabled = true;
+    document.getElementById('oTotal').innerHTML = '0 <span>DT</span>';
+    updateBtns();
+    return;
+  }
+  document.getElementById('clrBtn').disabled = false;
+  c.innerHTML = '';
+  oItems.forEach(function(oi, i) {
+    var d = document.createElement('div');
+    d.className = 'o-item';
+    d.innerHTML =
+      '<div class="oi-top">' +
+        '<span class="oi-em">' + oi.item.emoji + '</span>' +
+        '<div class="oi-bd">' +
+          '<div class="oi-nm">' + oi.item.name + '</div>' +
+          '<input class="oi-nt" placeholder="Note spéciale..." value="' + oi.note + '" oninput="oItems[' + i + '].note=this.value">' +
+        '</div>' +
+      '</div>' +
+      '<div class="oi-bot">' +
+        '<button class="q-btn" onclick="chQty(' + i + ',-1)">−</button>' +
+        '<span class="q-num">' + oi.qty + '</span>' +
+        '<button class="q-btn" onclick="chQty(' + i + ',1)">+</button>' +
+        '<span class="oi-price">' + (oi.item.price * oi.qty) + ' DT</span>' +
+      '</div>';
+    c.appendChild(d);
+  });
+  var total = oItems.reduce(function(s, o) { return s + o.item.price * o.qty; }, 0);
+  document.getElementById('oTotal').innerHTML = total + ' <span>DT</span>';
+  updateBtns();
+}
+
+function chQty(i, d) {
+  oItems[i].qty += d;
+  if (oItems[i].qty <= 0) oItems.splice(i, 1);
+  renderOrder();
+}
+
+function clearOrder() { oItems = []; renderOrder(); }
+
+function updateBtns() {
+  var ok = oItems.length > 0 && selTable !== null;
+  document.getElementById('printBtn').disabled = !ok;
+  document.getElementById('sendBtn').disabled = !ok;
+}
+
+function sendKitchen() {
+  if (!selTable || oItems.length === 0) return;
+  var btn = document.getElementById('sendBtn');
+  btn.disabled = true; btn.textContent = '⏳ Envoi...';
+
+  var orderPayload = {
+    tableNumber: selTable,
+    items: oItems.map(function(o) {
+      return { menuItemId: o.item.id, quantity: o.qty, note: o.note || '' };
+    })
+  };
+
+  function onSuccess(orderId) {
+    // Envoyer en cuisine
+    var url = window.API_URL + '/orders';
+    if (orderId) url = window.API_URL + '/orders/' + orderId + '/send-kitchen';
+    if (orderId) {
+      fetch(url, { method: 'POST', headers: {'Content-Type':'application/json'} }).catch(function(){});
+    }
+    kOrders.push({
+      id: orderId || nid++, table: selTable,
+      items: oItems.map(function(o) { return Object.assign({}, o); }),
+      status: 'sent', time: Date.now()
+    });
+    var t = TABLES.find(function(t) { return t.n === selTable; });
+    if (t) t.st = 'occupied';
+    updateKBadge();
+    document.getElementById('sucSlot').innerHTML =
+      '<div class="suc-flash">✓ Commande envoyée — Table ' + selTable + '</div>';
+    oItems = []; selTable = null;
+    buildTableBtns(); renderOrder();
+    document.getElementById('ohSub').textContent = 'Aucune table sélectionnée';
+    btn.textContent = 'Envoyer en cuisine →';
+    setTimeout(function() { document.getElementById('sucSlot').innerHTML = ''; }, 3500);
+  }
+
+  // Essayer l'API, sinon mode local
+  fetch(window.API_URL + '/orders', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(orderPayload)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(order) { onSuccess(order.id); })
+  .catch(function() { onSuccess(null); }); // mode offline
+}
+
+// ═══ TICKET MODAL ═══
+function openTicket() {
+  if (!selTable || oItems.length === 0) return;
+  var total = oItems.reduce(function(s, o) { return s + o.item.price * o.qty; }, 0);
+  var tva = (total * 0.1).toFixed(3);
+  var ht = (total / 1.1).toFixed(3);
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('fr-FR');
+  var timeStr = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  var orderNum = String(nid + 100).padStart(4, '0');
+
+  document.getElementById('tkSub').textContent = 'Table ' + selTable + ' · ' + timeStr;
+
+  var rows = oItems.map(function(o) {
+    return '<div class="rc-row"><span>' + o.qty + '×  ' + o.item.name + '</span><span>' + (o.item.price * o.qty).toFixed(3) + ' DT</span></div>' +
+      (o.note ? '<div class="rc-note">↳ ' + o.note + '</div>' : '');
+  }).join('');
+
+  var rName = window.RESTO_NAME || 'Café Sidi Bou';
+  var rSub  = window.RESTO_SUB  || 'Restaurant & Terrasse';
+  var rCity = window.RESTO_CITY || 'Sidi Bou Saïd, Tunisie';
+
+  document.getElementById('rcPreview').innerHTML =
+    '<div class="rc-logo"><div class="rc-name">' + rName + '</div><div class="rc-tag">' + rSub + ' · ' + rCity + '</div></div>' +
+    '<hr class="rc-div">' +
+    '<div class="rc-meta">' + dateStr + ' ' + timeStr + '</div>' +
+    '<div class="rc-meta">Table ' + selTable + ' · N° ' + orderNum + '</div>' +
+    '<hr class="rc-div">' +
+    rows +
+    '<hr class="rc-div">' +
+    '<div class="rc-row" style="font-size:11px;color:#888"><span>Sous-total HT</span><span>' + ht + ' DT</span></div>' +
+    '<div class="rc-row" style="font-size:11px;color:#888"><span>TVA (10%)</span><span>' + tva + ' DT</span></div>' +
+    '<hr class="rc-div">' +
+    '<div class="rc-total"><span>TOTAL TTC</span><span>' + total.toFixed(3) + ' DT</span></div>' +
+    '<div class="rc-footer">Merci de votre visite 🙏<br><b>' + rName + '</b> · ' + rCity + '<br>MF: 123456/A/M/000</div>';
+
+  document.getElementById('ticketModal').classList.add('open');
+}
+
+function printTicket() {
+  var html = document.getElementById('rcPreview').innerHTML;
+  var rName = window.RESTO_NAME || 'Café Sidi Bou';
+  var rSub  = window.RESTO_SUB  || 'Restaurant & Terrasse';
+  var rCity = window.RESTO_CITY || 'Sidi Bou Saïd, Tunisie';
+  var w = window.open('', '_blank', 'width=420,height=680');
+  w.document.write('<!DOCTYPE html><html><head><title>Ticket ' + rName + '</title><style>' +
+    '*{margin:0;padding:0;box-sizing:border-box}' +
+    'body{font-family:"Courier New",monospace;max-width:300px;margin:0 auto;padding:20px 12px;color:#111;background:#fff}' +
+    '.rc-name{text-align:center;font-size:17px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;margin-bottom:3px}' +
+    '.rc-tag{text-align:center;font-size:10px;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}' +
+    '.rc-div{border:none;border-top:1px dashed #ccc;margin:10px 0}' +
+    '.rc-meta{font-size:11px;color:#666;text-align:center;margin:3px 0}' +
+    '.rc-row{display:flex;justify-content:space-between;font-size:13px;padding:2px 0}' +
+    '.rc-note{font-size:10px;color:#888;padding-left:16px;font-style:italic;margin-bottom:3px}' +
+    '.rc-total{display:flex;justify-content:space-between;font-size:16px;font-weight:bold;padding:4px 0}' +
+    '.rc-footer{text-align:center;font-size:10px;color:#aaa;margin-top:14px;padding-top:10px;border-top:1px dashed #eee;line-height:1.7}' +
+    '.rc-footer b{color:#555}' +
+    '@media print{.no-print{display:none}body{padding:4px}}' +
+    '</style></head><body>' + html +
+    '<div class="no-print" style="text-align:center;margin-top:20px">' +
+    '<button onclick="window.print()" style="padding:10px 30px;font-size:14px;cursor:pointer;font-family:Cairo,sans-serif;background:#1a6eb5;color:#fff;border:none;border-radius:8px">🖨 Imprimer</button>' +
+    '</div></body></html>');
+  w.document.close();
+  setTimeout(function() { w.print(); }, 400);
+}
+
+// ═══ KITCHEN ═══
+function renderKitchen() {
+  var active = kOrders.filter(function(o) { return o.status !== 'served'; });
+  document.getElementById('kSub').textContent = 'Zitoun POS · ' + active.length + ' commande' + (active.length !== 1 ? 's' : '') + ' active' + (active.length !== 1 ? 's' : '');
+  function by(s) { return kOrders.filter(function(o) { return o.status === s; }); }
+  var ns = by('sent'), ps = by('preparing'), rs = by('ready');
+  document.getElementById('cN').textContent = ns.length;
+  document.getElementById('cP').textContent = ps.length;
+  document.getElementById('cR').textContent = rs.length;
+  document.getElementById('sN').textContent = ns.length;
+  document.getElementById('sP').textContent = ps.length;
+  document.getElementById('sR').textContent = rs.length;
+  renderKCol('colNew', ns, 'new');
+  renderKCol('colPrep', ps, 'prep');
+  renderKCol('colReady', rs, 'ready');
+}
+
+function renderKCol(id, orders, type) {
+  var c = document.getElementById(id);
+  if (orders.length === 0) { c.innerHTML = '<div class="k-nil">Aucune commande</div>'; return; }
+  c.innerHTML = '';
+  orders.forEach(function(order) {
+    var el = Math.floor((Date.now() - order.time) / 60000);
+    var tt = el === 0 ? "À l'instant" : 'Il y a ' + el + ' min';
+    var pct = Math.min(100, ((Date.now() - order.time) / (15 * 60000)) * 100);
+    var d = document.createElement('div');
+    d.className = 'kcard' + (type === 'new' ? ' k-urg' : '') + (type === 'ready' ? ' k-glow' : '');
+    var btn = '';
+    if (type === 'new')  btn = '<button class="kb kb-acc" onclick="kAction(' + order.id + ',\'preparing\')">✅ Accepter</button>';
+    if (type === 'prep') btn = '<button class="kb kb-rdy" onclick="kAction(' + order.id + ',\'ready\')">🔔 Prêt</button>';
+    if (type === 'ready') btn = '<button class="kb kb-srv" onclick="kAction(' + order.id + ',\'served\')">✓ Servi</button>';
+    var items = order.items.map(function(o) {
+      return '<div class="k-line"><span class="k-qt">×' + o.qty + '</span><span>' + o.item.emoji + '</span>' +
+        '<div>' + o.item.name + (o.note ? '<span class="k-note">↳ ' + o.note + '</span>' : '') + '</div></div>';
+    }).join('');
+    d.innerHTML =
+      '<div class="kc-top">' +
+        '<div><div class="kc-table">Table ' + order.table + '</div>' +
+        '<div class="kc-time' + (type === 'ready' ? ' ready' : '') + '">' + (type === 'ready' ? '● Prêt à servir' : tt) + '</div></div>' +
+        btn +
+      '</div>' +
+      (type === 'prep' ? '<div class="k-prog"><div class="k-pf" style="width:' + pct + '%"></div></div>' : '') +
+      '<div class="kc-items">' + items + '</div>';
+    c.appendChild(d);
+  });
+}
+
+function kAction(id, s) {
+  var o = kOrders.find(function(o) { return o.id === id; });
+  if (o) { o.status = s; renderKitchen(); updateKBadge(); }
+}
+
+function updateKBadge() {
+  var n = kOrders.filter(function(o) { return o.status === 'sent'; }).length;
+  var b = document.getElementById('kitchenBadge');
+  b.textContent = n; b.style.display = n > 0 ? 'inline' : 'none';
+  var bb = document.getElementById('bnBadge');
+  if (bb) { bb.textContent = n; bb.style.display = n > 0 ? 'inline' : 'none'; }
+}
+
+// ═══ TABLES ═══
+var pendFree = null;
+
+function buildTables() {
+  var g = document.getElementById('tGrid');
+  g.innerHTML = '';
+  var LBL = {free: 'Libre', occupied: 'Occupée', reserved: 'Réservée'};
+  TABLES.forEach(function(t) {
+    var d = document.createElement('div');
+    d.className = 'tcard ' + t.st;
+    var acts = '';
+    if (t.st === 'free') {
+      acts = '<button class="tc-btn tc-ord" onclick="event.stopPropagation();goOrder(' + t.n + ')">Commander</button>' +
+             '<button class="tc-btn tc-rsv" onclick="event.stopPropagation();reserveTable(' + t.n + ')">Réserver</button>';
+    } else if (t.st === 'occupied') {
+      acts = '<button class="tc-btn tc-free" onclick="event.stopPropagation();askFree(' + t.n + ',\'occupied\')">Libérer</button>';
+    } else {
+      acts = '<button class="tc-btn tc-ord" onclick="event.stopPropagation();goOrder(' + t.n + ')">Commander</button>' +
+             '<button class="tc-btn tc-free" onclick="event.stopPropagation();askFree(' + t.n + ',\'reserved\')">Libérer</button>';
+    }
+    d.innerHTML =
+      '<div class="tc-num">' + t.n + '</div>' +
+      '<div class="tc-badge">' + LBL[t.st] + '</div>' +
+      '<div class="tc-seats">🪑 ' + t.s + ' places</div>' +
+      '<div class="tc-acts">' + acts + '</div>';
+    g.appendChild(d);
+  });
+}
+
+function goOrder(n) {
+  var firstBtn = document.querySelector('.nav-btn');
+  showPage('server', firstBtn);
+  pickTable(n);
+}
+
+function reserveTable(n) {
+  var t = TABLES.find(function(t) { return t.n === n; });
+  if (t) { t.st = 'reserved'; buildTables(); }
+}
+
+function askFree(n, from) {
+  pendFree = n;
+  document.getElementById('mbTitle').textContent = 'Libérer la table ' + n + ' ?';
+  document.getElementById('mbSub').textContent = from === 'occupied'
+    ? 'La commande sera clôturée et la table remise disponible.'
+    : 'La réservation sera annulée et la table remise disponible.';
+  document.getElementById('freeModal').classList.add('open');
+}
+
+function confirmFree() {
+  var t = TABLES.find(function(t) { return t.n === pendFree; });
+  if (t) {
+    t.st = 'free';
+    kOrders.forEach(function(o) { if (o.table === pendFree && o.status !== 'served') o.status = 'served'; });
+    updateKBadge();
+  }
+  pendFree = null;
+  closeModal('freeModal');
+  buildTables();
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ═══ SYNC BOTTOM NAV ═══
+function syncBottomNav(name) {
+  document.querySelectorAll('.bn-btn').forEach(function(b) { b.classList.remove('active'); });
+  var btn = document.getElementById('bn-' + name);
+  if (btn) btn.classList.add('active');
+}
+
+// ═══ SKIN SWITCHER ════════════════════════════
+var currentSkin = 'vert';
+
+function applySkin(skin) {
+  document.body.classList.remove('skin-bleu', 'skin-vert', 'skin-blanc', 'skin-noir');
+  document.body.classList.add('skin-' + skin);
+  currentSkin = skin;
+  ['vert','bleu','blanc','noir'].forEach(function(s) {
+    var el = document.getElementById('skin-' + s);
+    if (el) el.classList.toggle('active', s === skin);
+  });
+  var sidebar = document.querySelector('.sidebar');
+  var bottomNav = document.getElementById('bottomNav');
+  var themeColors = { vert:'#3d7a47', bleu:'#1a6eb5', blanc:'#555555', noir:'#111111' };
+  if (skin === 'noir') {
+    sidebar.style.background = '#111';
+    if (bottomNav) bottomNav.style.background = '#111';
+  } else {
+    sidebar.style.background = '';
+    if (bottomNav) bottomNav.style.background = '';
+  }
+  // Update theme-color meta for mobile browser chrome
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', themeColors[skin] || '#3d7a47');
+}
+
+// ═══ SETTINGS ════════════════════════════════
+var BRAND_EMOJIS = ['🫒','🌿','🍃','🌱','🌾','🍴','🍽️','🥘','🫕','🌊','🌴','⭐','🎯','🏺','🌺','🌙','☕','🍷','🫖','🧆'];
+var pickedBrandEmoji = '☕';
+
+function buildSettingsEmojiPicker() {
+  var wrap = document.getElementById('settingsEmojiPicker');
+  wrap.innerHTML = '';
+  BRAND_EMOJIS.forEach(function(em) {
+    var b = document.createElement('button');
+    b.className = 's-em' + (em === pickedBrandEmoji ? ' on' : '');
+    b.type = 'button'; b.textContent = em;
+    b.onclick = function() {
+      document.querySelectorAll('.s-em').forEach(function(x) { x.classList.remove('on'); });
+      b.classList.add('on');
+      pickedBrandEmoji = em;
+    };
+    wrap.appendChild(b);
+  });
+}
+
+function initSettings() {
+  document.getElementById('settingsName').value = document.getElementById('brandName').textContent;
+  document.getElementById('settingsSub').value = document.getElementById('brandSub').textContent;
+  document.getElementById('settingsCity').value = 'Tunisie';
+  pickedBrandEmoji = document.getElementById('brandIcon').textContent.trim() || '🫒';
+  buildSettingsEmojiPicker();
+}
+
+function saveSettings() {
+  var name = document.getElementById('settingsName').value.trim() || 'Zitoun';
+  var sub  = document.getElementById('settingsSub').value.trim();
+  var city = document.getElementById('settingsCity').value.trim();
+
+  document.getElementById('brandName').textContent = name;
+  document.getElementById('brandSub').textContent  = sub;
+  document.getElementById('brandIcon').textContent  = pickedBrandEmoji;
+  window.RESTO_NAME = name; window.RESTO_SUB = sub;
+  window.RESTO_CITY = city; window.RESTO_ICON = pickedBrandEmoji;
+
+  // Sauvegarder sur l'API Render
+  fetch(window.API_URL + '/settings', {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ name: name, subtitle: sub, city: city, icon: pickedBrandEmoji })
+  }).catch(function() {});
+
+  var saved = document.getElementById('settingsSaved');
+  saved.style.display = 'flex';
+  setTimeout(function() { saved.style.display = 'none'; }, 2500);
+}
+
+// ═══ ADMIN ═══════════════════════════════════
+var EMOJIS = ['🥗','🍲','🐟','🥚','🍵','🥩','🍗','🍝','🫕','🐠','🍮','🍫','🍯','🥧','🍰','🧆','🥙','🌮','🍕','🍔','🥪','🌯','🧇','🥞','🍣','🦞','🦐','🍤','🥘','🫔','💧','🍷','🍺','🍻','☕','🫖','🥤','🍹','🍸','🥛','🧃','🫗'];
+var artEditId = null;
+var tblEditId = null;
+var deleteTarget = null;
+var deleteType = null;
+
+function buildAdminMenu() {
+  var list = document.getElementById('adminMenuList');
+  document.getElementById('adminMenuCount').textContent = MENU.length + ' article' + (MENU.length > 1 ? 's' : '');
+  list.innerHTML = '';
+  var catLabels = {entree:'Entrée', plat:'Plat', dessert:'Dessert', boisson:'Boisson'};
+  MENU.forEach(function(item) {
+    var d = document.createElement('div');
+    d.className = 'admin-item';
+    d.innerHTML =
+      '<span class="admin-item-em">' + item.emoji + '</span>' +
+      '<div class="admin-item-info"><div class="admin-item-name">' + item.name + '</div>' +
+      '<div class="admin-item-meta">' + (catLabels[item.cat]||item.cat) + ' · ' + item.price + ' DT</div></div>' +
+      '<button class="admin-avail-toggle ' + (item.avail?'on':'off') + '" title="' + (item.avail?'Disponible':'Indisponible') + '" onclick="toggleAvail(' + item.id + ')"></button>' +
+      '<button class="admin-edit-btn" onclick="openEditArticle(' + item.id + ')" title="Modifier">✏️</button>' +
+      '<button class="admin-del-btn" onclick="askDeleteItem(' + item.id + ')" title="Supprimer">🗑</button>';
+    list.appendChild(d);
+  });
+}
+
+function buildAdminTables() {
+  var grid = document.getElementById('adminTableGrid');
+  document.getElementById('adminTableCount').textContent = TABLES.length + ' table' + (TABLES.length>1?'s':'');
+  grid.innerHTML = '';
+  TABLES.forEach(function(t) {
+    var d = document.createElement('div');
+    d.className = 'admin-tcard';
+    d.innerHTML =
+      '<div class="admin-tcard-num">' + t.n + '</div>' +
+      '<div class="admin-tcard-seats">🪑 ' + t.s + ' places</div>' +
+      '<button class="admin-tcard-del" onclick="askDeleteTable(' + t.n + ')" title="Supprimer">✕</button>';
+    grid.appendChild(d);
+  });
+}
+
+function openAddArticle() {
+  artEditId = null;
+  document.getElementById('articleModalTitle').textContent = 'Ajouter un article';
+  document.getElementById('artName').value = '';
+  document.getElementById('artPrice').value = '';
+  document.getElementById('artCat').value = 'plat';
+  document.getElementById('artError').style.display = 'none';
+  buildEmojiGrid('🍗');
+  document.getElementById('articleModal').classList.add('open');
+}
+
+function openEditArticle(id) {
+  var item = MENU.find(function(m) { return m.id === id; });
+  if (!item) return;
+  artEditId = id;
+  document.getElementById('articleModalTitle').textContent = 'Modifier "' + item.name + '"';
+  document.getElementById('artName').value = item.name;
+  document.getElementById('artPrice').value = item.price;
+  document.getElementById('artCat').value = item.cat;
+  document.getElementById('artError').style.display = 'none';
+  buildEmojiGrid(item.emoji);
+  document.getElementById('articleModal').classList.add('open');
+}
+
+function buildEmojiGrid(selected) {
+  var grid = document.getElementById('emojiGrid');
+  grid.innerHTML = '';
+  document.getElementById('artEmojiSelected').textContent = selected || '❓';
+  EMOJIS.forEach(function(em) {
+    var b = document.createElement('button');
+    b.className = 'adm-emoji-btn' + (em === selected ? ' picked' : '');
+    b.type = 'button'; b.textContent = em;
+    b.onclick = function() {
+      document.querySelectorAll('.adm-emoji-btn').forEach(function(x) { x.classList.remove('picked'); });
+      b.classList.add('picked');
+      document.getElementById('artEmojiSelected').textContent = em;
+    };
+    grid.appendChild(b);
+  });
+}
+
+function getPickedEmoji() {
+  var picked = document.querySelector('.adm-emoji-btn.picked');
+  return picked ? picked.textContent : '🍽️';
+}
+
+function saveArticle() {
+  var name = document.getElementById('artName').value.trim();
+  var price = parseFloat(document.getElementById('artPrice').value);
+  var cat = document.getElementById('artCat').value;
+  var emoji = getPickedEmoji();
+  var err = document.getElementById('artError');
+  if (!name) { err.textContent = '⚠ Le nom est obligatoire.'; err.style.display='block'; return; }
+  if (isNaN(price) || price < 0) { err.textContent = '⚠ Le prix est invalide.'; err.style.display='block'; return; }
+  err.style.display = 'none';
+  if (artEditId !== null) {
+    var item = MENU.find(function(m) { return m.id === artEditId; });
+    if (item) { item.name=name; item.price=price; item.cat=cat; item.emoji=emoji; }
+  } else {
+    var newId = MENU.reduce(function(max,m) { return m.id>max?m.id:max; }, 0) + 1;
+    MENU.push({ id:newId, name:name, price:price, cat:cat, emoji:emoji, avail:true });
+  }
+  closeModal('articleModal');
+  buildAdminMenu(); buildMenuItems();
+}
+
+function toggleAvail(id) {
+  var item = MENU.find(function(m) { return m.id === id; });
+  if (item) item.avail = !item.avail;
+  buildAdminMenu(); buildMenuItems();
+}
+
+function askDeleteItem(id) {
+  var item = MENU.find(function(m) { return m.id === id; });
+  if (!item) return;
+  deleteTarget = id; deleteType = 'item';
+  document.getElementById('delTitle').textContent = 'Supprimer "' + item.name + '" ?';
+  document.getElementById('delSub').textContent = 'Cet article sera retiré du menu définitivement.';
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+function openAddTable() {
+  document.getElementById('tableModalTitle').textContent = 'Ajouter une table';
+  document.getElementById('tblNum').value = '';
+  document.getElementById('tblSeats').value = '';
+  document.getElementById('tblError').style.display = 'none';
+  document.getElementById('tableModal').classList.add('open');
+}
+
+function saveTable() {
+  var num = parseInt(document.getElementById('tblNum').value);
+  var seats = parseInt(document.getElementById('tblSeats').value);
+  var err = document.getElementById('tblError');
+  if (isNaN(num)||num<1) { err.textContent='⚠ Numéro invalide.'; err.style.display='block'; return; }
+  if (isNaN(seats)||seats<1) { err.textContent='⚠ Nombre de places invalide.'; err.style.display='block'; return; }
+  if (TABLES.find(function(t){return t.n===num;})) { err.textContent='⚠ La table '+num+' existe déjà.'; err.style.display='block'; return; }
+  err.style.display = 'none';
+  TABLES.push({ n:num, s:seats, st:'free' });
+  TABLES.sort(function(a,b){return a.n-b.n;});
+  closeModal('tableModal');
+  buildAdminTables(); buildTables(); buildTableBtns();
+}
+
+function askDeleteTable(n) {
+  deleteTarget = n; deleteType = 'table';
+  document.getElementById('delTitle').textContent = 'Supprimer la table ' + n + ' ?';
+  document.getElementById('delSub').textContent = 'La table '+n+' sera retirée du plan de salle.';
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+function confirmDelete() {
+  if (deleteType === 'item') {
+    var idx = MENU.findIndex(function(m){return m.id===deleteTarget;});
+    if (idx>-1) MENU.splice(idx,1);
+    buildAdminMenu(); buildMenuItems();
+  } else if (deleteType === 'table') {
+    var idx2 = TABLES.findIndex(function(t){return t.n===deleteTarget;});
+    if (idx2>-1) TABLES.splice(idx2,1);
+    buildAdminTables(); buildTables(); buildTableBtns();
+  }
+  deleteTarget=null; deleteType=null;
+  closeModal('deleteModal');
+}
+
+// ═══ CLOCK ═══
+function updateClock() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+}
+
+// ═══ START ═══
+document.addEventListener('DOMContentLoaded', function() {
+  window.RESTO_NAME = 'Zitoun';
+  window.RESTO_SUB  = 'Restaurant POS';
+  window.RESTO_CITY = 'Tunisie';
+  window.RESTO_ICON = '🫒';
+
+  // ── URL du backend Render ──────────────────
+  window.API_URL = 'https://zitoun-pos-api.onrender.com/api';
+
+  applySkin('vert');
+  init();
+  buildAdminMenu();
+  buildAdminTables();
+
+  // Charger le menu et les tables depuis l'API
+  loadFromAPI();
+});
+
+function loadFromAPI() {
+  // Charger le menu
+  fetch(window.API_URL + '/menu')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.length > 0) {
+        MENU.length = 0;
+        data.forEach(function(item) {
+          MENU.push({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            cat: item.category ? item.category.toLowerCase() : 'plat',
+            emoji: item.emoji || '🍽️',
+            avail: item.available
+          });
+        });
+        buildMenuItems();
+        buildAdminMenu();
+      }
+    })
+    .catch(function() { /* API indisponible — données locales utilisées */ });
+
+  // Charger les tables
+  fetch(window.API_URL + '/tables')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.length > 0) {
+        TABLES.length = 0;
+        data.forEach(function(t) {
+          TABLES.push({
+            n: t.number,
+            s: t.seats,
+            st: t.status ? t.status.toLowerCase() : 'free',
+            _id: t.id
+          });
+        });
+        buildTables();
+        buildTableBtns();
+        buildAdminTables();
+      }
+    })
+    .catch(function() { /* API indisponible — données locales utilisées */ });
+
+  // Charger les paramètres du restaurant
+  fetch(window.API_URL + '/settings')
+    .then(function(r) { return r.json(); })
+    .then(function(s) {
+      if (s && s.name) {
+        window.RESTO_NAME = s.name;
+        window.RESTO_SUB  = s.subtitle || '';
+        window.RESTO_CITY = s.city || '';
+        window.RESTO_ICON = s.icon || '🫒';
+        document.getElementById('brandName').textContent = s.name;
+        document.getElementById('brandSub').textContent  = s.subtitle || '';
+        document.getElementById('brandIcon').textContent = s.icon || '🫒';
+      }
+    })
+    .catch(function() {});
+}
+</script>
+</body>
+</html>
