@@ -3,9 +3,9 @@
 #  Déposer à la RACINE du repo GitHub
 #  Render lit ce fichier → crée tout automatiquement
 # ════════════════════════════════════════════
-
+ 
 services:
-
+ 
   # ── API Spring Boot ──────────────────────
   - type: web
     name: zitoun-pos-api
@@ -21,7 +21,7 @@ services:
         sync: false       # ← coller la JDBC URL Neon ici
       - key: FRONTEND_URL
         value: https://zitoun-pos-frontend.onrender.com
-
+ 
   # ── Frontend Angular ─────────────────────
   - type: web
     name: zitoun-pos-frontend
@@ -29,10 +29,6 @@ services:
     buildCommand: cd frontend && npm ci && npm run build:prod
     staticPublishPath: ./frontend/dist/zitoun-pos/browser
     plan: free
-    region: frankfurt
-    envVars:
-      - key: NODE_VERSION
-        value: "20"
     routes:
       - type: rewrite
         source: /*
