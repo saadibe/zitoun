@@ -9,5 +9,5 @@ public class MenuItem {
     @Enumerated(EnumType.STRING) private Category category;
     private String emoji;
     private boolean available = true;
-    public enum Category { ENTREE, PLAT, DESSERT, BOISSON }
+    public enum Category { ENTREE, SANDWICH, PLAT, DESSERT, BOISSON }
 }
