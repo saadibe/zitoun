@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#3d7a47">
-<title>Zitoun POS — Restaurant Management</title>
+<title>La Perla — Saveurs Authentiques de Tunisie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -1111,10 +1111,10 @@ button {
   <nav class="sidebar">
     <div class="s-inner">
       <div class="brand">
-        <div class="brand-icon" id="brandIcon" style="background:linear-gradient(135deg,#4e9658,#2d6b38);font-size:20px">🫒</div>
+        <div class="brand-icon" id="brandIcon" style="background:linear-gradient(135deg,#4e9658,#2d6b38);font-size:20px">🌶️</div>
         <div>
-          <div class="brand-name" id="brandName">Zitoun</div>
-          <div class="brand-sub" id="brandSub">Restaurant POS</div>
+          <div class="brand-name" id="brandName">La Perla</div>
+          <div class="brand-sub" id="brandSub">Saveurs Authentiques de Tunisie</div>
         </div>
       </div>
       <ul class="nav">
@@ -1147,7 +1147,7 @@ button {
       <div class="s-sep"></div>
       <div class="s-footer">
         <span class="s-dot"></span>
-        <span>Zitoun POS · v1.0</span>
+        <span>La Perla · v1.0</span>
       </div>
     </div>
   </nav>
@@ -1165,7 +1165,7 @@ button {
           <div class="topbar">
             <div>
               <div class="tp-title">📋 Nouvelle Commande</div>
-              <div class="tp-sub">Zitoun POS — Sélectionnez une table puis ajoutez les articles</div>
+              <div class="tp-sub">La Perla — Sélectionnez une table puis ajoutez les articles</div>
             </div>
             <div class="tp-right">
               <div class="time-badge" id="timeBadge">--:--</div>
@@ -1266,7 +1266,7 @@ button {
       <div class="topbar">
         <div>
           <div class="tp-title">⚙️ Administration</div>
-          <div class="tp-sub">Zitoun POS · Paramètres, menu et tables</div>
+          <div class="tp-sub">La Perla · Paramètres, menu et tables</div>
         </div>
       </div>
 
@@ -1511,27 +1511,56 @@ button {
 <script>
 // ═══ DATA ═══
 const MENU = [
-  {id:1, name:'Salade César',      price:12, cat:'entree',  emoji:'🥗', avail:true},
-  {id:2, name:"Soupe à l'oignon",  price:9,  cat:'entree',  emoji:'🍲', avail:true},
-  {id:3, name:'Tartare de saumon', price:15, cat:'entree',  emoji:'🐟', avail:true},
-  {id:4, name:'Steak frites',      price:24, cat:'plat',    emoji:'🥩', avail:true},
-  {id:5, name:'Poulet rôti',       price:19, cat:'plat',    emoji:'🍗', avail:true},
-  {id:6, name:'Pâtes carbonara',   price:17, cat:'plat',    emoji:'🍝', avail:true},
-  {id:7, name:'Saumon grillé',     price:22, cat:'plat',    emoji:'🐠', avail:false},
-  {id:8, name:'Crème brûlée',      price:8,  cat:'dessert', emoji:'🍮', avail:true},
-  {id:9, name:'Fondant chocolat',  price:9,  cat:'dessert', emoji:'🍫', avail:true},
-  {id:10,name:'Tarte tatin',       price:8,  cat:'dessert', emoji:'🥧', avail:true},
-  {id:11,name:'Eau minérale',      price:3,  cat:'boisson', emoji:'💧', avail:true},
-  {id:12,name:'Vin rouge (verre)', price:6,  cat:'boisson', emoji:'🍷', avail:true},
-  {id:13,name:'Bière pression',    price:5,  cat:'boisson', emoji:'🍺', avail:true},
-  {id:14,name:'Café',              price:3,  cat:'boisson', emoji:'☕', avail:true},
+  // ── ENTRÉES ──
+  {id:1,  name:'Brick thon à l\'oeuf',     price:4,    cat:'entree', emoji:'🥚', avail:true},
+  {id:2,  name:'Fricassée',                price:3,    cat:'entree', emoji:'🫓', avail:true},
+  {id:3,  name:'Salade au choix',          price:7,    cat:'entree', emoji:'🥗', avail:true},
+  // ── SANDWICHS ──
+  {id:4,  name:'Tunisien',                 price:8,    cat:'plat',   emoji:'🥖', avail:true},
+  {id:5,  name:'Kaftaji',                  price:8,    cat:'plat',   emoji:'🫔', avail:true},
+  {id:6,  name:'Kaftaji merguez',          price:11,   cat:'plat',   emoji:'🌭', avail:true},
+  // ── CHAPATI ──
+  {id:7,  name:'Chapati Thon',             price:6,    cat:'plat',   emoji:'🫓', avail:true},
+  {id:8,  name:'Chapati Escalope',         price:7,    cat:'plat',   emoji:'🍗', avail:true},
+  {id:9,  name:'Chapati Viande Hachée',    price:8,    cat:'plat',   emoji:'🥩', avail:true},
+  // ── TABOUNA ──
+  {id:10, name:'Tabouna Thon',             price:8,    cat:'plat',   emoji:'🫓', avail:true},
+  {id:11, name:'Tabouna Escalope',         price:9,    cat:'plat',   emoji:'🍗', avail:true},
+  {id:12, name:'Tabouna Viande Hachée',    price:10,   cat:'plat',   emoji:'🥩', avail:true},
+  // ── MLÉWI ──
+  {id:13, name:'Mléwi Thon',               price:7,    cat:'plat',   emoji:'🫓', avail:true},
+  {id:14, name:'Mléwi Escalope',           price:8,    cat:'plat',   emoji:'🍗', avail:true},
+  {id:15, name:'Mléwi Viande Hachée',      price:9,    cat:'plat',   emoji:'🥩', avail:true},
+  // ── PAINS & PIZZAS ──
+  {id:16, name:'Panuozzo La Perla',        price:12,   cat:'plat',   emoji:'🍞', avail:true},
+  {id:17, name:'Panuozzo Mexicain',        price:13,   cat:'plat',   emoji:'🌶️', avail:true},
+  {id:18, name:'Libanais Escalope',        price:9,    cat:'plat',   emoji:'🥙', avail:true},
+  // ── BAGUETTE ──
+  {id:19, name:'Baguette Thon',            price:9,    cat:'plat',   emoji:'🥖', avail:true},
+  {id:20, name:'Baguette Escalope',        price:10,   cat:'plat',   emoji:'🥖', avail:true},
+  {id:21, name:'Baguette Viande Hachée',   price:11,   cat:'plat',   emoji:'🥖', avail:true},
+  // ── MAKLOUB ──
+  {id:22, name:'Makloub Thon',             price:9,    cat:'plat',   emoji:'🫔', avail:true},
+  {id:23, name:'Makloub Escalope',         price:10,   cat:'plat',   emoji:'🍗', avail:true},
+  {id:24, name:'Makloub Viande Hachée',    price:11,   cat:'plat',   emoji:'🥩', avail:true},
+  // ── CORNET ──
+  {id:25, name:'Cornet Thon',              price:10,   cat:'plat',   emoji:'🌮', avail:true},
+  {id:26, name:'Cornet Escalope',          price:11,   cat:'plat',   emoji:'🍗', avail:true},
+  {id:27, name:'Cornet Viande Hachée',     price:11,   cat:'plat',   emoji:'🥩', avail:true},
+  // ── PIZZA ──
+  {id:28, name:'Pizza Margarita',          price:7,    cat:'plat',   emoji:'🍕', avail:true},
+  {id:29, name:'Pizza au Thon',            price:8,    cat:'plat',   emoji:'🍕', avail:true},
+  {id:30, name:'Pizza Escalope',           price:9,    cat:'plat',   emoji:'🍕', avail:true},
+  {id:31, name:'Pizza Viande Hachée',      price:10,   cat:'plat',   emoji:'🍕', avail:true},
+  // ── BOISSONS ──
+  {id:32, name:'Eau minérale & Sodas',     price:1.80, cat:'boisson', emoji:'🥤', avail:true},
+  {id:33, name:'Citronnade maison',        price:4,    cat:'boisson', emoji:'🍋', avail:true},
 ];
 const CATS = [
-  {k:'all',     l:'Tout',     e:'✦'},
-  {k:'entree',  l:'Entrées',  e:'🥗'},
-  {k:'plat',    l:'Plats',    e:'🥩'},
-  {k:'dessert', l:'Desserts', e:'🍮'},
-  {k:'boisson', l:'Boissons', e:'🍷'},
+  {k:'all',     l:'Tout',      e:'✦'},
+  {k:'entree',  l:'Entrées',   e:'🥗'},
+  {k:'plat',    l:'Sandwichs', e:'🥙'},
+  {k:'boisson', l:'Boissons',  e:'🥤'},
 ];
 const TABLES = [
   {n:1,s:2,st:'free'},    {n:2,s:4,st:'occupied'},
@@ -1747,7 +1776,7 @@ function openTicket() {
       (o.note ? '<div class="rc-note">↳ ' + o.note + '</div>' : '');
   }).join('');
 
-  var rName = window.RESTO_NAME || 'Café Sidi Bou';
+  var rName = window.RESTO_NAME || 'La Perla';
   var rSub  = window.RESTO_SUB  || 'Restaurant & Terrasse';
   var rCity = window.RESTO_CITY || 'Sidi Bou Saïd, Tunisie';
 
@@ -1770,7 +1799,7 @@ function openTicket() {
 
 function printTicket() {
   var html = document.getElementById('rcPreview').innerHTML;
-  var rName = window.RESTO_NAME || 'Café Sidi Bou';
+  var rName = window.RESTO_NAME || 'La Perla';
   var rSub  = window.RESTO_SUB  || 'Restaurant & Terrasse';
   var rCity = window.RESTO_CITY || 'Sidi Bou Saïd, Tunisie';
   var w = window.open('', '_blank', 'width=420,height=680');
@@ -1798,7 +1827,7 @@ function printTicket() {
 // ═══ KITCHEN ═══
 function renderKitchen() {
   var active = kOrders.filter(function(o) { return o.status !== 'served'; });
-  document.getElementById('kSub').textContent = 'Zitoun POS · ' + active.length + ' commande' + (active.length !== 1 ? 's' : '') + ' active' + (active.length !== 1 ? 's' : '');
+  document.getElementById('kSub').textContent = 'La Perla · ' + active.length + ' commande' + (active.length !== 1 ? 's' : '') + ' active' + (active.length !== 1 ? 's' : '');
   function by(s) { return kOrders.filter(function(o) { return o.status === s; }); }
   var ns = by('sent'), ps = by('preparing'), rs = by('ready');
   document.getElementById('cN').textContent = ns.length;
@@ -2113,7 +2142,7 @@ function initSettings() {
 }
 
 function saveSettings() {
-  var name = document.getElementById('settingsName').value.trim() || 'Zitoun';
+  var name = document.getElementById('settingsName').value.trim() || 'La Perla';
   var sub  = document.getElementById('settingsSub').value.trim();
   var city = document.getElementById('settingsCity').value.trim();
 
@@ -2308,10 +2337,10 @@ function updateClock() {
 
 // ═══ START ═══
 document.addEventListener('DOMContentLoaded', function() {
-  window.RESTO_NAME = 'Zitoun';
-  window.RESTO_SUB  = 'Restaurant POS';
+  window.RESTO_NAME = 'La Perla';
+  window.RESTO_SUB  = 'Saveurs Authentiques de Tunisie';
   window.RESTO_CITY = 'Tunisie';
-  window.RESTO_ICON = '🫒';
+  window.RESTO_ICON = '🌶️';
 
   // ── URL du backend Render ──────────────────
   window.API_URL = 'https://zitoun-pos-api.onrender.com/api';
