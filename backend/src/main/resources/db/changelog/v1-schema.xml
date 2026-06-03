@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- ══ TABLE menu_item ══ -->
+    <changeSet id="1-create-menu-item" author="zitoun">
+        <createTable tableName="menu_item">
+            <column name="id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="name" type="VARCHAR(200)"><constraints nullable="false"/></column>
+            <column name="price" type="DOUBLE PRECISION"><constraints nullable="false"/></column>
+            <column name="category" type="VARCHAR(30)"/>
+            <column name="emoji" type="VARCHAR(20)"/>
+            <column name="available" type="BOOLEAN" defaultValueBoolean="true"/>
+        </createTable>
+    </changeSet>
+
+    <!-- ══ TABLE orders ══ -->
+    <changeSet id="1-create-orders" author="zitoun">
+        <createTable tableName="orders">
+            <column name="id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="table_number" type="INTEGER"><constraints nullable="false"/></column>
+            <column name="status" type="VARCHAR(20)"><constraints nullable="false"/></column>
+            <column name="server_name" type="VARCHAR(100)"/>
+            <column name="total_amount" type="DOUBLE PRECISION"/>
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <!-- ══ TABLE order_item ══ -->
+    <changeSet id="1-create-order-item" author="zitoun">
+        <createTable tableName="order_item">
+            <column name="id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="order_id" type="BIGINT"><constraints foreignKeyName="fk_order" references="orders(id)"/></column>
+            <column name="menu_item_id" type="BIGINT"><constraints foreignKeyName="fk_menu_item" references="menu_item(id)"/></column>
+            <column name="quantity" type="INTEGER"><constraints nullable="false"/></column>
+            <column name="note" type="VARCHAR(500)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- ══ TABLE restaurant_table ══ -->
+    <changeSet id="1-create-restaurant-table" author="zitoun">
+        <createTable tableName="restaurant_table">
+            <column name="id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="number" type="INTEGER"><constraints nullable="false" unique="true"/></column>
+            <column name="seats" type="INTEGER"/>
+            <column name="status" type="VARCHAR(20)" defaultValue="FREE"/>
+            <column name="current_order_id" type="BIGINT"/>
+            <column name="reserved_name" type="VARCHAR(100)"/>
+            <column name="occupied_since" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <!-- ══ TABLE restaurant_settings ══ -->
+    <changeSet id="1-create-settings" author="zitoun">
+        <createTable tableName="restaurant_settings">
+            <column name="id" type="BIGINT" defaultValue="1"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="name" type="VARCHAR(100)" defaultValue="La Perla"/>
+            <column name="subtitle" type="VARCHAR(150)"/>
+            <column name="city" type="VARCHAR(100)"/>
+            <column name="icon" type="VARCHAR(10)"/>
+            <column name="tax_number" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
