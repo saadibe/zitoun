@@ -5,8 +5,10 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <!-- Vider et recharger le menu La Perla complet -->
     <changeSet id="8-reload-menu-laperla" author="zitoun">
+        <!-- Vider dans l ordre des FK : order_item -> orders -> menu_item -->
+        <delete tableName="order_item"/>
+        <delete tableName="orders"/>
         <delete tableName="menu_item"/>
 
         <!-- ENTREES -->
