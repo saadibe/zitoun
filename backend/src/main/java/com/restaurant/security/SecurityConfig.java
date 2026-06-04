@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -32,29 +33,32 @@ public class SecurityConfig {
             .cors(c -> c.configurationSource(corsSource()))
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // ── Tout public en OPTIONS (preflight CORS) ──
+                // OPTIONS preflight toujours permis
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // ── Public ──────────────────────────────────
-                .requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
-                // ── Menu et tables : lecture publique ────────
-                .requestMatchers(HttpMethod.GET, "/api/menu").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/tables").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/settings").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/settings/categories").permitAll()
-                // ── Cuisine ─────────────────────────────────
+                // Auth endpoints publics — AntPathRequestMatcher ignore les query params
+                .requestMatchers(new AntPathRequestMatcher("/api/auth/login")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/auth/refresh")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/auth/logout")).permitAll()
+                // H2 console
+                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+                // Lecture publique
+                .requestMatchers(new AntPathRequestMatcher("/api/menu", "GET")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/tables", "GET")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/settings", "GET")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/settings/categories", "GET")).permitAll()
+                // Cuisine
                 .requestMatchers("/api/orders/active").hasAnyRole("CUISINE","ADMIN","SERVEUR","CAISSE")
-                .requestMatchers(HttpMethod.PATCH, "/api/orders/*/status").hasAnyRole("CUISINE","ADMIN")
-                // ── Admin seulement ──────────────────────────
-                .requestMatchers(HttpMethod.POST,   "/api/menu/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT,    "/api/menu/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/menu/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PATCH,  "/api/menu/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT,    "/api/settings/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST,   "/api/settings/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/settings/**").hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/api/orders/*/status","PATCH")).hasAnyRole("CUISINE","ADMIN")
+                // Admin seulement
+                .requestMatchers(new AntPathRequestMatcher("/api/menu/**","POST")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/api/menu/**","PUT")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/api/menu/**","DELETE")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/api/menu/**","PATCH")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/api/settings/**","PUT")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/api/settings/**","POST")).hasRole("ADMIN")
+                .requestMatchers(new AntPathRequestMatcher("/api/settings/**","DELETE")).hasRole("ADMIN")
                 .requestMatchers("/api/auth/users/**").hasRole("ADMIN")
-                // ── Tout le reste : authentifié ──────────────
+                // Tout le reste : authentifié
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
