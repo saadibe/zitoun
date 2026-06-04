@@ -14,6 +14,8 @@ services:
         sync: false
       - key: FRONTEND_URL
         value: https://zitoun-pos-frontend.onrender.com
+      - key: JWT_SECRET
+        sync: false
 
   - type: web
     name: zitoun-pos-frontend
