@@ -2025,7 +2025,7 @@ function sendKitchen() {
   }
 
   // Essayer l'API, sinon mode local
-  fetch(window.API_URL + '/orders', {
+  authFetch(window.API_URL + '/orders', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify(orderPayload)
@@ -2524,23 +2524,23 @@ function doLogin() {
   btn.disabled = true;
   btn.innerHTML = '<span>⏳</span> Vérification...';
 
-  // Simuler un léger délai (vrai API = appel backend)
-  setTimeout(function() {
-    // Chercher l'utilisateur
-    var found = AUTH_USERS.find(function(u) {
-      return u.user.toLowerCase() === user.toLowerCase()
-          && u.pass === pass
-          && u.role === selectedLoginRole;
-    });
-
-    // Admin peut se connecter sur n'importe quel rôle avec son mot de passe
-    if (!found) {
-      var adminUser = AUTH_USERS.find(function(u) { return u.role === 'admin' && u.pass === pass && u.user.toLowerCase() === user.toLowerCase(); });
-      if (adminUser) found = { user: user, pass: pass, role: selectedLoginRole, avatar: adminUser.avatar };
-    }
-
-    if (!found) {
-      err.textContent = '❌ Identifiant ou mot de passe incorrect.';
+  // Appel API backend
+  var ROLE_ICONS = { ADMIN:'⚙️', SERVEUR:'📋', CUISINE:'🍳', CAISSE:'💰' };
+  fetch(window.API_URL + '/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: user, password: pass })
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('unauthorized');
+    return res.json();
+  })
+  .then(function(data) {
+    // Vérifier que le rôle correspond à celui sélectionné
+    var returnedRole = (data.role || '').toUpperCase();
+    var wantedRole   = selectedLoginRole.toUpperCase();
+    if (returnedRole !== wantedRole && returnedRole !== 'ADMIN') {
+      err.textContent = '❌ Ce compte n\'a pas le rôle ' + selectedLoginRole + '.';
       err.style.display = 'block';
       btn.disabled = false;
       btn.innerHTML = '<span>🔓</span> Se connecter';
@@ -2548,20 +2548,25 @@ function doLogin() {
     }
 
     // Créer la session
-    var token = generateToken(found.user, found.role);
     currentSession = {
-      user:      found.user,
-      role:      found.role,
-      avatar:    found.avatar || '👤',
-      token:     token,
+      user:      data.username,
+      role:      returnedRole,
+      avatar:    ROLE_ICONS[returnedRole] || '👤',
+      token:     data.token,
       loginTime: new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})
     };
 
-    // Sauvegarder dans sessionStorage
+    // Stocker le token
     sessionStorage.setItem('zitoun_session', JSON.stringify(currentSession));
 
     onLoginSuccess();
-  }, 600);
+  })
+  .catch(function(e) {
+    err.textContent = '❌ Identifiant ou mot de passe incorrect.';
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.innerHTML = '<span>🔓</span> Se connecter';
+  });
 }
 
 // ── Après connexion réussie ──
@@ -2665,29 +2670,70 @@ function buildUserList() {
   }).join('');
 }
 
+var API_USERS = [];  // chargé depuis l'API
+
+function loadUsers() {
+  authFetch(window.API_URL + '/auth/users')
+    .then(function(r) { return r.json(); })
+    .then(function(data) { API_USERS = data; buildUserList(); })
+    .catch(function() { buildUserList(); });
+}
+
+function openUserManager() {
+  loadUsers();
+  document.getElementById('userManagerModal').classList.add('open');
+}
+
+function buildUserList() {
+  var list = document.getElementById('userList');
+  var roleIcons = { ADMIN:'⚙️', SERVEUR:'📋', CUISINE:'🍳', CAISSE:'💰' };
+  var roleLbls  = { ADMIN:'Administrateur', SERVEUR:'Serveur', CUISINE:'Cuisine', CAISSE:'Caisse' };
+  if (!API_USERS.length) {
+    list.innerHTML = '<div style="text-align:center;color:var(--ink3);padding:16px;font-style:italic">Chargement...</div>';
+    return;
+  }
+  list.innerHTML = API_USERS.map(function(u) {
+    return '<div class="user-row">' +
+      '<span class="user-avatar">' + (roleIcons[u.role] || '👤') + '</span>' +
+      '<div class="user-info">' +
+        '<div class="user-name">' + u.username + '</div>' +
+        '<div class="user-role-lbl">' + (roleLbls[u.role] || u.role) + '</div>' +
+      '</div>' +
+      '<button class="user-del-btn" onclick="deleteUser(' + u.id + ')" title="Supprimer">🗑</button>' +
+    '</div>';
+  }).join('');
+}
+
 function addUser() {
   var user = document.getElementById('newUserName').value.trim();
   var pass = document.getElementById('newUserPass').value.trim();
   var role = document.getElementById('newUserRole').value;
-  var roleIcons = { admin:'⚙️', serveur:'📋', cuisine:'🍳', caisse:'💰' };
+  if (!user || !pass) { alert('⚠ Remplissez le nom et le mot de passe'); return; }
 
-  if (!user || !pass) {
-    alert('⚠ Remplissez le nom et le mot de passe');
-    return;
-  }
-  AUTH_USERS.push({ user: user, pass: pass, role: role, avatar: roleIcons[role] || '👤' });
-  document.getElementById('newUserName').value = '';
-  document.getElementById('newUserPass').value = '';
-  buildUserList();
+  authFetch(window.API_URL + '/auth/users', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ username: user, password: pass, role: role.toUpperCase() })
+  })
+  .then(function(r) {
+    if (r.status === 409) throw new Error('exists');
+    return r.json();
+  })
+  .then(function() {
+    document.getElementById('newUserName').value = '';
+    document.getElementById('newUserPass').value = '';
+    loadUsers();
+  })
+  .catch(function(e) {
+    alert(e.message === 'exists' ? '⚠ Cet identifiant existe déjà.' : '⚠ Erreur lors de la création.');
+  });
 }
 
-function deleteUser(i) {
-  if (AUTH_USERS[i] && AUTH_USERS[i].role === 'admin' && AUTH_USERS.filter(function(u){return u.role==='admin';}).length === 1) {
-    alert('⚠ Impossible de supprimer le dernier compte admin.');
-    return;
-  }
-  AUTH_USERS.splice(i, 1);
-  buildUserList();
+function deleteUser(id) {
+  if (!confirm('Supprimer cet utilisateur ?')) return;
+  authFetch(window.API_URL + '/auth/users/' + id, { method: 'DELETE' })
+  .then(function() { loadUsers(); })
+  .catch(function() { alert('⚠ Impossible de supprimer le dernier admin.'); });
 }
 
 // ═══ SKIN SWITCHER ════════════════════════════
@@ -2796,7 +2842,7 @@ function saveSettings() {
   buildMenuItems();
 
   // API
-  fetch(window.API_URL + '/settings', {
+  authFetch(window.API_URL + '/settings', {
     method: 'PUT',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ name: name, subtitle: sub, city: city, icon: pickedBrandEmoji })
@@ -3014,6 +3060,16 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('loginRestoName').textContent = window.RESTO_NAME || 'La Perla';
   }
 });
+
+// Helper pour les requêtes authentifiées
+function authFetch(url, options) {
+  options = options || {};
+  options.headers = options.headers || {};
+  if (currentSession && currentSession.token) {
+    options.headers['Authorization'] = 'Bearer ' + currentSession.token;
+  }
+  return fetch(url, options);
+}
 
 function loadFromAPI() {
   // Charger le menu
