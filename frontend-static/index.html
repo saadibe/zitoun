@@ -2127,8 +2127,7 @@ function printTicket() {
     '.rc-footer{text-align:center;font-size:10px;color:#aaa;margin-top:14px;padding-top:10px;border-top:1px dashed #eee;line-height:1.7}' +
     '.rc-footer b{color:#555}' +
     '@media print{.no-print{display:none}body{padding:4px}}' +
-    '</style>
-<script>
+    '</style><\/script>';  w.document.close(); setTimeout(function() { w.print(); }, 500); })
 
 // ══ Nettoyer les paramètres de tracking injectés par les proxies/antivirus ══
 (function() {
@@ -3573,7 +3572,6 @@ function loadFromAPI() {
     })
     .catch(function() {});
 }
-</script>
 
 
 <!-- MODAL CATEGORIES -->
