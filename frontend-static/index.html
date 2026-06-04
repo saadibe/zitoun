@@ -1542,6 +1542,7 @@ button {
           <input class="settings-input" id="settingsTVACustom" type="number" min="0" max="100" step="0.1" placeholder="Ex: 7.5" style="min-width:80px">
         </div>
         <button class="settings-save" style="background:var(--ink)" onclick="openUserManager()">👤 Comptes</button>
+        <button class="settings-save" style="background:var(--ink2)" onclick="openCategoryManager()">🏷️ Catégories</button>
         <button class="settings-save" onclick="saveSettings()">💾 Enregistrer</button>
         <div class="settings-saved" id="settingsSaved">✓ Enregistré !</div>
       </div>
@@ -2914,11 +2915,12 @@ function saveSettings() {
   renderOrder();
   buildMenuItems();
 
-  // API
+  // API - sauvegarder tout
   authFetch(window.API_URL + '/settings', {
     method: 'PUT',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ name: name, subtitle: sub, city: city, icon: pickedBrandEmoji })
+    body: JSON.stringify({ id:1, name:name, subtitle:sub, city:city,
+      icon:pickedBrandEmoji, currency:currency, tvaRate:tva, theme:currentSkin })
   }).catch(function() {});
 
   var saved = document.getElementById('settingsSaved');
@@ -3123,7 +3125,10 @@ document.addEventListener('DOMContentLoaded', function() {
   buildAdminMenu();
   buildAdminTables();
 
-  // Charger le menu et les tables depuis l'API
+  loadSettingsFromAPI();
+  loadCategories();
+
+  // Charger menu et tables
   loadFromAPI();
 
   // Vérifier si une session existe déjà
@@ -3209,6 +3214,86 @@ function scheduleTokenRefresh() {
     }
   }, delay);
   console.log('⏰ Prochain refresh dans', Math.round(delay/60000), 'minutes');
+}
+
+function loadSettingsFromAPI() {
+  fetch(window.API_URL + '/settings')
+    .then(function(r) { if (!r.ok) return null; return r.json(); })
+    .then(function(s) {
+      if (!s || !s.name) return;
+      window.RESTO_NAME = s.name; window.RESTO_SUB = s.subtitle||''; window.RESTO_CITY = s.city||'';
+      window.RESTO_ICON = s.icon||''; window.RESTO_CURRENCY = s.currency||'DT';
+      window.RESTO_TVA = (s.tvaRate !== undefined) ? s.tvaRate : 10;
+      var e = document.getElementById('brandName'); if(e) e.textContent = s.name;
+      e = document.getElementById('brandSub'); if(e) e.textContent = s.subtitle||'';
+      e = document.getElementById('brandIcon'); if(e) e.textContent = s.icon||'';
+      e = document.getElementById('loginRestoName'); if(e) e.textContent = s.name;
+      e = document.getElementById('loginLogo'); if(e) e.textContent = s.icon||'';
+      document.title = s.name + ' POS';
+      if (s.theme) applySkin(s.theme);
+    }).catch(function() {});
+}
+
+function loadCategories() {
+  fetch(window.API_URL + '/settings/categories')
+    .then(function(r) { if (!r.ok) return []; return r.json(); })
+    .then(function(data) {
+      window.API_CATS = data || [];
+      buildCatManagerList();
+      CATS = [{k:'all',l:'Tout',e:'*'}].concat(
+        window.API_CATS.map(function(c) { return {k:c.code,l:c.label,e:c.emoji||''}; })
+      );
+      buildCatBtns();
+    }).catch(function() {});
+}
+
+function buildCatManagerList() {
+  var list = document.getElementById('catManagerList');
+  if (!list) return;
+  var cats = window.API_CATS || [];
+  if (!cats.length) { list.innerHTML = '<p style="text-align:center;color:var(--ink3);padding:16px">Aucune categorie</p>'; return; }
+  list.innerHTML = cats.map(function(c) {
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">' +
+      '<span style="font-size:20px;width:28px;text-align:center">'+(c.emoji||'')+'</span>' +
+      '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+c.label+'</div>' +
+      '<div style="font-size:11px;color:var(--ink3);font-family:monospace">'+c.code+'</div></div>' +
+      '<button onclick="deleteCategory('+c.id+')" style="width:28px;height:28px;border-radius:7px;background:var(--terra-light);color:var(--terracotta);border:1.5px solid var(--terracotta);cursor:pointer">x</button>' +
+    '</div>';
+  }).join('');
+}
+
+function addCategory() {
+  var emoji = document.getElementById('newCatEmoji').value.trim();
+  var label = document.getElementById('newCatLabel').value.trim();
+  var code = document.getElementById('newCatCode').value.trim().toUpperCase().replace(/\s+/g,'_');
+  if (!label||!code) { alert('Remplissez le nom et le code'); return; }
+  authFetch(window.API_URL+'/settings/categories', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({label:label,code:code,emoji:emoji,sortOrder:(window.API_CATS||[]).length+1,active:true})
+  }).then(function(r){if(!r.ok)throw new Error();return r.json();})
+  .then(function(){
+    document.getElementById('newCatEmoji').value='';
+    document.getElementById('newCatLabel').value='';
+    document.getElementById('newCatCode').value='';
+    loadCategories();
+  }).catch(function(){alert('Erreur - categorie existe peut-etre deja');});
+}
+
+function deleteCategory(id) {
+  if (!confirm('Supprimer cette categorie ?')) return;
+  authFetch(window.API_URL+'/settings/categories/'+id,{method:'DELETE'})
+  .then(function(){loadCategories();}).catch(function(){alert('Erreur');});
+}
+
+function buildCatSelect(selected) {
+  var sel = document.getElementById('artCat'); if (!sel) return;
+  var cats = (window.API_CATS&&window.API_CATS.length)?window.API_CATS:[
+    {code:'ENTREE',label:'Entrees',emoji:''},{code:'SANDWICH',label:'Sandwichs',emoji:''},
+    {code:'PLAT',label:'Pain Pizzas',emoji:''},{code:'BOISSON',label:'Boissons',emoji:''}
+  ];
+  sel.innerHTML = cats.map(function(c){
+    return '<option value="'+c.code+'"'+(c.code===selected?' selected':'')+'>'+(c.emoji||'')+' '+c.label+'</option>';
+  }).join('');
 }
 
 function loadFromAPI() {
@@ -3307,5 +3392,25 @@ function loadFromAPI() {
   </div>
 </div>
 
+
+<!-- MODAL CATEGORIES -->
+<div class="modal-ov" id="categoryModal">
+  <div class="modal-box" style="max-width:420px;padding:0;overflow:hidden;border-top:5px solid var(--sky)">
+    <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div style="font-family:'Tajawal',sans-serif;font-size:16px;font-weight:800;color:var(--ink)">Catégories du menu</div>
+      <button onclick="closeModal('categoryModal')" style="background:var(--cream);border:2px solid var(--sand);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:13px">✕</button>
+    </div>
+    <div style="padding:14px 20px;max-height:280px;overflow-y:auto" id="catManagerList"></div>
+    <div style="padding:12px 20px 20px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--ink3);margin-bottom:10px">Ajouter</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input id="newCatEmoji" placeholder="Emoji" style="width:50px;text-align:center;padding:8px;border-radius:9px;border:2px solid var(--border);background:var(--ivory);outline:none">
+        <input id="newCatLabel" placeholder="Nom" style="flex:1;min-width:100px;padding:8px;border-radius:9px;border:2px solid var(--border);background:var(--ivory);font-family:Cairo,sans-serif;outline:none">
+        <input id="newCatCode" placeholder="CODE" style="flex:1;min-width:100px;padding:8px;border-radius:9px;border:2px solid var(--border);background:var(--ivory);font-family:monospace;outline:none;text-transform:uppercase">
+        <button onclick="addCategory()" style="padding:8px 14px;border-radius:9px;border:none;background:var(--sky);color:#fff;font-weight:700;cursor:pointer;white-space:nowrap">+ Ajouter</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
