@@ -1305,6 +1305,24 @@ button {
 .cat-add-btn { padding:8px 16px; border-radius:9px; border:none; background:var(--sky); color:#fff; font-size:12.5px; font-weight:700; cursor:pointer; font-family:'Cairo',sans-serif; white-space:nowrap; }
 .cat-add-btn:hover { background:var(--sky2); }
 </style>
+
+<script>
+// Stubs — remplacés par les vraies fonctions quand le script principal charge
+function _doLoginReal() {
+  var btn = document.getElementById('loginBtn');
+  if (btn) btn.disabled = true;
+  // Attendre que le script principal soit chargé
+  var wait = setInterval(function() {
+    if (typeof _doLoginReal === 'function') {
+      clearInterval(wait);
+      _doLoginReal();
+    }
+  }, 100);
+  setTimeout(function() { clearInterval(wait); if (btn) btn.disabled = false; }, 5000);
+}
+function showPage(n,b) { window._pendingPage = {n:n,b:b}; }
+function closeModal(id) { var el=document.getElementById(id); if(el) el.classList.remove('open'); }
+</script>
 </head>
 <body>
 <!-- ══ LOGIN PAGE ══ -->
@@ -1317,17 +1335,17 @@ button {
     <div class="login-fields">
       <div class="login-field">
         <label class="login-label">Nom / Identifiant</label>
-        <input class="login-input" id="loginUser" placeholder="Ex: Mohamed" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
+        <input class="login-input" id="loginUser" placeholder="Ex: Mohamed" autocomplete="username" onkeydown="if(event.key==='Enter')_doLoginReal()">
       </div>
       <div class="login-field">
         <label class="login-label">Code PIN / Mot de passe</label>
-        <input class="login-input" id="loginPass" type="password" placeholder="••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        <input class="login-input" id="loginPass" type="password" placeholder="••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')_doLoginReal()">
       </div>
     </div>
 
     <div class="login-error" id="loginError">❌ Identifiant ou mot de passe incorrect</div>
 
-    <button class="login-btn" id="loginBtn" onclick="doLogin()">
+    <button class="login-btn" id="loginBtn" onclick="_doLoginReal()">
       <span>🔓</span> Se connecter
     </button>
 
@@ -1865,6 +1883,7 @@ function init() {
 
 // ═══ NAVIGATION ═══
 function showPage(name, btn) {
+  window._pendingPage = null;
   document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
   document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
   document.getElementById('page-' + name).classList.add('active');
@@ -2092,7 +2111,25 @@ function printTicket() {
     '.rc-footer{text-align:center;font-size:10px;color:#aaa;margin-top:14px;padding-top:10px;border-top:1px dashed #eee;line-height:1.7}' +
     '.rc-footer b{color:#555}' +
     '@media print{.no-print{display:none}body{padding:4px}}' +
-    '</style></head><body>' + html +
+    '</style>
+<script>
+// Stubs — remplacés par les vraies fonctions quand le script principal charge
+function _doLoginReal() {
+  var btn = document.getElementById('loginBtn');
+  if (btn) btn.disabled = true;
+  // Attendre que le script principal soit chargé
+  var wait = setInterval(function() {
+    if (typeof _doLoginReal === 'function') {
+      clearInterval(wait);
+      _doLoginReal();
+    }
+  }, 100);
+  setTimeout(function() { clearInterval(wait); if (btn) btn.disabled = false; }, 5000);
+}
+function showPage(n,b) { window._pendingPage = {n:n,b:b}; }
+function closeModal(id) { var el=document.getElementById(id); if(el) el.classList.remove('open'); }
+</script>
+</head><body>' + html +
     '<div class="no-print" style="text-align:center;margin-top:20px">' +
     '<button onclick="window.print()" style="padding:10px 30px;font-size:14px;cursor:pointer;font-family:Cairo,sans-serif;background:#1a6eb5;color:#fff;border:none;border-radius:8px">🖨 Imprimer</button>' +
     '</div></body></html>');
@@ -2440,7 +2477,25 @@ function printTableTicket(n) {
     '.rc-total{display:flex;justify-content:space-between;font-size:16px;font-weight:bold;margin:8px 0}' +
     '.rc-footer{text-align:center;font-size:11px;color:#888;margin-top:16px;line-height:1.6}' +
     '@media print{body{padding:4px}}' +
-    '</style></head><body>' +
+    '</style>
+<script>
+// Stubs — remplacés par les vraies fonctions quand le script principal charge
+function _doLoginReal() {
+  var btn = document.getElementById('loginBtn');
+  if (btn) btn.disabled = true;
+  // Attendre que le script principal soit chargé
+  var wait = setInterval(function() {
+    if (typeof _doLoginReal === 'function') {
+      clearInterval(wait);
+      _doLoginReal();
+    }
+  }, 100);
+  setTimeout(function() { clearInterval(wait); if (btn) btn.disabled = false; }, 5000);
+}
+function showPage(n,b) { window._pendingPage = {n:n,b:b}; }
+function closeModal(id) { var el=document.getElementById(id); if(el) el.classList.remove('open'); }
+</script>
+</head><body>' +
     '<div class="rc-logo"><div class="rc-name">' + rName + '</div>' +
     (rSub ? '<div class="rc-tag">' + rSub + (rCity ? ' · ' + rCity : '') + '</div>' : '') +
     '</div><hr>' +
@@ -2568,7 +2623,7 @@ function selectRole(role) {
 }
 
 // ── Connexion ──
-function doLogin() {
+function _doLoginReal() {
   var user = document.getElementById('loginUser').value.trim();
   var pass = document.getElementById('loginPass').value;
   var err  = document.getElementById('loginError');
@@ -3296,6 +3351,11 @@ document.addEventListener('DOMContentLoaded', function() {
   loadFromAPI();
 
   // Vérifier si une session existe déjà
+  if (window._pendingPage) {
+    var pp = window._pendingPage;
+    showPage(pp.n, pp.b);
+    window._pendingPage = null;
+  }
   if (!checkExistingSession()) {
     // Mettre à jour le logo login
     document.getElementById('loginLogo').textContent = window.RESTO_ICON || '🌶️';
