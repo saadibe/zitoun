@@ -1,6 +1,7 @@
 package com.restaurant.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,25 +23,34 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtFilter jwtFilter;
+    private final JwtFilter             jwtFilter;
+    private final OAuth2SuccessHandler  oauth2SuccessHandler;
+    private final OAuth2FailureHandler  oauth2FailureHandler;
+
+    @Value("${frontend.url:https://zitoun-pos-frontend.onrender.com}")
+    private String frontendUrl;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(c -> c.configurationSource(corsSource()))
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+            // Stateless pour les appels API — OAuth2 a besoin d'une session temporaire
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+
             .authorizeHttpRequests(auth -> auth
-                // ── Public : login ──────────────────────
-                .requestMatchers("/api/auth/**").permitAll()
-                // ── Public : H2 console (dev) ───────────
+                // ── Public ──────────────────────────────
+                .requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/api/auth/oauth2/**").permitAll()
+                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
-                // ── Menu : lecture publique ─────────────
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/menu").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/tables").permitAll()
                 // ── Cuisine ─────────────────────────────
                 .requestMatchers("/api/orders/active").hasAnyRole("CUISINE","ADMIN","SERVEUR","CAISSE")
-                .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/api/orders/*/status").hasAnyRole("CUISINE","ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/api/orders/*/status")
+                    .hasAnyRole("CUISINE","ADMIN")
                 // ── Admin uniquement ────────────────────
                 .requestMatchers("/api/menu/**").hasAnyRole("ADMIN")
                 .requestMatchers("/api/settings/**").hasAnyRole("ADMIN")
@@ -48,8 +58,21 @@ public class SecurityConfig {
                 // ── Tout le reste : authentifié ──────────
                 .anyRequest().authenticated()
             )
+
+            // ── OAuth2 Login ────────────────────────────
+            .oauth2Login(oauth2 -> oauth2
+                .authorizationEndpoint(a ->
+                    a.baseUri("/api/auth/oauth2/authorize"))
+                .redirectionEndpoint(r ->
+                    r.baseUri("/api/auth/oauth2/callback/*"))
+                .successHandler(oauth2SuccessHandler)
+                .failureHandler(oauth2FailureHandler)
+            )
+
+            // ── JWT filter pour les appels API ──────────
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            .headers(h -> h.frameOptions(f -> f.disable())); // pour H2 console
+
+            .headers(h -> h.frameOptions(f -> f.disable()));
 
         return http.build();
     }
@@ -60,7 +83,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
