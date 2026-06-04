@@ -1684,7 +1684,8 @@ button {
     <div class="td-body" id="tdBody"></div>
     <div class="td-footer">
       <button class="td-btn-close" onclick="closeModal('tableDetailModal')">Fermer</button>
-      <button class="td-btn-enc" id="tdEncBtn" onclick="closeModal('tableDetailModal');openEncaisser(currentDetailTable)">💰 Encaisser cette table</button>
+      <button class="td-btn-close" style="background:var(--sky-pale);color:var(--sky);border-color:var(--sky-light)" onclick="printTableTicket(currentDetailTable)">🖨 Ticket</button>
+      <button class="td-btn-enc" id="tdEncBtn" onclick="closeModal('tableDetailModal');openEncaisser(currentDetailTable)">💰 Encaisser</button>
     </div>
   </div>
 </div>
@@ -2374,6 +2375,70 @@ function confirmerEncaissement() {
   setTimeout(function() { flash.remove(); }, 3500);
 
   encTable = null;
+}
+
+function printTableTicket(n) {
+  var orders = kOrders.filter(function(o) { return o.table === n && o.status !== 'served'; });
+  var rName = window.RESTO_NAME || 'La Perla';
+  var rSub  = window.RESTO_SUB  || '';
+  var rCity = window.RESTO_CITY || '';
+  var cur   = getCur();
+  var tvaRate = getTVA();
+
+  // Compiler tous les articles
+  var allItems = {};
+  orders.forEach(function(order) {
+    order.items.forEach(function(item) {
+      var key = item.item.id;
+      if (allItems[key]) allItems[key].qty += item.qty;
+      else allItems[key] = { item: item.item, qty: item.qty };
+    });
+  });
+
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('fr-FR');
+  var timeStr = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  var orderNum = String(n).padStart(3,'0') + '-' + now.getHours() + now.getMinutes();
+
+  var total = 0;
+  var rows = '';
+  Object.values(allItems).forEach(function(i) {
+    var sub = i.item.price * i.qty;
+    total += sub;
+    rows += '<div class="rc-row"><span>' + i.item.emoji + ' ' + i.item.name + ' ×' + i.qty + '</span><span>' + fmt(sub) + '</span></div>';
+  });
+
+  var tva  = tvaRate > 0 ? (total * tvaRate / (1 + tvaRate)).toFixed(cur==='DT'?3:2) : '0';
+  var ht   = tvaRate > 0 ? (total / (1 + tvaRate)).toFixed(cur==='DT'?3:2) : fmt(total);
+
+  var w = window.open('', '_blank', 'width=420,height=680');
+  w.document.write('<!DOCTYPE html><html><head><title>Ticket ' + rName + '</title><style>' +
+    'body{font-family:monospace;font-size:13px;padding:20px;max-width:320px;margin:0 auto}' +
+    '.rc-logo{text-align:center;margin-bottom:14px}' +
+    '.rc-name{font-size:20px;font-weight:bold}' +
+    '.rc-tag{font-size:11px;color:#666;margin-top:2px}' +
+    'hr{border:none;border-top:1px dashed #ccc;margin:10px 0}' +
+    '.rc-meta{font-size:12px;color:#555;text-align:center;margin:3px 0}' +
+    '.rc-row{display:flex;justify-content:space-between;margin:4px 0;font-size:13px}' +
+    '.rc-total{display:flex;justify-content:space-between;font-size:16px;font-weight:bold;margin:8px 0}' +
+    '.rc-footer{text-align:center;font-size:11px;color:#888;margin-top:16px;line-height:1.6}' +
+    '@media print{body{padding:4px}}' +
+    '</style></head><body>' +
+    '<div class="rc-logo"><div class="rc-name">' + rName + '</div>' +
+    (rSub ? '<div class="rc-tag">' + rSub + (rCity ? ' · ' + rCity : '') + '</div>' : '') +
+    '</div><hr>' +
+    '<div class="rc-meta">' + dateStr + ' ' + timeStr + '</div>' +
+    '<div class="rc-meta">Table ' + n + ' · N° ' + orderNum + '</div>' +
+    '<hr>' + rows + '<hr>' +
+    (tvaRate > 0 ?
+      '<div class="rc-row" style="font-size:11px;color:#888"><span>Sous-total HT</span><span>' + ht + ' ' + cur + '</span></div>' +
+      '<div class="rc-row" style="font-size:11px;color:#888"><span>TVA (' + tvaRate + '%)</span><span>' + tva + ' ' + cur + '</span></div><hr>'
+      : '') +
+    '<div class="rc-total"><span>TOTAL TTC</span><span>' + fmt(total) + '</span></div><hr>' +
+    '<div class="rc-footer">Merci de votre visite 🙏<br><b>' + rName + '</b><br>' + rCity + '<br>' + (window.RESTO_TAX || '') + '</div>' +
+    '</body></html>');
+  w.document.close();
+  setTimeout(function() { w.print(); }, 400);
 }
 
 function askFree(n, from) {
