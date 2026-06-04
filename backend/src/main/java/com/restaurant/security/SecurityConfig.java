@@ -1,7 +1,6 @@
 package com.restaurant.security;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,87 +15,60 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtFilter             jwtFilter;
-    private final OAuth2SuccessHandler  oauth2SuccessHandler;
-    private final OAuth2FailureHandler  oauth2FailureHandler;
-
-    @Value("${frontend.url:https://zitoun-pos-frontend.onrender.com}")
-    private String frontendUrl;
+    private final JwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(c -> c.configurationSource(corsSource()))
-
-            // Stateless pour les appels API — OAuth2 a besoin d'une session temporaire
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // ── Public ──────────────────────────────
-                .requestMatchers("/api/auth/login").permitAll()
-                .requestMatchers("/api/auth/oauth2/**").permitAll()
-                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                // Public
+                .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/menu").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/tables").permitAll()
-                // ── Cuisine ─────────────────────────────
+                // Cuisine
                 .requestMatchers("/api/orders/active").hasAnyRole("CUISINE","ADMIN","SERVEUR","CAISSE")
                 .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/api/orders/*/status")
                     .hasAnyRole("CUISINE","ADMIN")
-                // ── Admin uniquement ────────────────────
-                .requestMatchers("/api/menu/**").hasAnyRole("ADMIN")
-                .requestMatchers("/api/settings/**").hasAnyRole("ADMIN")
-                .requestMatchers("/api/auth/users/**").hasAnyRole("ADMIN")
-                // ── Tout le reste : authentifié ──────────
+                // Admin seulement
+                .requestMatchers("/api/menu/**").hasRole("ADMIN")
+                .requestMatchers("/api/settings/**").hasRole("ADMIN")
+                .requestMatchers("/api/auth/users/**").hasRole("ADMIN")
+                // Tout le reste : authentifié
                 .anyRequest().authenticated()
             )
-
-            // ── OAuth2 Login ────────────────────────────
-            .oauth2Login(oauth2 -> oauth2
-                .authorizationEndpoint(a ->
-                    a.baseUri("/api/auth/oauth2/authorize"))
-                .redirectionEndpoint(r ->
-                    r.baseUri("/api/auth/oauth2/callback/*"))
-                .successHandler(oauth2SuccessHandler)
-                .failureHandler(oauth2FailureHandler)
-            )
-
-            // ── JWT filter pour les appels API ──────────
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-
             .headers(h -> h.frameOptions(f -> f.disable()));
 
         return http.build();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    @Bean PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+            AuthenticationConfiguration cfg) throws Exception {
+        return cfg.getAuthenticationManager();
     }
 
     @Bean
     public CorsConfigurationSource corsSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("*"));
-        config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(false);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
+        CorsConfiguration c = new CorsConfiguration();
+        c.setAllowedOriginPatterns(List.of("*"));
+        c.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        c.setAllowedHeaders(List.of("*"));
+        c.setAllowCredentials(false);
+        UrlBasedCorsConfigurationSource s = new UrlBasedCorsConfigurationSource();
+        s.registerCorsConfiguration("/**", c);
+        return s;
     }
 }
