@@ -1292,27 +1292,7 @@ button {
   <div class="login-card">
     <div class="login-logo" id="loginLogo">🌶️</div>
     <div class="login-title" id="loginRestoName">La Perla</div>
-    <div class="login-sub">Système de gestion — Connexion</div>
-
-    <!-- Choix du rôle -->
-    <div class="login-roles">
-      <button class="role-btn selected" id="role-serveur" onclick="selectRole('serveur')">
-        <span class="role-ico">📋</span>
-        <span class="role-lbl">Serveur</span>
-      </button>
-      <button class="role-btn" id="role-cuisine" onclick="selectRole('cuisine')">
-        <span class="role-ico">🍳</span>
-        <span class="role-lbl">Cuisine</span>
-      </button>
-      <button class="role-btn" id="role-caisse" onclick="selectRole('caisse')">
-        <span class="role-ico">💰</span>
-        <span class="role-lbl">Caisse</span>
-      </button>
-      <button class="role-btn" id="role-admin" onclick="selectRole('admin')">
-        <span class="role-ico">⚙️</span>
-        <span class="role-lbl">Admin</span>
-      </button>
-    </div>
+    <div class="login-sub">Entrez vos identifiants pour accéder au système</div>
 
     <div class="login-fields">
       <div class="login-field">
@@ -2536,19 +2516,16 @@ function doLogin() {
     return res.json();
   })
   .then(function(data) {
-    // Vérifier que le rôle correspond à celui sélectionné
     var returnedRole = (data.role || '').toUpperCase();
-    if (!data.accessToken) { err.textContent = '❌ Erreur serveur.'; err.style.display='block'; btn.disabled=false; btn.innerHTML='<span>🔓</span> Se connecter'; return; }
-    var wantedRole   = selectedLoginRole.toUpperCase();
-    if (returnedRole !== wantedRole && returnedRole !== 'ADMIN') {
-      err.textContent = '❌ Ce compte n\'a pas le rôle ' + selectedLoginRole + '.';
+    if (!data.accessToken) {
+      err.textContent = '❌ Erreur serveur.';
       err.style.display = 'block';
       btn.disabled = false;
       btn.innerHTML = '<span>🔓</span> Se connecter';
       return;
     }
 
-    // Créer la session
+    // Créer la session — le rôle vient du backend, pas du sélecteur
     currentSession = {
       user:         data.username,
       role:         returnedRole,
