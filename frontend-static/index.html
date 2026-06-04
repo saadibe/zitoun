@@ -1284,61 +1284,7 @@ button {
 .user-add-select { padding:8px 11px; border-radius:9px; border:2px solid var(--border); background:var(--ivory); font-size:13px; font-family:'Cairo',sans-serif; cursor:pointer; outline:none; }
 .user-add-btn { padding:9px 16px; border-radius:9px; border:none; background:var(--sky); color:#fff; font-size:12.5px; font-weight:700; cursor:pointer; font-family:'Cairo',sans-serif; white-space:nowrap; }
 .user-add-btn:hover { background:var(--sky2); }
-
-/* ── CATEGORY MANAGER ── */
-.cat-manager { display:flex; flex-direction:column; gap:8px; }
-.cat-item {
-  display:flex; align-items:center; gap:10px;
-  background:var(--white); border:2px solid var(--border);
-  border-radius:11px; padding:10px 14px; transition:border-color .15s;
-}
-.cat-item:hover { border-color:var(--sky-light); }
-.cat-item-em { font-size:22px; width:28px; text-align:center; }
-.cat-item-info { flex:1; }
-.cat-item-label { font-size:13.5px; font-weight:700; color:var(--ink); }
-.cat-item-code { font-size:11px; color:var(--ink3); margin-top:2px; font-family:monospace; }
-.cat-del-btn { width:30px; height:30px; border-radius:7px; background:var(--terra-light); color:var(--terracotta); border:1.5px solid var(--terracotta); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
-.cat-del-btn:hover { background:var(--terracotta); color:#fff; }
-.cat-add-form { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
-.cat-add-input { flex:1; min-width:100px; padding:8px 11px; border-radius:9px; border:2px solid var(--border); background:var(--ivory); font-size:13px; font-family:'Cairo',sans-serif; outline:none; }
-.cat-add-input:focus { border-color:var(--sky); }
-.cat-add-btn { padding:8px 16px; border-radius:9px; border:none; background:var(--sky); color:#fff; font-size:12.5px; font-weight:700; cursor:pointer; font-family:'Cairo',sans-serif; white-space:nowrap; }
-.cat-add-btn:hover { background:var(--sky2); }
 </style>
-
-<script>
-
-// ══ Nettoyer les paramètres de tracking injectés par les proxies/antivirus ══
-(function() {
-  try {
-    var url = new URL(window.location.href);
-    var dirty = false;
-    // Supprimer les paramètres de tracking connus
-    ['_sm_au_', 'utm_source', 'utm_medium', 'utm_campaign', 'fbclid', 'gclid', 'ref'].forEach(function(p) {
-      if (url.searchParams.has(p)) { url.searchParams.delete(p); dirty = true; }
-    });
-    if (dirty) {
-      window.history.replaceState({}, document.title, url.pathname + (url.search || '') + (url.hash || ''));
-    }
-  } catch(e) {}
-})();
-
-// Stubs — remplacés par les vraies fonctions quand le script principal charge
-function _doLoginReal() {
-  var btn = document.getElementById('loginBtn');
-  if (btn) btn.disabled = true;
-  // Attendre que le script principal soit chargé
-  var wait = setInterval(function() {
-    if (typeof _doLoginReal === 'function') {
-      clearInterval(wait);
-      _doLoginReal();
-    }
-  }, 100);
-  setTimeout(function() { clearInterval(wait); if (btn) btn.disabled = false; }, 5000);
-}
-function showPage(n,b) { window._pendingPage = {n:n,b:b}; }
-function closeModal(id) { var el=document.getElementById(id); if(el) el.classList.remove('open'); }
-</script>
 </head>
 <body>
 <!-- ══ LOGIN PAGE ══ -->
@@ -1351,17 +1297,17 @@ function closeModal(id) { var el=document.getElementById(id); if(el) el.classLis
     <div class="login-fields">
       <div class="login-field">
         <label class="login-label">Nom / Identifiant</label>
-        <input class="login-input" id="loginUser" placeholder="Ex: Mohamed" autocomplete="username" onkeydown="if(event.key==='Enter')_doLoginReal()">
+        <input class="login-input" id="loginUser" placeholder="Ex: Mohamed" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
       <div class="login-field">
         <label class="login-label">Code PIN / Mot de passe</label>
-        <input class="login-input" id="loginPass" type="password" placeholder="••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')_doLoginReal()">
+        <input class="login-input" id="loginPass" type="password" placeholder="••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
     </div>
 
     <div class="login-error" id="loginError">❌ Identifiant ou mot de passe incorrect</div>
 
-    <button class="login-btn" id="loginBtn" onclick="_doLoginReal()">
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">
       <span>🔓</span> Se connecter
     </button>
 
@@ -1595,7 +1541,6 @@ function closeModal(id) { var el=document.getElementById(id); if(el) el.classLis
           <span class="settings-lbl">TVA personnalisée</span>
           <input class="settings-input" id="settingsTVACustom" type="number" min="0" max="100" step="0.1" placeholder="Ex: 7.5" style="min-width:80px">
         </div>
-        <button class="settings-save" style="background:var(--ink2)" onclick="openCategoryManager()">🏷️ Catégories</button>
         <button class="settings-save" style="background:var(--ink)" onclick="openUserManager()">👤 Comptes</button>
         <button class="settings-save" onclick="saveSettings()">💾 Enregistrer</button>
         <div class="settings-saved" id="settingsSaved">✓ Enregistré !</div>
@@ -1664,6 +1609,10 @@ function closeModal(id) { var el=document.getElementById(id); if(el) el.classLis
         <div class="adm-field">
           <label class="adm-label">Catégorie</label>
           <select class="adm-select" id="artCat">
+            <option value="entree">🥗 Entrée</option>
+            <option value="plat">🥩 Plat</option>
+            <option value="dessert">🍮 Dessert</option>
+            <option value="boisson">🍷 Boisson</option>
           </select>
         </div>
       </div>
@@ -1899,7 +1848,6 @@ function init() {
 
 // ═══ NAVIGATION ═══
 function showPage(name, btn) {
-  window._pendingPage = null;
   document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
   document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
   document.getElementById('page-' + name).classList.add('active');
@@ -2127,40 +2075,7 @@ function printTicket() {
     '.rc-footer{text-align:center;font-size:10px;color:#aaa;margin-top:14px;padding-top:10px;border-top:1px dashed #eee;line-height:1.7}' +
     '.rc-footer b{color:#555}' +
     '@media print{.no-print{display:none}body{padding:4px}}' +
-    '</style><\/script>';  w.document.close(); setTimeout(function() { w.print(); }, 500); })
-
-// ══ Nettoyer les paramètres de tracking injectés par les proxies/antivirus ══
-(function() {
-  try {
-    var url = new URL(window.location.href);
-    var dirty = false;
-    // Supprimer les paramètres de tracking connus
-    ['_sm_au_', 'utm_source', 'utm_medium', 'utm_campaign', 'fbclid', 'gclid', 'ref'].forEach(function(p) {
-      if (url.searchParams.has(p)) { url.searchParams.delete(p); dirty = true; }
-    });
-    if (dirty) {
-      window.history.replaceState({}, document.title, url.pathname + (url.search || '') + (url.hash || ''));
-    }
-  } catch(e) {}
-})();
-
-// Stubs — remplacés par les vraies fonctions quand le script principal charge
-function _doLoginReal() {
-  var btn = document.getElementById('loginBtn');
-  if (btn) btn.disabled = true;
-  // Attendre que le script principal soit chargé
-  var wait = setInterval(function() {
-    if (typeof _doLoginReal === 'function') {
-      clearInterval(wait);
-      _doLoginReal();
-    }
-  }, 100);
-  setTimeout(function() { clearInterval(wait); if (btn) btn.disabled = false; }, 5000);
-}
-function showPage(n,b) { window._pendingPage = {n:n,b:b}; }
-function closeModal(id) { var el=document.getElementById(id); if(el) el.classList.remove('open'); }
-</script>
-</head><body>' + html +
+    '</style></head><body>' + html +
     '<div class="no-print" style="text-align:center;margin-top:20px">' +
     '<button onclick="window.print()" style="padding:10px 30px;font-size:14px;cursor:pointer;font-family:Cairo,sans-serif;background:#1a6eb5;color:#fff;border:none;border-radius:8px">🖨 Imprimer</button>' +
     '</div></body></html>');
@@ -2508,41 +2423,7 @@ function printTableTicket(n) {
     '.rc-total{display:flex;justify-content:space-between;font-size:16px;font-weight:bold;margin:8px 0}' +
     '.rc-footer{text-align:center;font-size:11px;color:#888;margin-top:16px;line-height:1.6}' +
     '@media print{body{padding:4px}}' +
-    '</style>
-<script>
-
-// ══ Nettoyer les paramètres de tracking injectés par les proxies/antivirus ══
-(function() {
-  try {
-    var url = new URL(window.location.href);
-    var dirty = false;
-    // Supprimer les paramètres de tracking connus
-    ['_sm_au_', 'utm_source', 'utm_medium', 'utm_campaign', 'fbclid', 'gclid', 'ref'].forEach(function(p) {
-      if (url.searchParams.has(p)) { url.searchParams.delete(p); dirty = true; }
-    });
-    if (dirty) {
-      window.history.replaceState({}, document.title, url.pathname + (url.search || '') + (url.hash || ''));
-    }
-  } catch(e) {}
-})();
-
-// Stubs — remplacés par les vraies fonctions quand le script principal charge
-function _doLoginReal() {
-  var btn = document.getElementById('loginBtn');
-  if (btn) btn.disabled = true;
-  // Attendre que le script principal soit chargé
-  var wait = setInterval(function() {
-    if (typeof _doLoginReal === 'function') {
-      clearInterval(wait);
-      _doLoginReal();
-    }
-  }, 100);
-  setTimeout(function() { clearInterval(wait); if (btn) btn.disabled = false; }, 5000);
-}
-function showPage(n,b) { window._pendingPage = {n:n,b:b}; }
-function closeModal(id) { var el=document.getElementById(id); if(el) el.classList.remove('open'); }
-</script>
-</head><body>' +
+    '</style></head><body>' +
     '<div class="rc-logo"><div class="rc-name">' + rName + '</div>' +
     (rSub ? '<div class="rc-tag">' + rSub + (rCity ? ' · ' + rCity : '') + '</div>' : '') +
     '</div><hr>' +
@@ -2670,7 +2551,7 @@ function selectRole(role) {
 }
 
 // ── Connexion ──
-function _doLoginReal() {
+function doLogin() {
   var user = document.getElementById('loginUser').value.trim();
   var pass = document.getElementById('loginPass').value;
   var err  = document.getElementById('loginError');
@@ -2694,33 +2575,13 @@ function _doLoginReal() {
 
   // Appel API backend
   var ROLE_ICONS = { ADMIN:'⚙️', SERVEUR:'📋', CUISINE:'🍳', CAISSE:'💰' };
-
-  // Afficher "réveil du serveur" si lent
-  var wakeTimer = setTimeout(function() {
-    err.textContent = '⏳ Démarrage du serveur en cours (30-60 sec)...';
-    err.style.background = 'var(--yellow-dim)';
-    err.style.color = '#8a6000';
-    err.style.borderColor = 'var(--yellow)';
-    err.style.display = 'block';
-  }, 4000);
-
-  // Timeout 60 secondes (Render peut dormir)
-  var controller = new AbortController();
-  var timeoutId = setTimeout(function() { controller.abort(); }, 60000);
-
   fetch(window.API_URL + '/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: user, password: pass }),
-    signal: controller.signal
+    body: JSON.stringify({ username: user, password: pass })
   })
   .then(function(res) {
-    clearTimeout(timeoutId);
-    clearTimeout(wakeTimer);
-    err.style.background = ''; err.style.color = ''; err.style.borderColor = '';
-    if (res.status === 401) throw new Error('unauthorized');
-    if (res.status === 403) throw new Error('forbidden');
-    if (!res.ok) throw new Error('server_error');
+    if (!res.ok) throw new Error('unauthorized');
     return res.json();
   })
   .then(function(data) {
@@ -2752,19 +2613,7 @@ function _doLoginReal() {
     onLoginSuccess();
   })
   .catch(function(e) {
-    console.error('Login error:', e);
-    clearTimeout(timeoutId);
-    clearTimeout(wakeTimer);
-    err.style.background = ''; err.style.color = ''; err.style.borderColor = '';
-    if (e.message === 'unauthorized') {
-      err.textContent = '❌ Identifiant ou mot de passe incorrect.';
-    } else if (e.message === 'forbidden') {
-      err.textContent = '❌ Accès refusé (403). Vérifiez l\'URL du backend.';
-    } else if (e.name === 'AbortError') {
-      err.textContent = '⏱ Délai dépassé. Le serveur met trop de temps à répondre.';
-    } else {
-      err.textContent = '❌ Erreur: ' + e.message + '. Réessayez.';
-    }
+    err.textContent = '❌ Identifiant ou mot de passe incorrect.';
     err.style.display = 'block';
     btn.disabled = false;
     btn.innerHTML = '<span>🔓</span> Se connecter';
@@ -2960,115 +2809,6 @@ function deleteUser(id) {
   .catch(function() { alert('⚠ Impossible de supprimer le dernier admin.'); });
 }
 
-
-// ═══ CATEGORIES API ══════════════════════════════
-var API_CATS = [];
-
-function loadCategories() {
-  fetch(window.API_URL + '/settings/categories')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      API_CATS = data;
-      buildCatManagerList();
-      // Mettre à jour les catégories du menu dans l'interface
-      CATS = [{k:'all', l:'Tout', e:'✦'}].concat(
-        data.map(function(c) {
-          return { k: c.code, l: c.label, e: c.emoji || '🍽️' };
-        })
-      );
-      buildCatBtns();
-      buildAdminMenu();
-    })
-    .catch(function() {}); // fallback sur CATS local
-}
-
-function openCategoryManager() {
-  loadCategories();
-  document.getElementById('categoryModal').classList.add('open');
-}
-
-function buildCatManagerList() {
-  var list = document.getElementById('catManagerList');
-  if (!list) return;
-  if (!API_CATS.length) {
-    list.innerHTML = '<div style="text-align:center;color:var(--ink3);padding:16px;font-style:italic">Aucune catégorie</div>';
-    return;
-  }
-  list.innerHTML = API_CATS.map(function(c) {
-    return '<div class="cat-item">' +
-      '<span class="cat-item-em">' + (c.emoji || '🍽️') + '</span>' +
-      '<div class="cat-item-info">' +
-        '<div class="cat-item-label">' + c.label + '</div>' +
-        '<div class="cat-item-code">' + c.code + '</div>' +
-      '</div>' +
-      '<button class="cat-del-btn" onclick="deleteCategory(' + c.id + ', '' + c.label + '')" title="Supprimer">🗑</button>' +
-    '</div>';
-  }).join('');
-}
-
-function addCategory() {
-  var emoji = document.getElementById('newCatEmoji').value.trim() || '🍽️';
-  var label = document.getElementById('newCatLabel').value.trim();
-  var code  = document.getElementById('newCatCode').value.trim().toUpperCase().replace(/\s+/g,'_');
-  if (!label || !code) { alert('⚠ Remplissez le nom et le code'); return; }
-
-  authFetch(window.API_URL + '/settings/categories', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ label: label, code: code, emoji: emoji, sortOrder: API_CATS.length + 1, active: true })
-  })
-  .then(function(r) {
-    if (r.status === 409) throw new Error('exists');
-    if (!r.ok) throw new Error('error');
-    return r.json();
-  })
-  .then(function() {
-    document.getElementById('newCatEmoji').value = '';
-    document.getElementById('newCatLabel').value = '';
-    document.getElementById('newCatCode').value  = '';
-    loadCategories();
-  })
-  .catch(function(e) {
-    alert(e.message === 'exists' ? '⚠ Cette catégorie existe déjà.' : '⚠ Erreur lors de la création.');
-  });
-}
-
-function deleteCategory(id, label) {
-  if (!confirm('Supprimer la catégorie "' + label + '" ?\nLes articles de cette catégorie ne seront pas supprimés.')) return;
-  authFetch(window.API_URL + '/settings/categories/' + id, { method: 'DELETE' })
-  .then(function() { loadCategories(); })
-  .catch(function() { alert('⚠ Erreur lors de la suppression.'); });
-}
-
-// ═══ SETTINGS API ══════════════════════════════
-function loadSettingsFromAPI() {
-  fetch(window.API_URL + '/settings')
-    .then(function(r) { return r.json(); })
-    .then(function(s) {
-      if (!s || !s.name) return;
-      // Mettre à jour toutes les variables globales
-      window.RESTO_NAME     = s.name;
-      window.RESTO_SUB      = s.subtitle || '';
-      window.RESTO_CITY     = s.city || '';
-      window.RESTO_ICON     = s.icon || '🌶️';
-      window.RESTO_CURRENCY = s.currency || 'DT';
-      window.RESTO_TVA      = s.tvaRate  !== undefined ? s.tvaRate : 10;
-      window.RESTO_THEME    = s.theme    || 'vert';
-
-      // Mettre à jour l'interface
-      document.getElementById('brandName').textContent = s.name;
-      document.getElementById('brandSub').textContent  = s.subtitle || '';
-      document.getElementById('brandIcon').textContent = s.icon || '🌶️';
-      document.getElementById('loginRestoName').textContent = s.name;
-      document.getElementById('loginLogo').textContent = s.icon || '🌶️';
-      document.title = s.name + ' — POS';
-
-      // Appliquer le thème sauvegardé
-      if (s.theme) applySkin(s.theme);
-    })
-    .catch(function() {});
-}
-
 // ═══ SKIN SWITCHER ════════════════════════════
 var currentSkin = 'vert';
 
@@ -3236,29 +2976,13 @@ function buildAdminTables() {
   });
 }
 
-function buildCatSelect(selected) {
-  var sel = document.getElementById('artCat');
-  sel.innerHTML = '';
-  var cats = API_CATS.length ? API_CATS : [
-    {code:'ENTREE',label:'Entrées'},{code:'SANDWICH',label:'Sandwichs'},
-    {code:'PLAT',label:'Pain & Pizzas'},{code:'BOISSON',label:'Boissons'}
-  ];
-  cats.forEach(function(c) {
-    var o = document.createElement('option');
-    o.value = c.code || c.k;
-    o.textContent = (c.emoji || c.e || '') + ' ' + (c.label || c.l);
-    o.selected = o.value === (selected || '');
-    sel.appendChild(o);
-  });
-}
-
 function openAddArticle() {
   artEditId = null;
   document.getElementById('articleModalTitle').textContent = 'Ajouter un article';
   document.getElementById('artName').value = '';
   document.getElementById('artPrice').value = '';
+  document.getElementById('artCat').value = 'plat';
   document.getElementById('artError').style.display = 'none';
-  buildCatSelect('');
   buildEmojiGrid('🍗');
   document.getElementById('articleModal').classList.add('open');
 }
@@ -3270,7 +2994,7 @@ function openEditArticle(id) {
   document.getElementById('articleModalTitle').textContent = 'Modifier "' + item.name + '"';
   document.getElementById('artName').value = item.name;
   document.getElementById('artPrice').value = item.price;
-  buildCatSelect(item.cat);
+  document.getElementById('artCat').value = item.cat;
   document.getElementById('artError').style.display = 'none';
   buildEmojiGrid(item.emoji);
   document.getElementById('articleModal').classList.add('open');
@@ -3394,40 +3118,15 @@ document.addEventListener('DOMContentLoaded', function() {
   // ── URL du backend Render ──────────────────
   window.API_URL = 'https://zitoun-pos-api.onrender.com/api';
 
-  // Nettoyer l'URL courante des paramètres de tracking
-  try {
-    var cleanUrl = new URL(window.location.href);
-    ['_sm_au_','utm_source','utm_medium','fbclid','gclid'].forEach(function(p) {
-      cleanUrl.searchParams.delete(p);
-    });
-    if (cleanUrl.search !== window.location.search) {
-      window.history.replaceState({}, document.title, cleanUrl.toString());
-    }
-  } catch(e) {}
-
   applySkin('vert');
   init();
   buildAdminMenu();
   buildAdminTables();
 
-  // Réveiller le serveur Render (peut dormir après 15 min d'inactivité)
-  fetch(window.API_URL + '/menu').catch(function() {});
-
-  // Charger les paramètres du restaurant
-  loadSettingsFromAPI();
-
-  // Charger les catégories
-  loadCategories();
-
   // Charger le menu et les tables depuis l'API
   loadFromAPI();
 
   // Vérifier si une session existe déjà
-  if (window._pendingPage) {
-    var pp = window._pendingPage;
-    showPage(pp.n, pp.b);
-    window._pendingPage = null;
-  }
   if (!checkExistingSession()) {
     // Mettre à jour le logo login
     document.getElementById('loginLogo').textContent = window.RESTO_ICON || '🌶️';
@@ -3572,32 +3271,7 @@ function loadFromAPI() {
     })
     .catch(function() {});
 }
-
-
-<!-- MODAL CATEGORIES -->
-<div class="modal-ov" id="categoryModal">
-  <div class="modal-box" style="max-width:440px;padding:0;overflow:hidden;border-top:5px solid var(--sky)">
-    <div style="padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div style="font-family:'Tajawal',sans-serif;font-size:17px;font-weight:800;color:var(--ink)">🏷️ Catégories du menu</div>
-        <div style="font-size:12px;color:var(--ink3);margin-top:2px">Ajouter, modifier ou supprimer des catégories</div>
-      </div>
-      <button onclick="closeModal('categoryModal')" style="background:var(--cream);border:2px solid var(--sand);border-radius:8px;padding:5px 11px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Cairo',sans-serif">✕</button>
-    </div>
-    <div style="padding:16px 24px;max-height:320px;overflow-y:auto">
-      <div class="cat-manager" id="catManagerList"></div>
-    </div>
-    <div style="padding:0 24px 24px;border-top:1px solid var(--border);padding-top:16px">
-      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--ink3);margin-bottom:10px">Ajouter une catégorie</div>
-      <div class="cat-add-form">
-        <input class="cat-add-input" id="newCatEmoji" placeholder="🍽️" style="max-width:60px;text-align:center">
-        <input class="cat-add-input" id="newCatLabel" placeholder="Nom (ex: Desserts)">
-        <input class="cat-add-input" id="newCatCode" placeholder="Code (ex: DESSERT)" style="text-transform:uppercase">
-        <button class="cat-add-btn" onclick="addCategory()">+ Ajouter</button>
-      </div>
-    </div>
-  </div>
-</div>
+</script>
 
 <!-- MODAL GESTION UTILISATEURS -->
 <div class="modal-ov" id="userManagerModal">
