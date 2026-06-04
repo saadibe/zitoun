@@ -1333,15 +1333,41 @@ button {
         </div>
         <div class="settings-group">
           <span class="settings-lbl">Nom du restaurant</span>
-          <input class="settings-input" id="settingsName" placeholder="Ex: Mon Restaurant" style="min-width:200px">
+          <input class="settings-input" id="settingsName" placeholder="Ex: Mon Restaurant" style="min-width:180px">
         </div>
         <div class="settings-group">
           <span class="settings-lbl">Sous-titre</span>
-          <input class="settings-input" id="settingsSub" placeholder="Ex: Restaurant & Terrasse" style="min-width:190px">
+          <input class="settings-input" id="settingsSub" placeholder="Ex: Restaurant & Terrasse" style="min-width:170px">
         </div>
         <div class="settings-group">
           <span class="settings-lbl">Ville</span>
-          <input class="settings-input" id="settingsCity" placeholder="Ex: Tunis" style="min-width:150px">
+          <input class="settings-input" id="settingsCity" placeholder="Ex: Tunis" style="min-width:120px">
+        </div>
+        <div class="settings-group">
+          <span class="settings-lbl">Devise</span>
+          <select class="settings-input" id="settingsCurrency" style="min-width:90px;cursor:pointer">
+            <option value="DT">DT — Dinar</option>
+            <option value="€">€ — Euro</option>
+            <option value="$">$ — Dollar</option>
+            <option value="MAD">MAD — Dirham</option>
+            <option value="DA">DA — Dinar DZ</option>
+          </select>
+        </div>
+        <div class="settings-group">
+          <span class="settings-lbl">TVA (%)</span>
+          <select class="settings-input" id="settingsTVA" style="min-width:100px;cursor:pointer">
+            <option value="0">Pas de TVA</option>
+            <option value="7">7%</option>
+            <option value="10" selected>10%</option>
+            <option value="13">13%</option>
+            <option value="19">19%</option>
+            <option value="20">20%</option>
+            <option value="custom">Autre...</option>
+          </select>
+        </div>
+        <div class="settings-group" id="tvaCustomGroup" style="display:none">
+          <span class="settings-lbl">TVA personnalisée</span>
+          <input class="settings-input" id="settingsTVACustom" type="number" min="0" max="100" step="0.1" placeholder="Ex: 7.5" style="min-width:80px">
         </div>
         <button class="settings-save" onclick="saveSettings()">💾 Enregistrer</button>
         <div class="settings-saved" id="settingsSaved">✓ Enregistré !</div>
@@ -1404,7 +1430,7 @@ button {
       </div>
       <div class="adm-row">
         <div class="adm-field">
-          <label class="adm-label">Prix (DT)</label>
+          <label class="adm-label" id="priceLbl">Prix (DT)</label>
           <input class="adm-input" id="artPrice" type="number" min="0" step="0.5" placeholder="0.000">
         </div>
         <div class="adm-field">
@@ -1527,7 +1553,7 @@ button {
         <div class="enc-input-row">
           <span class="enc-input-lbl">Montant reçu :</span>
           <input class="enc-input" id="encRecu" type="number" step="0.001" placeholder="0.000" oninput="calcRendu()">
-          <span style="font-size:13px;font-weight:700;color:var(--ink3)">DT</span>
+          <span style="font-size:13px;font-weight:700;color:var(--ink3)" id="encCurLabel">DT</span>
         </div>
         <div class="enc-rendu" id="encRendu"></div>
       </div>
@@ -1705,7 +1731,7 @@ function buildMenuItems() {
       '<div class="mc-top"><span class="mc-em">' + item.emoji + '</span>' +
       (item.avail ? '' : '<span class="mc-tag">Épuisé</span>') + '</div>' +
       '<span class="mc-nm">' + item.name + '</span>' +
-      '<span class="mc-pr">' + item.price + ' DT</span>';
+      '<span class="mc-pr">' + item.price + ' ' + getCur() + '</span>';
     if (item.avail) {
       d.onclick = (function(it) { return function() { addItem(it); }; })(item);
     }
@@ -1725,7 +1751,7 @@ function renderOrder() {
   if (oItems.length === 0) {
     c.innerHTML = '<div class="o-empty"><div class="o-empty-ico">🧺</div><div class="o-empty-txt">Sélectionnez une table<br>puis ajoutez des articles</div></div>';
     document.getElementById('clrBtn').disabled = true;
-    document.getElementById('oTotal').innerHTML = '0 <span>DT</span>';
+    document.getElementById('oTotal').innerHTML = '0 <span>' + getCur() + '</span>';
     updateBtns();
     return;
   }
@@ -1746,12 +1772,12 @@ function renderOrder() {
         '<button class="q-btn" onclick="chQty(' + i + ',-1)">−</button>' +
         '<span class="q-num">' + oi.qty + '</span>' +
         '<button class="q-btn" onclick="chQty(' + i + ',1)">+</button>' +
-        '<span class="oi-price">' + (oi.item.price * oi.qty) + ' DT</span>' +
+        '<span class="oi-price">' + fmt(oi.item.price * oi.qty) + '</span>' +
       '</div>';
     c.appendChild(d);
   });
   var total = oItems.reduce(function(s, o) { return s + o.item.price * o.qty; }, 0);
-  document.getElementById('oTotal').innerHTML = total + ' <span>DT</span>';
+  document.getElementById('oTotal').innerHTML = total.toFixed(getCur()==='DT'?3:2) + ' <span>' + getCur() + '</span>';
   updateBtns();
 }
 
@@ -1820,8 +1846,9 @@ function sendKitchen() {
 function openTicket() {
   if (!selTable || oItems.length === 0) return;
   var total = oItems.reduce(function(s, o) { return s + o.item.price * o.qty; }, 0);
-  var tva = (total * 0.1).toFixed(3);
-  var ht = (total / 1.1).toFixed(3);
+  var tvaRate = getTVA() / 100;
+  var tva = tvaRate > 0 ? (total * tvaRate / (1 + tvaRate)).toFixed(getCur()==='DT'?3:2) : '0';
+  var ht  = tvaRate > 0 ? (total / (1 + tvaRate)).toFixed(getCur()==='DT'?3:2) : total.toFixed(getCur()==='DT'?3:2);
   var now = new Date();
   var dateStr = now.toLocaleDateString('fr-FR');
   var timeStr = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
@@ -1846,10 +1873,10 @@ function openTicket() {
     '<hr class="rc-div">' +
     rows +
     '<hr class="rc-div">' +
-    '<div class="rc-row" style="font-size:11px;color:#888"><span>Sous-total HT</span><span>' + ht + ' DT</span></div>' +
-    '<div class="rc-row" style="font-size:11px;color:#888"><span>TVA (10%)</span><span>' + tva + ' DT</span></div>' +
+    '<div class="rc-row" style="font-size:11px;color:#888"><span>Sous-total HT</span><span>' + ht + ' ' + getCur() + '</span></div>' +
+    (getTVA() > 0 ? '<div class="rc-row" style="font-size:11px;color:#888"><span>TVA (' + getTVA() + '%)</span><span>' + tva + ' ' + getCur() + '</span></div>' : '') +
     '<hr class="rc-div">' +
-    '<div class="rc-total"><span>TOTAL TTC</span><span>' + total.toFixed(3) + ' DT</span></div>' +
+    '<div class="rc-total"><span>TOTAL TTC</span><span>' + fmt(total) + '</span></div>' +
     '<div class="rc-footer">Merci de votre visite 🙏<br><b>' + rName + '</b> · ' + rCity + '<br>MF: 123456/A/M/000</div>';
 
   document.getElementById('ticketModal').classList.add('open');
@@ -2020,7 +2047,7 @@ function openTableDetail(n) {
       return '<div class="td-line">' +
         '<div class="td-line-name"><span class="td-line-qty">×' + i.qty + '</span>' +
         '<span>' + i.item.emoji + ' ' + i.item.name + '</span></div>' +
-        '<span class="td-line-price">' + sub.toFixed(3) + ' DT</span>' +
+        '<span class="td-line-price">' + fmt(sub) + '</span>' +
         '</div>';
     }).join('');
     grandTotal += orderTotal;
@@ -2038,7 +2065,7 @@ function openTableDetail(n) {
 
   html += '<div class="td-total-bar">' +
     '<span class="td-total-lbl">Total · ' + totalItems + ' article' + (totalItems > 1 ? 's' : '') + '</span>' +
-    '<span class="td-total-val">' + grandTotal.toFixed(3) + ' DT</span>' +
+    '<span class="td-total-val">' + fmt(grandTotal) + '</span>' +
     '</div>';
 
   body.innerHTML = html;
@@ -2082,7 +2109,7 @@ function openEncaisser(n) {
     html += '<div class="enc-row">' +
       '<div class="enc-row-name"><span class="enc-row-qty">×' + i.qty + '</span>' +
       '<span>' + i.item.emoji + ' ' + i.item.name + '</span></div>' +
-      '<span style="font-weight:700;color:var(--ink)">' + subtotal.toFixed(3) + ' DT</span>' +
+      '<span style="font-weight:700;color:var(--ink)">' + fmt(subtotal) + '</span>' +
       '</div>';
   });
 
@@ -2092,7 +2119,7 @@ function openEncaisser(n) {
 
   container.innerHTML = html;
   encTotalVal = total;
-  document.getElementById('encTotal').textContent = total.toFixed(3) + ' DT';
+  document.getElementById('encTotal').textContent = fmt(total);
 
   // Reset
   document.getElementById('encRecu').value = '';
@@ -2256,24 +2283,64 @@ function buildSettingsEmojiPicker() {
 
 function initSettings() {
   document.getElementById('settingsName').value = document.getElementById('brandName').textContent;
-  document.getElementById('settingsSub').value = document.getElementById('brandSub').textContent;
-  document.getElementById('settingsCity').value = 'Tunisie';
-  pickedBrandEmoji = document.getElementById('brandIcon').textContent.trim() || '🫒';
+  document.getElementById('settingsSub').value  = document.getElementById('brandSub').textContent;
+  document.getElementById('settingsCity').value = window.RESTO_CITY || 'Tunisie';
+
+  // Devise
+  var cur = document.getElementById('settingsCurrency');
+  cur.value = window.RESTO_CURRENCY || 'DT';
+
+  // TVA
+  var tva = window.RESTO_TVA || 0;
+  var sel = document.getElementById('settingsTVA');
+  var knownVals = ['0','7','10','13','19','20'];
+  if (knownVals.indexOf(String(tva)) >= 0) {
+    sel.value = String(tva);
+    document.getElementById('tvaCustomGroup').style.display = 'none';
+  } else {
+    sel.value = 'custom';
+    document.getElementById('tvaCustomGroup').style.display = 'flex';
+    document.getElementById('settingsTVACustom').value = tva;
+  }
+
+  // Afficher/cacher champ custom TVA
+  sel.onchange = function() {
+    document.getElementById('tvaCustomGroup').style.display =
+      sel.value === 'custom' ? 'flex' : 'none';
+  };
+
+  pickedBrandEmoji = document.getElementById('brandIcon').textContent.trim() || '🌶️';
   buildSettingsEmojiPicker();
 }
 
 function saveSettings() {
-  var name = document.getElementById('settingsName').value.trim() || 'La Perla';
-  var sub  = document.getElementById('settingsSub').value.trim();
-  var city = document.getElementById('settingsCity').value.trim();
+  var name     = document.getElementById('settingsName').value.trim() || 'La Perla';
+  var sub      = document.getElementById('settingsSub').value.trim();
+  var city     = document.getElementById('settingsCity').value.trim();
+  var currency = document.getElementById('settingsCurrency').value || 'DT';
+  var tvaSelect = document.getElementById('settingsTVA').value;
+  var tva = tvaSelect === 'custom'
+    ? parseFloat(document.getElementById('settingsTVACustom').value) || 0
+    : parseFloat(tvaSelect) || 0;
 
+  // Sidebar
   document.getElementById('brandName').textContent = name;
   document.getElementById('brandSub').textContent  = sub;
   document.getElementById('brandIcon').textContent  = pickedBrandEmoji;
-  window.RESTO_NAME = name; window.RESTO_SUB = sub;
-  window.RESTO_CITY = city; window.RESTO_ICON = pickedBrandEmoji;
 
-  // Sauvegarder sur l'API Render
+  // Globales
+  window.RESTO_NAME     = name;
+  window.RESTO_SUB      = sub;
+  window.RESTO_CITY     = city;
+  window.RESTO_ICON     = pickedBrandEmoji;
+  window.RESTO_CURRENCY = currency;
+  window.RESTO_TVA      = tva;
+
+  // Rafraîchir l'affichage des prix
+  renderOrder();
+  buildMenuItems();
+
+  // API
   fetch(window.API_URL + '/settings', {
     method: 'PUT',
     headers: {'Content-Type':'application/json'},
@@ -2283,6 +2350,15 @@ function saveSettings() {
   var saved = document.getElementById('settingsSaved');
   saved.style.display = 'flex';
   setTimeout(function() { saved.style.display = 'none'; }, 2500);
+}
+
+
+// ═══ DEVISE & TVA ═══════════════════════════
+function getCur() { return window.RESTO_CURRENCY || 'DT'; }
+function getTVA() { return window.RESTO_TVA !== undefined ? window.RESTO_TVA : 10; }
+function fmt(amount) {
+  var decimals = getCur() === 'DT' ? 3 : 2;
+  return amount.toFixed(decimals) + ' ' + getCur();
 }
 
 // ═══ ADMIN ═══════════════════════════════════
@@ -2458,10 +2534,12 @@ function updateClock() {
 
 // ═══ START ═══
 document.addEventListener('DOMContentLoaded', function() {
-  window.RESTO_NAME = 'La Perla';
-  window.RESTO_SUB  = 'Saveurs Authentiques de Tunisie';
-  window.RESTO_CITY = 'Tunisie';
-  window.RESTO_ICON = '🌶️';
+  window.RESTO_NAME     = 'La Perla';
+  window.RESTO_SUB      = 'Saveurs Authentiques de Tunisie';
+  window.RESTO_CITY     = 'Tunisie';
+  window.RESTO_ICON     = '🌶️';
+  window.RESTO_CURRENCY = 'DT';    // devise par défaut
+  window.RESTO_TVA      = 10;      // TVA en % (0 = pas de TVA)
 
   // ── URL du backend Render ──────────────────
   window.API_URL = 'https://zitoun-pos-api.onrender.com/api';
