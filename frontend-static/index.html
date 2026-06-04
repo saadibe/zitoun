@@ -2705,15 +2705,22 @@ function _doLoginReal() {
     err.style.display = 'block';
   }, 4000);
 
+  // Timeout 60 secondes (Render peut dormir)
+  var controller = new AbortController();
+  var timeoutId = setTimeout(function() { controller.abort(); }, 60000);
+
   fetch(window.API_URL + '/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: user, password: pass })
+    body: JSON.stringify({ username: user, password: pass }),
+    signal: controller.signal
   })
   .then(function(res) {
+    clearTimeout(timeoutId);
     clearTimeout(wakeTimer);
     err.style.background = ''; err.style.color = ''; err.style.borderColor = '';
     if (res.status === 401) throw new Error('unauthorized');
+    if (res.status === 403) throw new Error('forbidden');
     if (!res.ok) throw new Error('server_error');
     return res.json();
   })
@@ -2746,11 +2753,18 @@ function _doLoginReal() {
     onLoginSuccess();
   })
   .catch(function(e) {
+    console.error('Login error:', e);
+    clearTimeout(timeoutId);
+    clearTimeout(wakeTimer);
     err.style.background = ''; err.style.color = ''; err.style.borderColor = '';
     if (e.message === 'unauthorized') {
       err.textContent = '❌ Identifiant ou mot de passe incorrect.';
+    } else if (e.message === 'forbidden') {
+      err.textContent = '❌ Accès refusé (403). Vérifiez l\'URL du backend.';
+    } else if (e.name === 'AbortError') {
+      err.textContent = '⏱ Délai dépassé. Le serveur met trop de temps à répondre.';
     } else {
-      err.textContent = '❌ Serveur indisponible. Réessayez dans 30 secondes.';
+      err.textContent = '❌ Erreur: ' + e.message + '. Réessayez.';
     }
     err.style.display = 'block';
     btn.disabled = false;
