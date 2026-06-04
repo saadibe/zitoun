@@ -10,5 +10,6 @@
     <include file="db/changelog/v3-settings.xml"/>
     <include file="db/changelog/v4-tables.xml"/>
     <include file="db/changelog/v5-users.xml"/>
+    <include file="db/changelog/v6-refresh-token.xml"/>
 
 </databaseChangeLog>
