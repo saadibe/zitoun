@@ -15,42 +15,58 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration-ms:28800000}") // 8 heures par défaut
-    private long expirationMs;
+    @Value("${jwt.access-expiration-ms:28800000}")   // 8 heures
+    private long accessExpirationMs;
 
     private SecretKey getKey() {
-        byte[] keyBytes = Base64.getDecoder().decode(jwtSecret);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return Keys.hmacShaKeyFor(Base64.getDecoder().decode(jwtSecret));
     }
 
-    /** Générer un token JWT signé */
-    public String generateToken(String username, String role) {
+    // ── Générer Access Token (8h) ─────────────────
+    public String generateAccessToken(String username, String role) {
         return Jwts.builder()
             .subject(username)
             .claim("role", role)
+            .claim("type", "access")
             .issuedAt(new Date())
-            .expiration(new Date(System.currentTimeMillis() + expirationMs))
+            .expiration(new Date(System.currentTimeMillis() + accessExpirationMs))
             .signWith(getKey())
             .compact();
     }
 
-    /** Extraire le username du token */
+    // ── Extraire claims ───────────────────────────
     public String extractUsername(String token) {
         return parseClaims(token).getSubject();
     }
 
-    /** Extraire le rôle du token */
     public String extractRole(String token) {
         return parseClaims(token).get("role", String.class);
     }
 
-    /** Valider le token */
+    public Date extractExpiration(String token) {
+        return parseClaims(token).getExpiration();
+    }
+
+    // ── Valider ───────────────────────────────────
     public boolean isValid(String token) {
         try {
             parseClaims(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            return false;   // expiré
         } catch (JwtException | IllegalArgumentException e) {
+            return false;   // invalide
+        }
+    }
+
+    public boolean isExpired(String token) {
+        try {
+            parseClaims(token);
             return false;
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (Exception e) {
+            return true;
         }
     }
 
