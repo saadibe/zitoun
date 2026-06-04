@@ -1307,6 +1307,22 @@ button {
 </style>
 
 <script>
+
+// ══ Nettoyer les paramètres de tracking injectés par les proxies/antivirus ══
+(function() {
+  try {
+    var url = new URL(window.location.href);
+    var dirty = false;
+    // Supprimer les paramètres de tracking connus
+    ['_sm_au_', 'utm_source', 'utm_medium', 'utm_campaign', 'fbclid', 'gclid', 'ref'].forEach(function(p) {
+      if (url.searchParams.has(p)) { url.searchParams.delete(p); dirty = true; }
+    });
+    if (dirty) {
+      window.history.replaceState({}, document.title, url.pathname + (url.search || '') + (url.hash || ''));
+    }
+  } catch(e) {}
+})();
+
 // Stubs — remplacés par les vraies fonctions quand le script principal charge
 function _doLoginReal() {
   var btn = document.getElementById('loginBtn');
@@ -2113,6 +2129,22 @@ function printTicket() {
     '@media print{.no-print{display:none}body{padding:4px}}' +
     '</style>
 <script>
+
+// ══ Nettoyer les paramètres de tracking injectés par les proxies/antivirus ══
+(function() {
+  try {
+    var url = new URL(window.location.href);
+    var dirty = false;
+    // Supprimer les paramètres de tracking connus
+    ['_sm_au_', 'utm_source', 'utm_medium', 'utm_campaign', 'fbclid', 'gclid', 'ref'].forEach(function(p) {
+      if (url.searchParams.has(p)) { url.searchParams.delete(p); dirty = true; }
+    });
+    if (dirty) {
+      window.history.replaceState({}, document.title, url.pathname + (url.search || '') + (url.hash || ''));
+    }
+  } catch(e) {}
+})();
+
 // Stubs — remplacés par les vraies fonctions quand le script principal charge
 function _doLoginReal() {
   var btn = document.getElementById('loginBtn');
@@ -2479,6 +2511,22 @@ function printTableTicket(n) {
     '@media print{body{padding:4px}}' +
     '</style>
 <script>
+
+// ══ Nettoyer les paramètres de tracking injectés par les proxies/antivirus ══
+(function() {
+  try {
+    var url = new URL(window.location.href);
+    var dirty = false;
+    // Supprimer les paramètres de tracking connus
+    ['_sm_au_', 'utm_source', 'utm_medium', 'utm_campaign', 'fbclid', 'gclid', 'ref'].forEach(function(p) {
+      if (url.searchParams.has(p)) { url.searchParams.delete(p); dirty = true; }
+    });
+    if (dirty) {
+      window.history.replaceState({}, document.title, url.pathname + (url.search || '') + (url.hash || ''));
+    }
+  } catch(e) {}
+})();
+
 // Stubs — remplacés par les vraies fonctions quand le script principal charge
 function _doLoginReal() {
   var btn = document.getElementById('loginBtn');
@@ -3332,6 +3380,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ── URL du backend Render ──────────────────
   window.API_URL = 'https://zitoun-pos-api.onrender.com/api';
+
+  // Nettoyer l'URL courante des paramètres de tracking
+  try {
+    var cleanUrl = new URL(window.location.href);
+    ['_sm_au_','utm_source','utm_medium','fbclid','gclid'].forEach(function(p) {
+      cleanUrl.searchParams.delete(p);
+    });
+    if (cleanUrl.search !== window.location.search) {
+      window.history.replaceState({}, document.title, cleanUrl.toString());
+    }
+  } catch(e) {}
 
   applySkin('vert');
   init();
