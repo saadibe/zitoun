@@ -2592,13 +2592,26 @@ function doLogin() {
 
   // Appel API backend
   var ROLE_ICONS = { ADMIN:'⚙️', SERVEUR:'📋', CUISINE:'🍳', CAISSE:'💰' };
+
+  // Afficher "réveil du serveur" si lent
+  var wakeTimer = setTimeout(function() {
+    err.textContent = '⏳ Démarrage du serveur en cours (30-60 sec)...';
+    err.style.background = 'var(--yellow-dim)';
+    err.style.color = '#8a6000';
+    err.style.borderColor = 'var(--yellow)';
+    err.style.display = 'block';
+  }, 4000);
+
   fetch(window.API_URL + '/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: user, password: pass })
   })
   .then(function(res) {
-    if (!res.ok) throw new Error('unauthorized');
+    clearTimeout(wakeTimer);
+    err.style.background = ''; err.style.color = ''; err.style.borderColor = '';
+    if (res.status === 401) throw new Error('unauthorized');
+    if (!res.ok) throw new Error('server_error');
     return res.json();
   })
   .then(function(data) {
@@ -2630,7 +2643,12 @@ function doLogin() {
     onLoginSuccess();
   })
   .catch(function(e) {
-    err.textContent = '❌ Identifiant ou mot de passe incorrect.';
+    err.style.background = ''; err.style.color = ''; err.style.borderColor = '';
+    if (e.message === 'unauthorized') {
+      err.textContent = '❌ Identifiant ou mot de passe incorrect.';
+    } else {
+      err.textContent = '❌ Serveur indisponible. Réessayez dans 30 secondes.';
+    }
     err.style.display = 'block';
     btn.disabled = false;
     btn.innerHTML = '<span>🔓</span> Se connecter';
@@ -3264,6 +3282,9 @@ document.addEventListener('DOMContentLoaded', function() {
   init();
   buildAdminMenu();
   buildAdminTables();
+
+  // Réveiller le serveur Render (peut dormir après 15 min d'inactivité)
+  fetch(window.API_URL + '/menu').catch(function() {});
 
   // Charger les paramètres du restaurant
   loadSettingsFromAPI();
