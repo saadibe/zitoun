@@ -1284,24 +1284,6 @@ button {
 .user-add-select { padding:8px 11px; border-radius:9px; border:2px solid var(--border); background:var(--ivory); font-size:13px; font-family:'Cairo',sans-serif; cursor:pointer; outline:none; }
 .user-add-btn { padding:9px 16px; border-radius:9px; border:none; background:var(--sky); color:#fff; font-size:12.5px; font-weight:700; cursor:pointer; font-family:'Cairo',sans-serif; white-space:nowrap; }
 .user-add-btn:hover { background:var(--sky2); }
-
-/* ── OAuth2 boutons ── */
-.oauth-sep { display:flex; align-items:center; gap:12px; margin:16px 0; }
-.oauth-sep-line { flex:1; height:1px; background:var(--border); }
-.oauth-sep-txt { font-size:12px; color:var(--ink4); font-weight:600; white-space:nowrap; }
-.oauth-btns { display:flex; gap:8px; margin-bottom:16px; }
-.oauth-btn {
-  flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
-  padding:11px 8px; border-radius:11px;
-  border:2px solid var(--border); background:var(--ivory);
-  font-size:13px; font-weight:700; color:var(--ink);
-  cursor:pointer; transition:all .18s; font-family:'Cairo',sans-serif;
-  text-decoration:none;
-}
-.oauth-btn:hover { border-color:var(--sky); background:var(--sky-pale); transform:translateY(-1px); }
-.oauth-btn .ob-ico { font-size:18px; }
-.oauth-btn.google:hover { border-color:#4285f4; background:#f0f4ff; }
-.oauth-btn.github:hover { border-color:#333; background:#f6f6f6; }
 </style>
 </head>
 <body>
@@ -1349,20 +1331,7 @@ button {
       <span>🔓</span> Se connecter
     </button>
 
-    <div class="oauth-sep">
-      <div class="oauth-sep-line"></div>
-      <div class="oauth-sep-txt">ou continuer avec</div>
-      <div class="oauth-sep-line"></div>
-    </div>
-    <div class="oauth-btns">
-      <button class="oauth-btn google" onclick="loginWithOAuth('google')">
-        <span class="ob-ico">🇬</span> Google
-      </button>
-      <button class="oauth-btn github" onclick="loginWithOAuth('github')">
-        <span class="ob-ico">🐙</span> GitHub
-      </button>
-    </div>
-    <div class="login-footer">Zitoun POS · v1.0 — JWT + OAuth2</div>
+    <div class="login-footer">Zitoun POS · v1.0 — JWT sécurisé (8h + refresh 7j)</div>
   </div>
 </div>
 
@@ -2569,6 +2538,7 @@ function doLogin() {
   .then(function(data) {
     // Vérifier que le rôle correspond à celui sélectionné
     var returnedRole = (data.role || '').toUpperCase();
+    if (!data.accessToken) { err.textContent = '❌ Erreur serveur.'; err.style.display='block'; btn.disabled=false; btn.innerHTML='<span>🔓</span> Se connecter'; return; }
     var wantedRole   = selectedLoginRole.toUpperCase();
     if (returnedRole !== wantedRole && returnedRole !== 'ADMIN') {
       err.textContent = '❌ Ce compte n\'a pas le rôle ' + selectedLoginRole + '.';
@@ -2580,15 +2550,19 @@ function doLogin() {
 
     // Créer la session
     currentSession = {
-      user:      data.username,
-      role:      returnedRole,
-      avatar:    ROLE_ICONS[returnedRole] || '👤',
-      token:     data.token,
-      loginTime: new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})
+      user:         data.username,
+      role:         returnedRole,
+      avatar:       ROLE_ICONS[returnedRole] || '👤',
+      token:        data.accessToken,
+      refreshToken: data.refreshToken,
+      expiresAt:    Date.now() + (data.accessTokenExpiresIn * 1000),
+      loginTime:    new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})
     };
 
-    // Stocker le token
+    // Stocker les deux tokens
     sessionStorage.setItem('zitoun_session', JSON.stringify(currentSession));
+    // Démarrer le renouvellement automatique
+    scheduleTokenRefresh();
 
     onLoginSuccess();
   })
@@ -2640,6 +2614,15 @@ function applyRoleNavigation(role) {
 
 // ── Déconnexion ──
 function doLogout() {
+  if (refreshTimer) clearTimeout(refreshTimer);
+  // Révoquer le refresh token côté serveur
+  if (currentSession && currentSession.refreshToken) {
+    fetch(window.API_URL + '/auth/logout', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ refreshToken: currentSession.refreshToken })
+    }).catch(function() {});
+  }
   currentSession = null;
   sessionStorage.removeItem('zitoun_session');
 
@@ -2658,72 +2641,24 @@ function doLogout() {
   document.getElementById('loginPage').style.display = 'flex';
 }
 
-
-// ── OAuth2 Login ──────────────────────────────
-function loginWithOAuth(provider) {
-  // Récupérer l'URL OAuth2 depuis le backend
-  fetch(window.API_URL + '/auth/providers')
-    .then(function(r) { return r.json(); })
-    .then(function(providers) {
-      var url = providers[provider];
-      if (url) {
-        // Ouvrir dans la même fenêtre — le backend redirige vers Google/GitHub
-        // puis revient sur le frontend avec ?token=JWT
-        window.location.href = url;
-      } else {
-        alert('Provider ' + provider + ' non configuré sur le serveur.');
-      }
-    })
-    .catch(function() {
-      alert('Impossible de contacter le serveur. Vérifiez que le backend est démarré.');
-    });
-}
-
-// ── Lire le token OAuth2 depuis l'URL ────────
-function checkOAuth2Callback() {
-  var params = new URLSearchParams(window.location.search);
-  var token    = params.get('token');
-  var username = params.get('username');
-  var role     = params.get('role');
-  var error    = params.get('error');
-
-  if (error) {
-    // Nettoyer l'URL
-    window.history.replaceState({}, '', window.location.pathname);
-    document.getElementById('loginError').textContent =
-      error === 'account_disabled'
-        ? '❌ Compte désactivé. Contactez l\'admin.'
-        : '❌ Erreur d\'authentification OAuth2.';
-    document.getElementById('loginError').style.display = 'block';
-    return;
-  }
-
-  if (token && username && role) {
-    // Nettoyer l'URL (enlever les params sensibles)
-    window.history.replaceState({}, '', window.location.pathname);
-
-    var ROLE_ICONS = { ADMIN:'⚙️', SERVEUR:'📋', CUISINE:'🍳', CAISSE:'💰' };
-    currentSession = {
-      user:      decodeURIComponent(username),
-      role:      role.toUpperCase(),
-      avatar:    ROLE_ICONS[role.toUpperCase()] || '🔑',
-      token:     token,
-      loginTime: new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})
-    };
-    sessionStorage.setItem('zitoun_session', JSON.stringify(currentSession));
-    onLoginSuccess();
-  }
-}
-
 // ── Vérifier si une session existe déjà ──
 function checkExistingSession() {
   var saved = sessionStorage.getItem('zitoun_session');
   if (saved) {
     try {
       var s = JSON.parse(saved);
-      if (isTokenValid(s.token)) {
+      if (s.token && s.expiresAt && s.expiresAt > Date.now()) {
         currentSession = s;
+        scheduleTokenRefresh();
         onLoginSuccess();
+        return true;
+      } else if (s.refreshToken) {
+        // Access token expiré mais refresh valide → rafraîchir
+        currentSession = s;
+        doTokenRefresh().then(function(ok) {
+          if (ok) { onLoginSuccess(); }
+          else { currentSession = null; sessionStorage.removeItem('zitoun_session'); }
+        });
         return true;
       }
     } catch(e) {}
@@ -3141,9 +3076,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // Charger le menu et les tables depuis l'API
   loadFromAPI();
 
-  // Vérifier callback OAuth2 (token dans l'URL)
-  checkOAuth2Callback();
-
   // Vérifier si une session existe déjà
   if (!checkExistingSession()) {
     // Mettre à jour le logo login
@@ -3152,14 +3084,81 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// Helper pour les requêtes authentifiées
+// Helper pour les requêtes authentifiées avec auto-refresh
+var refreshing = null;  // Promise en cours pour éviter les appels parallèles
+
 function authFetch(url, options) {
   options = options || {};
   options.headers = options.headers || {};
   if (currentSession && currentSession.token) {
     options.headers['Authorization'] = 'Bearer ' + currentSession.token;
   }
-  return fetch(url, options);
+  return fetch(url, options).then(function(res) {
+    if (res.status === 401 && currentSession && currentSession.refreshToken) {
+      // Token expiré → tenter le refresh
+      return doTokenRefresh().then(function(refreshed) {
+        if (refreshed) {
+          // Retry avec le nouveau token
+          options.headers['Authorization'] = 'Bearer ' + currentSession.token;
+          return fetch(url, options);
+        } else {
+          doLogout();
+          return res;
+        }
+      });
+    }
+    return res;
+  });
+}
+
+// ── Renouveler l'access token ─────────────────
+function doTokenRefresh() {
+  if (refreshing) return refreshing;  // éviter les appels parallèles
+  if (!currentSession || !currentSession.refreshToken) {
+    return Promise.resolve(false);
+  }
+  refreshing = fetch(window.API_URL + '/auth/refresh', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ refreshToken: currentSession.refreshToken })
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('refresh_failed');
+    return r.json();
+  })
+  .then(function(data) {
+    currentSession.token        = data.accessToken;
+    currentSession.refreshToken = data.refreshToken;
+    currentSession.expiresAt    = Date.now() + (data.accessTokenExpiresIn * 1000);
+    sessionStorage.setItem('zitoun_session', JSON.stringify(currentSession));
+    refreshing = null;
+    scheduleTokenRefresh();
+    console.log('🔄 Token renouvelé jusqu\'à', new Date(currentSession.expiresAt).toLocaleTimeString());
+    return true;
+  })
+  .catch(function() {
+    refreshing = null;
+    return false;
+  });
+  return refreshing;
+}
+
+// ── Planifier le refresh automatique ──────────
+// Se déclenche 5 minutes avant l'expiration
+var refreshTimer = null;
+function scheduleTokenRefresh() {
+  if (refreshTimer) clearTimeout(refreshTimer);
+  if (!currentSession || !currentSession.expiresAt) return;
+  var delay = currentSession.expiresAt - Date.now() - (5 * 60 * 1000); // 5 min avant
+  if (delay < 0) delay = 10000; // déjà expiré → refresh dans 10s
+  refreshTimer = setTimeout(function() {
+    if (currentSession && currentSession.refreshToken) {
+      doTokenRefresh().then(function(ok) {
+        if (!ok) doLogout();
+      });
+    }
+  }, delay);
+  console.log('⏰ Prochain refresh dans', Math.round(delay/60000), 'minutes');
 }
 
 function loadFromAPI() {
