@@ -2430,20 +2430,24 @@ var ROLE_LABELS = {
   caisse:  'Caisse'
 };
 
-// Pages accessibles par rôle
+// Pages accessibles par rôle (minuscules ET majuscules)
 var ROLE_PAGES = {
   admin:   ['server','kitchen','tables','admin'],
+  ADMIN:   ['server','kitchen','tables','admin'],
   serveur: ['server','tables'],
+  SERVEUR: ['server','tables'],
   cuisine: ['kitchen'],
+  CUISINE: ['kitchen'],
   caisse:  ['server','tables'],
+  CAISSE:  ['server','tables'],
 };
 
 // Page de démarrage par rôle
 var ROLE_HOME = {
-  admin:   'server',
-  serveur: 'server',
-  cuisine: 'kitchen',
-  caisse:  'tables',
+  admin:   'server', ADMIN:   'server',
+  serveur: 'server', SERVEUR: 'server',
+  cuisine: 'kitchen',CUISINE: 'kitchen',
+  caisse:  'tables', CAISSE:  'tables',
 };
 
 var currentSession = null;  // { user, role, avatar, token, loginTime }
@@ -2577,15 +2581,19 @@ function onLoginSuccess() {
 
 // ── Appliquer les restrictions de navigation ──
 function applyRoleNavigation(role) {
-  var allowed = ROLE_PAGES[role] || ['server'];
+  var r = (role || '').toLowerCase();
+  var allowed = ROLE_PAGES[r] || ROLE_PAGES[role] || ['server','kitchen','tables','admin'];
   document.querySelectorAll('.nav-btn').forEach(function(btn) {
     var page = btn.getAttribute('data-page');
     if (!page) return;
-    if (allowed.indexOf(page) === -1) {
-      btn.style.display = 'none';
-    } else {
-      btn.style.display = '';
-    }
+    btn.style.display = allowed.indexOf(page) === -1 ? 'none' : '';
+  });
+  // Même chose pour la bottom nav (tablette)
+  document.querySelectorAll('.bn-btn').forEach(function(btn) {
+    var onclick = btn.getAttribute('onclick') || '';
+    var match = onclick.match(/'(\w+)'/);
+    if (!match) return;
+    btn.style.display = allowed.indexOf(match[1]) === -1 ? 'none' : '';
   });
 }
 
