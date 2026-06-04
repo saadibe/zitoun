@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Vider et recharger le menu La Perla complet -->
+    <changeSet id="8-reload-menu-laperla" author="zitoun">
+        <delete tableName="menu_item"/>
+
+        <!-- ENTREES -->
+        <insert tableName="menu_item"><column name="name" value="Brick thon a l oeuf"/><column name="price" valueNumeric="4.0"/><column name="category" value="ENTREE"/><column name="emoji" value="&#x1F95A;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Fricassee"/><column name="price" valueNumeric="3.0"/><column name="category" value="ENTREE"/><column name="emoji" value="&#x1F96A;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Salade au choix"/><column name="price" valueNumeric="7.0"/><column name="category" value="ENTREE"/><column name="emoji" value="&#x1F957;"/><column name="available" valueBoolean="true"/></insert>
+
+        <!-- SANDWICHS -->
+        <insert tableName="menu_item"><column name="name" value="Tunisien"/><column name="price" valueNumeric="8.0"/><column name="category" value="SANDWICH"/><column name="emoji" value="&#x1F956;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Kaftaji"/><column name="price" valueNumeric="8.0"/><column name="category" value="SANDWICH"/><column name="emoji" value="&#x1FAD4;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Kaftaji merguez"/><column name="price" valueNumeric="11.0"/><column name="category" value="SANDWICH"/><column name="emoji" value="&#x1F32D;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Chapati Thon"/><column name="price" valueNumeric="6.0"/><column name="category" value="SANDWICH"/><column name="emoji" value="&#x1FAD3;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Chapati Escalope"/><column name="price" valueNumeric="7.0"/><column name="category" value="SANDWICH"/><column name="emoji" value="&#x1F357;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Chapati Viande Hachee"/><column name="price" valueNumeric="8.0"/><column name="category" value="SANDWICH"/><column name="emoji" value="&#x1F969;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Tabouna Thon"/><column name="price" valueNumeric="8.0"/><column name="category" value="SANDWICH"/><column name="emoji" value="&#x1FAD3;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Tabouna Escalope"/><column name="price" valueNumeric="9.0"/><column name="category" value="SANDWICH"/><column name="emoji" value="&#x1F357;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Tabouna Viande Hachee"/><column name="price" valueNumeric="10.0"/><column name="category" value="SANDWICH"/><column name="emoji" value="&#x1F969;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Mlewi Thon"/><column name="price" valueNumeric="7.0"/><column name="category" value="SANDWICH"/><column name="emoji" value="&#x1FAD3;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Mlewi Escalope"/><column name="price" valueNumeric="8.0"/><column name="category" value="SANDWICH"/><column name="emoji" value="&#x1F357;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Mlewi Viande Hachee"/><column name="price" valueNumeric="9.0"/><column name="category" value="SANDWICH"/><column name="emoji" value="&#x1F969;"/><column name="available" valueBoolean="true"/></insert>
+
+        <!-- PAIN ET PIZZAS -->
+        <insert tableName="menu_item"><column name="name" value="Panuozzo La Perla"/><column name="price" valueNumeric="12.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F96A;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Panuozzo Mexicain"/><column name="price" valueNumeric="13.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F336;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Libanais Escalope"/><column name="price" valueNumeric="9.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F959;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Baguette Thon"/><column name="price" valueNumeric="9.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F956;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Baguette Escalope"/><column name="price" valueNumeric="10.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F956;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Baguette Viande Hachee"/><column name="price" valueNumeric="11.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F956;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Makloub Thon"/><column name="price" valueNumeric="9.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1FAD4;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Makloub Escalope"/><column name="price" valueNumeric="10.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F357;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Makloub Viande Hachee"/><column name="price" valueNumeric="11.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F969;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Cornet Thon"/><column name="price" valueNumeric="10.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F32E;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Cornet Escalope"/><column name="price" valueNumeric="11.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F357;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Cornet Viande Hachee"/><column name="price" valueNumeric="11.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F969;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Pizza Margarita"/><column name="price" valueNumeric="7.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F355;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Pizza au Thon"/><column name="price" valueNumeric="8.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F355;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Pizza Escalope"/><column name="price" valueNumeric="9.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F355;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Pizza Viande Hachee"/><column name="price" valueNumeric="10.0"/><column name="category" value="PLAT"/><column name="emoji" value="&#x1F355;"/><column name="available" valueBoolean="true"/></insert>
+
+        <!-- BOISSONS -->
+        <insert tableName="menu_item"><column name="name" value="Eau minerale et Sodas"/><column name="price" valueNumeric="1.80"/><column name="category" value="BOISSON"/><column name="emoji" value="&#x1F964;"/><column name="available" valueBoolean="true"/></insert>
+        <insert tableName="menu_item"><column name="name" value="Citronnade maison"/><column name="price" valueNumeric="4.0"/><column name="category" value="BOISSON"/><column name="emoji" value="&#x1F34B;"/><column name="available" valueBoolean="true"/></insert>
+    </changeSet>
+
+</databaseChangeLog>
