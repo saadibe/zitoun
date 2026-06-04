@@ -16,29 +16,32 @@
         </createTable>
     </changeSet>
 
-    <!-- Comptes par defaut -->
+    <!-- Comptes par defaut — passwords mis a jour via v7 -->
     <changeSet id="5-default-users" author="zitoun">
+        <!-- validCheckSum accepte les deux versions du fichier -->
+        <validCheckSum>9:3dd833dfe85740892fdc433ef51b03c7</validCheckSum>
+        <validCheckSum>9:da1d0c3ae5e9f86fc63875e0b2f52fad</validCheckSum>
         <insert tableName="app_user">
             <column name="username" value="admin"/>
-            <column name="password" value="$2b$10$VouIUYeZ2ahtMhOaeOzHQOgLE0dpht5nUVXBHHksKOGR04vxvdgBe"/>
+            <column name="password" value="$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi."/>
             <column name="role" value="ADMIN"/>
             <column name="active" valueBoolean="true"/>
         </insert>
         <insert tableName="app_user">
             <column name="username" value="serveur"/>
-            <column name="password" value="$2b$10$v6LRzY5MnC8lpuOUcFMRBObH0Hgnlla4iB0zrtZjDzDXZpf5FNkAO"/>
+            <column name="password" value="$2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"/>
             <column name="role" value="SERVEUR"/>
             <column name="active" valueBoolean="true"/>
         </insert>
         <insert tableName="app_user">
             <column name="username" value="cuisine"/>
-            <column name="password" value="$2b$10$v6LRzY5MnC8lpuOUcFMRBObH0Hgnlla4iB0zrtZjDzDXZpf5FNkAO"/>
+            <column name="password" value="$2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"/>
             <column name="role" value="CUISINE"/>
             <column name="active" valueBoolean="true"/>
         </insert>
         <insert tableName="app_user">
             <column name="username" value="caisse"/>
-            <column name="password" value="$2b$10$v6LRzY5MnC8lpuOUcFMRBObH0Hgnlla4iB0zrtZjDzDXZpf5FNkAO"/>
+            <column name="password" value="$2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"/>
             <column name="role" value="CAISSE"/>
             <column name="active" valueBoolean="true"/>
         </insert>
