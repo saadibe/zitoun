@@ -9,5 +9,6 @@
     <include file="db/changelog/v2-menu-laperla.xml"/>
     <include file="db/changelog/v3-settings.xml"/>
     <include file="db/changelog/v4-tables.xml"/>
+    <include file="db/changelog/v5-users.xml"/>
 
 </databaseChangeLog>
