@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Ajouter colonnes manquantes a restaurant_settings -->
+    <changeSet id="10-settings-add-columns" author="zitoun">
+        <addColumn tableName="restaurant_settings">
+            <column name="currency" type="VARCHAR(10)" defaultValue="DT"/>
+            <column name="tva_rate" type="DOUBLE PRECISION" defaultValueNumeric="10.0"/>
+            <column name="theme" type="VARCHAR(20)" defaultValue="vert"/>
+        </addColumn>
+        <update tableName="restaurant_settings">
+            <column name="currency" value="DT"/>
+            <column name="tva_rate" valueNumeric="10.0"/>
+            <column name="theme" value="vert"/>
+            <where>id = 1</where>
+        </update>
+    </changeSet>
+
+    <!-- Table categories -->
+    <changeSet id="10-create-category" author="zitoun">
+        <createTable tableName="category">
+            <column name="id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="code" type="VARCHAR(50)"><constraints nullable="false" unique="true"/></column>
+            <column name="label" type="VARCHAR(100)"><constraints nullable="false"/></column>
+            <column name="emoji" type="VARCHAR(10)"/>
+            <column name="sort_order" type="INTEGER" defaultValueNumeric="0"/>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Categories par defaut La Perla -->
+    <changeSet id="10-default-categories" author="zitoun">
+        <insert tableName="category">
+            <column name="code" value="ENTREE"/>
+            <column name="label" value="Entrees"/>
+            <column name="emoji" value="&#x1F957;"/>
+            <column name="sort_order" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+        </insert>
+        <insert tableName="category">
+            <column name="code" value="SANDWICH"/>
+            <column name="label" value="Sandwichs"/>
+            <column name="emoji" value="&#x1F959;"/>
+            <column name="sort_order" valueNumeric="2"/>
+            <column name="active" valueBoolean="true"/>
+        </insert>
+        <insert tableName="category">
+            <column name="code" value="PLAT"/>
+            <column name="label" value="Pain et Pizzas"/>
+            <column name="emoji" value="&#x1F355;"/>
+            <column name="sort_order" valueNumeric="3"/>
+            <column name="active" valueBoolean="true"/>
+        </insert>
+        <insert tableName="category">
+            <column name="code" value="BOISSON"/>
+            <column name="label" value="Boissons"/>
+            <column name="emoji" value="&#x1F964;"/>
+            <column name="sort_order" valueNumeric="4"/>
+            <column name="active" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
