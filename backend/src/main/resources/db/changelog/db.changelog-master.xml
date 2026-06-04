@@ -12,5 +12,6 @@
     <include file="db/changelog/v5-users.xml"/>
     <include file="db/changelog/v6-refresh-token.xml"/>
     <include file="db/changelog/v7-fix-passwords.xml"/>
+    <include file="db/changelog/v8-reload-menu.xml"/>
 
 </databaseChangeLog>
