@@ -1284,6 +1284,24 @@ button {
 .user-add-select { padding:8px 11px; border-radius:9px; border:2px solid var(--border); background:var(--ivory); font-size:13px; font-family:'Cairo',sans-serif; cursor:pointer; outline:none; }
 .user-add-btn { padding:9px 16px; border-radius:9px; border:none; background:var(--sky); color:#fff; font-size:12.5px; font-weight:700; cursor:pointer; font-family:'Cairo',sans-serif; white-space:nowrap; }
 .user-add-btn:hover { background:var(--sky2); }
+
+/* ── OAuth2 boutons ── */
+.oauth-sep { display:flex; align-items:center; gap:12px; margin:16px 0; }
+.oauth-sep-line { flex:1; height:1px; background:var(--border); }
+.oauth-sep-txt { font-size:12px; color:var(--ink4); font-weight:600; white-space:nowrap; }
+.oauth-btns { display:flex; gap:8px; margin-bottom:16px; }
+.oauth-btn {
+  flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:11px 8px; border-radius:11px;
+  border:2px solid var(--border); background:var(--ivory);
+  font-size:13px; font-weight:700; color:var(--ink);
+  cursor:pointer; transition:all .18s; font-family:'Cairo',sans-serif;
+  text-decoration:none;
+}
+.oauth-btn:hover { border-color:var(--sky); background:var(--sky-pale); transform:translateY(-1px); }
+.oauth-btn .ob-ico { font-size:18px; }
+.oauth-btn.google:hover { border-color:#4285f4; background:#f0f4ff; }
+.oauth-btn.github:hover { border-color:#333; background:#f6f6f6; }
 </style>
 </head>
 <body>
@@ -1331,7 +1349,20 @@ button {
       <span>🔓</span> Se connecter
     </button>
 
-    <div class="login-footer">Zitoun POS · v1.0 — Sécurisé par token JWT</div>
+    <div class="oauth-sep">
+      <div class="oauth-sep-line"></div>
+      <div class="oauth-sep-txt">ou continuer avec</div>
+      <div class="oauth-sep-line"></div>
+    </div>
+    <div class="oauth-btns">
+      <button class="oauth-btn google" onclick="loginWithOAuth('google')">
+        <span class="ob-ico">🇬</span> Google
+      </button>
+      <button class="oauth-btn github" onclick="loginWithOAuth('github')">
+        <span class="ob-ico">🐙</span> GitHub
+      </button>
+    </div>
+    <div class="login-footer">Zitoun POS · v1.0 — JWT + OAuth2</div>
   </div>
 </div>
 
@@ -2627,6 +2658,63 @@ function doLogout() {
   document.getElementById('loginPage').style.display = 'flex';
 }
 
+
+// ── OAuth2 Login ──────────────────────────────
+function loginWithOAuth(provider) {
+  // Récupérer l'URL OAuth2 depuis le backend
+  fetch(window.API_URL + '/auth/providers')
+    .then(function(r) { return r.json(); })
+    .then(function(providers) {
+      var url = providers[provider];
+      if (url) {
+        // Ouvrir dans la même fenêtre — le backend redirige vers Google/GitHub
+        // puis revient sur le frontend avec ?token=JWT
+        window.location.href = url;
+      } else {
+        alert('Provider ' + provider + ' non configuré sur le serveur.');
+      }
+    })
+    .catch(function() {
+      alert('Impossible de contacter le serveur. Vérifiez que le backend est démarré.');
+    });
+}
+
+// ── Lire le token OAuth2 depuis l'URL ────────
+function checkOAuth2Callback() {
+  var params = new URLSearchParams(window.location.search);
+  var token    = params.get('token');
+  var username = params.get('username');
+  var role     = params.get('role');
+  var error    = params.get('error');
+
+  if (error) {
+    // Nettoyer l'URL
+    window.history.replaceState({}, '', window.location.pathname);
+    document.getElementById('loginError').textContent =
+      error === 'account_disabled'
+        ? '❌ Compte désactivé. Contactez l\'admin.'
+        : '❌ Erreur d\'authentification OAuth2.';
+    document.getElementById('loginError').style.display = 'block';
+    return;
+  }
+
+  if (token && username && role) {
+    // Nettoyer l'URL (enlever les params sensibles)
+    window.history.replaceState({}, '', window.location.pathname);
+
+    var ROLE_ICONS = { ADMIN:'⚙️', SERVEUR:'📋', CUISINE:'🍳', CAISSE:'💰' };
+    currentSession = {
+      user:      decodeURIComponent(username),
+      role:      role.toUpperCase(),
+      avatar:    ROLE_ICONS[role.toUpperCase()] || '🔑',
+      token:     token,
+      loginTime: new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})
+    };
+    sessionStorage.setItem('zitoun_session', JSON.stringify(currentSession));
+    onLoginSuccess();
+  }
+}
+
 // ── Vérifier si une session existe déjà ──
 function checkExistingSession() {
   var saved = sessionStorage.getItem('zitoun_session');
@@ -3052,6 +3140,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Charger le menu et les tables depuis l'API
   loadFromAPI();
+
+  // Vérifier callback OAuth2 (token dans l'URL)
+  checkOAuth2Callback();
 
   // Vérifier si une session existe déjà
   if (!checkExistingSession()) {
