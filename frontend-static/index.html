@@ -1148,9 +1148,193 @@ button {
 .skin-swatch.active { border-color: var(--ink); box-shadow: 0 0 0 3px var(--sky), 0 4px 12px rgba(0,0,0,.2); transform: scale(1.08); }
 .skin-swatch .check { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; background: rgba(0,0,0,.28); font-size: 16px; }
 .skin-swatch.active .check { display: flex; }
+
+/* ═══════════════════════════════════════════
+   LOGIN PAGE
+═══════════════════════════════════════════ */
+#loginPage {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--sky);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+/* Zellige background pattern */
+#loginPage::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0, rgba(255,255,255,.05) 1px, transparent 0, transparent 50%),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.05) 0, rgba(255,255,255,.05) 1px, transparent 0, transparent 50%);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+/* Colored stripe top */
+#loginPage::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 6px;
+  background: repeating-linear-gradient(90deg,
+    rgba(255,255,255,.4) 0, rgba(255,255,255,.4) 12px,
+    rgba(255,255,255,.1) 12px, rgba(255,255,255,.1) 24px,
+    rgba(255,255,255,.6) 24px, rgba(255,255,255,.6) 36px,
+    rgba(255,255,255,.2) 36px, rgba(255,255,255,.2) 48px);
+}
+.login-card {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 40px 36px 36px;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 32px 80px rgba(0,0,0,.25), 0 8px 24px rgba(0,0,0,.15);
+  position: relative; z-index: 1;
+  animation: modal-in .35s cubic-bezier(.34,1.3,.64,1);
+}
+.login-logo {
+  width: 64px; height: 64px; border-radius: 18px;
+  background: linear-gradient(135deg, var(--sky), var(--sky2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; margin: 0 auto 14px;
+  box-shadow: 0 8px 24px rgba(61,122,71,.35);
+}
+.login-title {
+  font-family: 'Tajawal', sans-serif; font-size: 26px; font-weight: 900;
+  color: var(--ink); text-align: center; margin-bottom: 4px;
+}
+.login-sub { font-size: 13px; color: var(--ink3); text-align: center; margin-bottom: 28px; }
+.login-roles {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px;
+}
+.role-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 14px 8px; border-radius: 14px;
+  border: 2px solid var(--border); background: var(--ivory);
+  cursor: pointer; transition: all .18s; font-family: 'Cairo', sans-serif;
+}
+.role-btn:hover { border-color: var(--sky); background: var(--sky-pale); }
+.role-btn.selected { border-color: var(--sky); background: var(--sky); color: #fff; box-shadow: 0 4px 16px rgba(61,122,71,.35); }
+.role-btn.selected .role-lbl { color: #fff; }
+.role-ico { font-size: 26px; }
+.role-lbl { font-size: 12px; font-weight: 700; color: var(--ink2); }
+.login-fields { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+.login-field { display: flex; flex-direction: column; gap: 5px; }
+.login-label { font-size: 11.5px; font-weight: 700; color: var(--ink2); text-transform: uppercase; letter-spacing: .8px; }
+.login-input {
+  padding: 11px 14px; border-radius: 11px;
+  border: 2px solid var(--border); background: var(--ivory);
+  font-size: 14px; font-family: 'Cairo', sans-serif; color: var(--ink);
+  outline: none; transition: border-color .15s;
+}
+.login-input:focus { border-color: var(--sky); background: var(--white); }
+.login-input.error { border-color: var(--terracotta); background: var(--terra-light); }
+.login-error {
+  background: var(--terra-light); border: 2px solid var(--terracotta);
+  color: var(--terracotta); border-radius: 10px;
+  padding: 10px 14px; font-size: 13px; font-weight: 600; text-align: center;
+  display: none; animation: pop .2s ease;
+}
+.login-btn {
+  width: 100%; padding: 14px; border-radius: 13px; border: none;
+  background: linear-gradient(135deg, var(--sky), var(--sky2));
+  color: #fff; font-size: 15px; font-weight: 800;
+  cursor: pointer; font-family: 'Cairo', sans-serif;
+  box-shadow: 0 6px 20px rgba(61,122,71,.4); transition: all .2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.login-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(61,122,71,.5); }
+.login-btn:active { transform: scale(.98); }
+.login-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.login-footer { text-align: center; font-size: 11.5px; color: var(--ink4); margin-top: 20px; }
+
+/* ── Indicateur de session dans la sidebar ── */
+.session-info {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 10px;
+  background: rgba(255,255,255,.1); margin-bottom: 8px;
+}
+.session-avatar {
+  width: 30px; height: 30px; border-radius: 9px;
+  background: rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+  flex-shrink: 0;
+}
+.session-name { font-size: 12px; font-weight: 700; color: #fff; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.session-role { font-size: 10px; color: rgba(255,255,255,.6); }
+.logout-btn {
+  width: 28px; height: 28px; border-radius: 8px; border: none;
+  background: rgba(255,255,255,.12); color: rgba(255,255,255,.7);
+  font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .15s; flex-shrink: 0;
+}
+.logout-btn:hover { background: rgba(255,255,255,.25); color: #fff; }
+
+/* ── Admin protégé ── */
+.nav-btn.locked .nav-ico::after { content: ' 🔒'; font-size: 10px; }
+
+/* ── GESTION UTILISATEURS (Admin) ── */
+.user-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+.user-row:last-child { border-bottom:none; }
+.user-avatar { font-size:20px; width:32px; text-align:center; }
+.user-info { flex:1; }
+.user-name { font-size:13.5px; font-weight:700; color:var(--ink); }
+.user-role-lbl { font-size:11px; color:var(--ink3); }
+.user-del-btn { background:var(--terra-light); color:var(--terracotta); border:1.5px solid var(--terracotta); border-radius:7px; width:28px; height:28px; cursor:pointer; font-size:13px; display:flex; align-items:center; justify-content:center; }
+.user-del-btn:hover { background:var(--terracotta); color:#fff; }
+.user-add-form { display:flex; flex-direction:column; gap:10px; padding-top:14px; border-top:1px solid var(--border); }
+.user-add-row { display:flex; gap:8px; }
+.user-add-input { flex:1; padding:8px 11px; border-radius:9px; border:2px solid var(--border); background:var(--ivory); font-size:13px; font-family:'Cairo',sans-serif; outline:none; }
+.user-add-input:focus { border-color:var(--sky); }
+.user-add-select { padding:8px 11px; border-radius:9px; border:2px solid var(--border); background:var(--ivory); font-size:13px; font-family:'Cairo',sans-serif; cursor:pointer; outline:none; }
+.user-add-btn { padding:9px 16px; border-radius:9px; border:none; background:var(--sky); color:#fff; font-size:12.5px; font-weight:700; cursor:pointer; font-family:'Cairo',sans-serif; white-space:nowrap; }
+.user-add-btn:hover { background:var(--sky2); }
 </style>
 </head>
 <body>
+<!-- ══ LOGIN PAGE ══ -->
+<div id="loginPage">
+  <div class="login-card">
+    <div class="login-logo" id="loginLogo">🌶️</div>
+    <div class="login-title" id="loginRestoName">La Perla</div>
+    <div class="login-sub">Système de gestion — Connexion</div>
+
+    <!-- Choix du rôle -->
+    <div class="login-roles">
+      <button class="role-btn selected" id="role-serveur" onclick="selectRole('serveur')">
+        <span class="role-ico">📋</span>
+        <span class="role-lbl">Serveur</span>
+      </button>
+      <button class="role-btn" id="role-cuisine" onclick="selectRole('cuisine')">
+        <span class="role-ico">🍳</span>
+        <span class="role-lbl">Cuisine</span>
+      </button>
+      <button class="role-btn" id="role-caisse" onclick="selectRole('caisse')">
+        <span class="role-ico">💰</span>
+        <span class="role-lbl">Caisse</span>
+      </button>
+      <button class="role-btn" id="role-admin" onclick="selectRole('admin')">
+        <span class="role-ico">⚙️</span>
+        <span class="role-lbl">Admin</span>
+      </button>
+    </div>
+
+    <div class="login-fields">
+      <div class="login-field">
+        <label class="login-label">Nom / Identifiant</label>
+        <input class="login-input" id="loginUser" placeholder="Ex: Mohamed" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="login-field">
+        <label class="login-label">Code PIN / Mot de passe</label>
+        <input class="login-input" id="loginPass" type="password" placeholder="••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+    </div>
+
+    <div class="login-error" id="loginError">❌ Identifiant ou mot de passe incorrect</div>
+
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">
+      <span>🔓</span> Se connecter
+    </button>
+
+    <div class="login-footer">Zitoun POS · v1.0 — Sécurisé par token JWT</div>
+  </div>
+</div>
+
 <div class="shell">
 
   <!-- ══ SIDEBAR ══ -->
@@ -1165,31 +1349,39 @@ button {
       </div>
       <ul class="nav">
         <li>
-          <button class="nav-btn active" onclick="showPage('server', this)">
+          <button class="nav-btn active" onclick="showPage('server', this)" data-page="server">
             <span class="nav-ico">📋</span>
             <span class="nav-lbl">Commandes</span>
           </button>
         </li>
         <li>
-          <button class="nav-btn" onclick="showPage('kitchen', this)">
+          <button class="nav-btn" onclick="showPage('kitchen', this)" data-page="kitchen">
             <span class="nav-ico">🍳</span>
             <span class="nav-lbl">Cuisine</span>
             <span class="nav-badge" id="kitchenBadge" style="display:none">0</span>
           </button>
         </li>
         <li>
-          <button class="nav-btn" onclick="showPage('tables', this)">
+          <button class="nav-btn" onclick="showPage('tables', this)" data-page="tables">
             <span class="nav-ico">🪑</span>
             <span class="nav-lbl">Tables</span>
           </button>
         </li>
         <li>
-          <button class="nav-btn" onclick="showPage('admin', this)">
+          <button class="nav-btn" onclick="showPage('admin', this)" data-page="admin">
             <span class="nav-ico">⚙️</span>
             <span class="nav-lbl">Admin</span>
           </button>
         </li>
       </ul>
+      <div class="session-info" id="sessionInfo" style="display:none">
+        <div class="session-avatar" id="sessionAvatar">👤</div>
+        <div>
+          <div class="session-name" id="sessionName">—</div>
+          <div class="session-role" id="sessionRoleLabel">—</div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()" title="Déconnexion">⏻</button>
+      </div>
       <div class="s-sep"></div>
       <div class="s-footer">
         <span class="s-dot"></span>
@@ -1369,6 +1561,7 @@ button {
           <span class="settings-lbl">TVA personnalisée</span>
           <input class="settings-input" id="settingsTVACustom" type="number" min="0" max="100" step="0.1" placeholder="Ex: 7.5" style="min-width:80px">
         </div>
+        <button class="settings-save" style="background:var(--ink)" onclick="openUserManager()">👤 Comptes</button>
         <button class="settings-save" onclick="saveSettings()">💾 Enregistrer</button>
         <div class="settings-saved" id="settingsSaved">✓ Enregistré !</div>
       </div>
@@ -2235,6 +2428,268 @@ function syncBottomNav(name) {
   if (btn) btn.classList.add('active');
 }
 
+
+// ═══════════════════════════════════════════════════
+//  AUTHENTIFICATION — Gestion Login / Token / Rôles
+// ═══════════════════════════════════════════════════
+
+// ── Comptes par défaut (modifiables dans Admin) ──
+// Format: { user, pass, role, avatar }
+// Rôles: serveur | cuisine | caisse | admin
+var AUTH_USERS = [
+  { user: 'admin',   pass: 'admin123',   role: 'admin',   avatar: '⚙️'  },
+  { user: 'serveur', pass: '1234',       role: 'serveur', avatar: '📋'  },
+  { user: 'cuisine', pass: '1234',       role: 'cuisine', avatar: '🍳'  },
+  { user: 'caisse',  pass: '1234',       role: 'caisse',  avatar: '💰'  },
+];
+
+var ROLE_LABELS = {
+  admin:   'Administrateur',
+  serveur: 'Serveur / Serveuse',
+  cuisine: 'Cuisine',
+  caisse:  'Caisse'
+};
+
+// Pages accessibles par rôle
+var ROLE_PAGES = {
+  admin:   ['server','kitchen','tables','admin'],
+  serveur: ['server','tables'],
+  cuisine: ['kitchen'],
+  caisse:  ['server','tables'],
+};
+
+// Page de démarrage par rôle
+var ROLE_HOME = {
+  admin:   'server',
+  serveur: 'server',
+  cuisine: 'kitchen',
+  caisse:  'tables',
+};
+
+var currentSession = null;  // { user, role, avatar, token, loginTime }
+var selectedLoginRole = 'serveur';
+
+// ── Générer un token simple (base64 timestamp + user) ──
+function generateToken(user, role) {
+  var payload = { user: user, role: role, ts: Date.now(), exp: Date.now() + 8*60*60*1000 };
+  return btoa(JSON.stringify(payload));
+}
+
+function decodeToken(token) {
+  try { return JSON.parse(atob(token)); } catch(e) { return null; }
+}
+
+function isTokenValid(token) {
+  var d = decodeToken(token);
+  return d && d.exp > Date.now();
+}
+
+// ── Sélection du rôle ──
+function selectRole(role) {
+  selectedLoginRole = role;
+  ['serveur','cuisine','caisse','admin'].forEach(function(r) {
+    document.getElementById('role-' + r).classList.toggle('selected', r === role);
+  });
+  // Rôle cuisine → pas de champ utilisateur nécessaire
+  var userField = document.getElementById('loginUser');
+  if (role === 'cuisine') {
+    userField.placeholder = 'Ex: Chef Ali';
+  } else if (role === 'admin') {
+    userField.placeholder = 'Identifiant admin';
+  } else {
+    userField.placeholder = 'Votre prénom';
+  }
+}
+
+// ── Connexion ──
+function doLogin() {
+  var user = document.getElementById('loginUser').value.trim();
+  var pass = document.getElementById('loginPass').value;
+  var err  = document.getElementById('loginError');
+  var btn  = document.getElementById('loginBtn');
+
+  if (!user) {
+    document.getElementById('loginUser').classList.add('error');
+    err.textContent = '⚠ Veuillez saisir votre identifiant.';
+    err.style.display = 'block'; return;
+  }
+  if (!pass) {
+    document.getElementById('loginPass').classList.add('error');
+    err.textContent = '⚠ Veuillez saisir votre mot de passe.';
+    err.style.display = 'block'; return;
+  }
+
+  document.getElementById('loginUser').classList.remove('error');
+  document.getElementById('loginPass').classList.remove('error');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span> Vérification...';
+
+  // Simuler un léger délai (vrai API = appel backend)
+  setTimeout(function() {
+    // Chercher l'utilisateur
+    var found = AUTH_USERS.find(function(u) {
+      return u.user.toLowerCase() === user.toLowerCase()
+          && u.pass === pass
+          && u.role === selectedLoginRole;
+    });
+
+    // Admin peut se connecter sur n'importe quel rôle avec son mot de passe
+    if (!found) {
+      var adminUser = AUTH_USERS.find(function(u) { return u.role === 'admin' && u.pass === pass && u.user.toLowerCase() === user.toLowerCase(); });
+      if (adminUser) found = { user: user, pass: pass, role: selectedLoginRole, avatar: adminUser.avatar };
+    }
+
+    if (!found) {
+      err.textContent = '❌ Identifiant ou mot de passe incorrect.';
+      err.style.display = 'block';
+      btn.disabled = false;
+      btn.innerHTML = '<span>🔓</span> Se connecter';
+      return;
+    }
+
+    // Créer la session
+    var token = generateToken(found.user, found.role);
+    currentSession = {
+      user:      found.user,
+      role:      found.role,
+      avatar:    found.avatar || '👤',
+      token:     token,
+      loginTime: new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})
+    };
+
+    // Sauvegarder dans sessionStorage
+    sessionStorage.setItem('zitoun_session', JSON.stringify(currentSession));
+
+    onLoginSuccess();
+  }, 600);
+}
+
+// ── Après connexion réussie ──
+function onLoginSuccess() {
+  var s = currentSession;
+
+  // Masquer la page de login
+  document.getElementById('loginPage').style.display = 'none';
+
+  // Afficher les infos de session dans la sidebar
+  document.getElementById('sessionInfo').style.display = 'flex';
+  document.getElementById('sessionAvatar').textContent  = s.avatar;
+  document.getElementById('sessionName').textContent    = s.user;
+  document.getElementById('sessionRoleLabel').textContent = ROLE_LABELS[s.role] || s.role;
+
+  // Configurer la navigation selon le rôle
+  applyRoleNavigation(s.role);
+
+  // Aller à la page de démarrage
+  var homePage = ROLE_HOME[s.role] || 'server';
+  var homeBtn  = document.querySelector('.nav-btn[data-page="' + homePage + '"]');
+  if (homeBtn) showPage(homePage, homeBtn);
+
+  console.log('✅ Connecté:', s.user, '(' + s.role + ') — Token:', s.token.substring(0,20) + '...');
+}
+
+// ── Appliquer les restrictions de navigation ──
+function applyRoleNavigation(role) {
+  var allowed = ROLE_PAGES[role] || ['server'];
+  document.querySelectorAll('.nav-btn').forEach(function(btn) {
+    var page = btn.getAttribute('data-page');
+    if (!page) return;
+    if (allowed.indexOf(page) === -1) {
+      btn.style.display = 'none';
+    } else {
+      btn.style.display = '';
+    }
+  });
+}
+
+// ── Déconnexion ──
+function doLogout() {
+  currentSession = null;
+  sessionStorage.removeItem('zitoun_session');
+
+  // Réinitialiser les champs
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginError').style.display = 'none';
+  document.getElementById('loginBtn').disabled = false;
+  document.getElementById('loginBtn').innerHTML = '<span>🔓</span> Se connecter';
+  document.getElementById('sessionInfo').style.display = 'none';
+
+  // Réafficher toutes les nav buttons
+  document.querySelectorAll('.nav-btn').forEach(function(b) { b.style.display = ''; });
+
+  // Retourner à la page login
+  document.getElementById('loginPage').style.display = 'flex';
+}
+
+// ── Vérifier si une session existe déjà ──
+function checkExistingSession() {
+  var saved = sessionStorage.getItem('zitoun_session');
+  if (saved) {
+    try {
+      var s = JSON.parse(saved);
+      if (isTokenValid(s.token)) {
+        currentSession = s;
+        onLoginSuccess();
+        return true;
+      }
+    } catch(e) {}
+  }
+  // Mettre à jour le logo et nom sur la page de login
+  document.getElementById('loginLogo').textContent = window.RESTO_ICON || '🌶️';
+  document.getElementById('loginRestoName').textContent = window.RESTO_NAME || 'La Perla';
+  return false;
+}
+
+// ═══════════════════════════════════════════════════
+//  GESTION DES COMPTES (Admin)
+// ═══════════════════════════════════════════════════
+
+function openUserManager() {
+  buildUserList();
+  document.getElementById('userManagerModal').classList.add('open');
+}
+
+function buildUserList() {
+  var list = document.getElementById('userList');
+  var roleIcons = { admin:'⚙️', serveur:'📋', cuisine:'🍳', caisse:'💰' };
+  list.innerHTML = AUTH_USERS.map(function(u, i) {
+    return '<div class="user-row">' +
+      '<span class="user-avatar">' + (u.avatar || roleIcons[u.role] || '👤') + '</span>' +
+      '<div class="user-info">' +
+        '<div class="user-name">' + u.user + '</div>' +
+        '<div class="user-role-lbl">' + (ROLE_LABELS[u.role] || u.role) + '</div>' +
+      '</div>' +
+      '<button class="user-del-btn" onclick="deleteUser(' + i + ')" title="Supprimer">🗑</button>' +
+    '</div>';
+  }).join('');
+}
+
+function addUser() {
+  var user = document.getElementById('newUserName').value.trim();
+  var pass = document.getElementById('newUserPass').value.trim();
+  var role = document.getElementById('newUserRole').value;
+  var roleIcons = { admin:'⚙️', serveur:'📋', cuisine:'🍳', caisse:'💰' };
+
+  if (!user || !pass) {
+    alert('⚠ Remplissez le nom et le mot de passe');
+    return;
+  }
+  AUTH_USERS.push({ user: user, pass: pass, role: role, avatar: roleIcons[role] || '👤' });
+  document.getElementById('newUserName').value = '';
+  document.getElementById('newUserPass').value = '';
+  buildUserList();
+}
+
+function deleteUser(i) {
+  if (AUTH_USERS[i] && AUTH_USERS[i].role === 'admin' && AUTH_USERS.filter(function(u){return u.role==='admin';}).length === 1) {
+    alert('⚠ Impossible de supprimer le dernier compte admin.');
+    return;
+  }
+  AUTH_USERS.splice(i, 1);
+  buildUserList();
+}
+
 // ═══ SKIN SWITCHER ════════════════════════════
 var currentSkin = 'vert';
 
@@ -2551,6 +3006,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Charger le menu et les tables depuis l'API
   loadFromAPI();
+
+  // Vérifier si une session existe déjà
+  if (!checkExistingSession()) {
+    // Mettre à jour le logo login
+    document.getElementById('loginLogo').textContent = window.RESTO_ICON || '🌶️';
+    document.getElementById('loginRestoName').textContent = window.RESTO_NAME || 'La Perla';
+  }
 });
 
 function loadFromAPI() {
@@ -2614,5 +3076,40 @@ function loadFromAPI() {
     .catch(function() {});
 }
 </script>
+
+<!-- MODAL GESTION UTILISATEURS -->
+<div class="modal-ov" id="userManagerModal">
+  <div class="modal-box" style="max-width:440px;padding:0;overflow:hidden;border-top:5px solid var(--sky)">
+    <div style="padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-family:'Tajawal',sans-serif;font-size:17px;font-weight:800;color:var(--ink)">👤 Gestion des comptes</div>
+        <div style="font-size:12px;color:var(--ink3);margin-top:2px">Utilisateurs autorisés à se connecter</div>
+      </div>
+      <button onclick="closeModal('userManagerModal')" style="background:var(--cream);border:2px solid var(--sand);border-radius:8px;padding:5px 11px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Cairo',sans-serif">✕ Fermer</button>
+    </div>
+    <div style="padding:16px 24px;max-height:300px;overflow-y:auto">
+      <div id="userList"></div>
+    </div>
+    <div style="padding:0 24px 24px">
+      <div class="user-add-form">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--ink3)">Ajouter un compte</div>
+        <div class="user-add-row">
+          <input class="user-add-input" id="newUserName" placeholder="Identifiant (ex: Ahmed)">
+          <input class="user-add-input" id="newUserPass" type="password" placeholder="Mot de passe">
+        </div>
+        <div class="user-add-row">
+          <select class="user-add-select" id="newUserRole">
+            <option value="serveur">📋 Serveur</option>
+            <option value="cuisine">🍳 Cuisine</option>
+            <option value="caisse">💰 Caisse</option>
+            <option value="admin">⚙️ Admin</option>
+          </select>
+          <button class="user-add-btn" onclick="addUser()">+ Ajouter</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
