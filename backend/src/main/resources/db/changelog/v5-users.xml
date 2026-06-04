@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- ══ TABLE app_user ══ -->
+    <changeSet id="5-create-app-user" author="zitoun">
+        <createTable tableName="app_user">
+            <column name="id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="username" type="VARCHAR(100)"><constraints nullable="false" unique="true"/></column>
+            <column name="password" type="VARCHAR(255)"><constraints nullable="false"/></column>
+            <column name="role" type="VARCHAR(20)"><constraints nullable="false"/></column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true"/>
+        </createTable>
+    </changeSet>
+
+    <!-- ══ Comptes par défaut ══ -->
+    <!-- Mots de passe BCrypt : admin123 / 1234 -->
+    <changeSet id="5-default-users" author="zitoun">
+        <!-- admin / admin123 -->
+        <insert tableName="app_user">
+            <column name="username" value="admin"/>
+            <column name="password" value="$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi."/>
+            <column name="role" value="ADMIN"/>
+            <column name="active" valueBoolean="true"/>
+        </insert>
+        <!-- serveur / 1234 -->
+        <insert tableName="app_user">
+            <column name="username" value="serveur"/>
+            <column name="password" value="$2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"/>
+            <column name="role" value="SERVEUR"/>
+            <column name="active" valueBoolean="true"/>
+        </insert>
+        <!-- cuisine / 1234 -->
+        <insert tableName="app_user">
+            <column name="username" value="cuisine"/>
+            <column name="password" value="$2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"/>
+            <column name="role" value="CUISINE"/>
+            <column name="active" valueBoolean="true"/>
+        </insert>
+        <!-- caisse / 1234 -->
+        <insert tableName="app_user">
+            <column name="username" value="caisse"/>
+            <column name="password" value="$2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"/>
+            <column name="role" value="CAISSE"/>
+            <column name="active" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
