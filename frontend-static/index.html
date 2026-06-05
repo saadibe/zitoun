@@ -2,14 +2,11 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#3d7a47">
-<link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%233d7a47'/><text y='130' x='90' text-anchor='middle' font-size='110'>&#x1F336;</text></svg>">
-<meta name="apple-mobile-web-app-title" content="La Perla POS">
 <title>La Perla — Saveurs Authentiques de Tunisie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -1287,273 +1284,7 @@ button {
 .user-add-select { padding:8px 11px; border-radius:9px; border:2px solid var(--border); background:var(--ivory); font-size:13px; font-family:'Cairo',sans-serif; cursor:pointer; outline:none; }
 .user-add-btn { padding:9px 16px; border-radius:9px; border:none; background:var(--sky); color:#fff; font-size:12.5px; font-weight:700; cursor:pointer; font-family:'Cairo',sans-serif; white-space:nowrap; }
 .user-add-btn:hover { background:var(--sky2); }
-
-/* ═══════════════════════════════════════
-   SAMSUNG S24 & TÉLÉPHONES MODERNES
-   Taille minimale 16px, touch targets 48px
-═══════════════════════════════════════ */
-@media screen and (max-width: 480px) {
-
-  /* Base font plus grand */
-  body { font-size: 16px; }
-
-  /* Login page */
-  .login-card { padding: 28px 20px 24px; margin: 16px; border-radius: 20px; }
-  .login-logo { width: 72px; height: 72px; font-size: 36px; }
-  .login-title { font-size: 28px; }
-  .login-sub { font-size: 14px; margin-bottom: 24px; }
-  .login-label { font-size: 13px; }
-  .login-input { padding: 14px 16px; font-size: 16px; border-radius: 13px; }
-  .login-btn { padding: 16px; font-size: 17px; border-radius: 14px; }
-  .login-footer { font-size: 12px; }
-
-  /* Topbar */
-  .topbar { padding: 14px 16px; }
-  .tp-title { font-size: 18px; }
-  .tp-sub { font-size: 12px; }
-
-  /* Bottom navigation — plus haute */
-  .bottom-nav { height: 72px; padding-bottom: calc(env(safe-area-inset-bottom) + 4px); }
-  .bn-btn { font-size: 11px; gap: 4px; }
-  .bn-ico { font-size: 26px; }
-
-  /* Menu cards — 2 colonnes sur S24 */
-  .menu-items { 
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 12px; 
-    padding: 14px 12px; 
-  }
-  .m-card { padding: 16px 12px 14px; border-radius: 16px; min-height: 120px; }
-  .mc-em { font-size: 36px; margin-bottom: 8px; }
-  .mc-nm { font-size: 14px; font-weight: 700; }
-  .mc-pr { font-size: 15px; font-weight: 800; }
-
-  /* Catégories */
-  .menu-bar { padding: 12px; gap: 8px; flex-wrap: wrap; }
-  .cats { gap: 6px; }
-  .cat-btn { padding: 8px 14px; font-size: 13px; border-radius: 20px; }
-
-  /* Sélection tables */
-  .tbl-btns { gap: 6px; flex-wrap: wrap; }
-  .tbl-btn { width: 44px; height: 44px; font-size: 15px; border-radius: 10px; }
-
-  /* Order panel */
-  .order-panel { height: 45vh; }
-  .o-head { padding: 12px 14px 10px; }
-  .oh-title { font-size: 16px; }
-  .o-item { padding: 12px; border-radius: 12px; }
-  .oi-nm { font-size: 14px; }
-  .oi-pr { font-size: 14px; }
-  .o-qty-btn { width: 32px; height: 32px; font-size: 18px; }
-  .o-qty-val { font-size: 16px; min-width: 28px; }
-  .o-tval { font-size: 26px; }
-  .o-foot { padding: 12px 14px 16px; gap: 10px; }
-
-  /* Bouton envoyer */
-  #sendBtn { padding: 14px; font-size: 15px; border-radius: 12px; }
-
-  /* Tables grid */
-  .t-grid, .tgrid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .tables-wrap { padding: 14px 12px; }
-  .tcard { padding: 16px 12px 14px; border-radius: 16px; }
-  .tc-num { font-size: 40px; }
-  .tc-badge { font-size: 12px; padding: 3px 10px; }
-  .tc-seats { font-size: 13px; }
-  .tc-acts { gap: 6px; margin-top: 10px; }
-  .tc-btn { padding: 10px 8px; font-size: 12px; border-radius: 9px; }
-
-  /* Admin */
-  .admin-settings-bar { padding: 12px; gap: 10px; }
-  .settings-input { font-size: 15px; padding: 10px 12px; }
-  .settings-lbl { font-size: 11px; }
-  .settings-save { padding: 10px 16px; font-size: 13px; }
-  .admin-cols-wrap { grid-template-columns: 1fr; }
-  .admin-item { padding: 12px; }
-  .admin-item-name { font-size: 14px; }
-  .admin-item-price { font-size: 16px; }
-  .admin-tables-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-
-  /* Modals */
-  .modal-box { width: 95%; border-radius: 18px; }
-  .adm-form { padding: 16px 20px 20px; }
-  .adm-input, .adm-select { padding: 12px; font-size: 15px; }
-  .adm-save, .adm-cancel { padding: 14px; font-size: 14px; }
-
-  /* Encaissement */
-  .enc-header { padding: 16px 20px; }
-  .enc-header-title { font-size: 17px; }
-  .enc-body { padding: 16px 20px; }
-  .enc-total-val { font-size: 32px; }
-  .enc-method-btn { padding: 14px 6px; }
-  .enc-method-btn .em { font-size: 24px; }
-  .enc-input { font-size: 18px; padding: 12px; }
-  .enc-footer { padding: 0 20px 20px; gap: 10px; }
-  .enc-confirm { padding: 14px; font-size: 14px; }
-
-  /* Kitchen */
-  .k-cols { grid-template-columns: 1fr; }
-  .k-bar { padding: 12px 16px; }
-  .k-clock { font-size: 22px; }
-  .k-stat { padding: 6px 12px; font-size: 12px; }
-  .kcard { padding: 14px; }
-  .kc-tbl { font-size: 18px; }
-  .kc-item { font-size: 14px; }
-  .kc-btn { padding: 10px 14px; font-size: 13px; }
-
-  /* Sidebar session */
-  .session-name { font-size: 13px; }
-  .session-role { font-size: 11px; }
-
-  /* Ticket modal */
-  .td-title { font-size: 20px; }
-  .td-line { font-size: 14px; }
-  .td-total-val { font-size: 24px; }
-  .td-footer { padding: 0 18px 20px; gap: 8px; }
-  .td-btn-enc { padding: 13px; font-size: 14px; }
-}
-
-/* ── Très petits écrans (< 360px) ── */
-@media screen and (max-width: 360px) {
-  .menu-items { grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; }
-  .mc-em { font-size: 30px; }
-  .mc-nm { font-size: 12px; }
-  .tbl-btn { width: 38px; height: 38px; font-size: 14px; }
-  .cat-btn { padding: 7px 10px; font-size: 12px; }
-}
-
-
-/* ═══════════════════════════════════════════════
-   MOBILE COMMANDES — S24 / Téléphone portrait
-   Menu plein écran + panier flottant
-═══════════════════════════════════════════════ */
-@media screen and (max-width: 600px) {
-
-  /* Grille : menu prend TOUT l'espace */
-  .srv-grid {
-    display: flex !important;
-    flex-direction: column !important;
-    position: relative;
-  }
-
-  /* Menu panel : plein écran */
-  .menu-panel {
-    flex: 1 !important;
-    height: 100% !important;
-    border-right: none !important;
-    border-bottom: none !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
-
-  /* Order panel : caché par défaut, slide depuis le bas */
-  .order-panel {
-    position: fixed !important;
-    bottom: 72px !important;
-    left: 0 !important; right: 0 !important;
-    height: 0 !important;
-    max-height: 80vh !important;
-    overflow: hidden !important;
-    transition: height .35s cubic-bezier(.4,0,.2,1) !important;
-    z-index: 40 !important;
-    border-radius: 20px 20px 0 0 !important;
-    box-shadow: 0 -8px 32px rgba(0,0,0,.18) !important;
-  }
-
-  .order-panel.mobile-open {
-    height: 70vh !important;
-    overflow: visible !important;
-  }
-
-  /* Bouton panier flottant */
-  .cart-fab {
-    display: flex !important;
-    position: fixed !important;
-    bottom: 86px !important;
-    right: 16px !important;
-    width: 60px !important; height: 60px !important;
-    border-radius: 30px !important;
-    background: var(--sky) !important;
-    color: #fff !important;
-    border: none !important;
-    font-size: 24px !important;
-    cursor: pointer !important;
-    z-index: 45 !important;
-    box-shadow: 0 6px 20px rgba(61,122,71,.45) !important;
-    align-items: center !important; justify-content: center !important;
-    transition: transform .2s !important;
-    flex-direction: column !important;
-    gap: 2px !important;
-  }
-  .cart-fab:active { transform: scale(.92) !important; }
-  .cart-fab-count {
-    font-size: 11px !important; font-weight: 800 !important;
-    line-height: 1 !important;
-  }
-  .cart-fab-total {
-    font-size: 10px !important; font-weight: 700 !important;
-    line-height: 1 !important; opacity: .9 !important;
-  }
-
-  /* Overlay quand panier ouvert */
-  .cart-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,.4);
-    z-index: 39;
-  }
-  .cart-overlay.show { display: block; }
-
-  /* Cacher les colonnes desktop dans le panier sur mobile */
-  .order-panel::before { display: none !important; }
-
-  /* Menu items 2 colonnes bien espacées */
-  .menu-items {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important;
-    padding: 12px !important;
-    overflow-y: auto !important;
-    flex: 1 !important;
-  }
-
-  .m-card {
-    padding: 14px 10px 12px !important;
-    min-height: 110px !important;
-    display: flex !important; flex-direction: column !important;
-    align-items: center !important; text-align: center !important;
-  }
-  .mc-em { font-size: 34px !important; margin-bottom: 6px !important; }
-  .mc-nm { font-size: 13px !important; font-weight: 700 !important; line-height: 1.2 !important; }
-  .mc-pr { font-size: 14px !important; font-weight: 800 !important; margin-top: 6px !important; }
-
-  /* Topbar compact */
-  .topbar { padding: 10px 14px !important; }
-  .tp-title { font-size: 16px !important; }
-  .tp-sub { font-size: 11px !important; }
-
-  /* Tables buttons */
-  .menu-bar { padding: 10px 12px !important; flex-direction: column !important; gap: 8px !important; }
-  .tbl-btns { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; }
-  .tbl-btn { width: 42px !important; height: 42px !important; font-size: 14px !important; }
-  .cats { flex-wrap: wrap !important; gap: 6px !important; }
-  .cat-btn { padding: 7px 12px !important; font-size: 13px !important; }
-
-  /* Pied de page panier */
-  .o-foot { padding: 10px 14px 16px !important; }
-  #sendBtn { padding: 14px !important; font-size: 15px !important; }
-}
-
 </style>
-
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js')
-      .then(function(reg) { console.log('SW registered'); })
-      .catch(function(err) { console.log('SW error:', err); });
-  });
-}
-</script>
 </head>
 <body>
 <!-- ══ LOGIN PAGE ══ -->
@@ -1644,16 +1375,7 @@ if ('serviceWorker' in navigator) {
     <!-- ═══════════════════════
          COMMANDES
     ═══════════════════════ -->
-    <!-- Overlay panier mobile -->
-<div class="cart-overlay" id="cartOverlay" onclick="toggleMobileCart()"></div>
-<!-- Bouton panier flottant mobile -->
-<button class="cart-fab" id="cartFab" onclick="toggleMobileCart()" style="display:none">
-  <span id="cartFabIcon">🛒</span>
-  <span class="cart-fab-count" id="cartFabCount">0</span>
-  <span class="cart-fab-total" id="cartFabTotal">0 DT</span>
-</button>
-
-<div class="page active" id="page-server">
+    <div class="page active" id="page-server">
       <div class="srv-grid">
 
         <!-- Menu -->
@@ -1820,7 +1542,6 @@ if ('serviceWorker' in navigator) {
           <input class="settings-input" id="settingsTVACustom" type="number" min="0" max="100" step="0.1" placeholder="Ex: 7.5" style="min-width:80px">
         </div>
         <button class="settings-save" style="background:var(--ink)" onclick="openUserManager()">👤 Comptes</button>
-        <button class="settings-save" style="background:var(--ink2)" onclick="openCategoryManager()">🏷️ Catégories</button>
         <button class="settings-save" onclick="saveSettings()">💾 Enregistrer</button>
         <div class="settings-saved" id="settingsSaved">✓ Enregistré !</div>
       </div>
@@ -2246,6 +1967,7 @@ function updateBtns() {
   var ok = oItems.length > 0 && selTable !== null;
   document.getElementById('printBtn').disabled = !ok;
   document.getElementById('sendBtn').disabled = !ok;
+  updateCartFab();
 }
 
 function sendKitchen() {
@@ -3193,12 +2915,11 @@ function saveSettings() {
   renderOrder();
   buildMenuItems();
 
-  // API - sauvegarder tout
+  // API
   authFetch(window.API_URL + '/settings', {
     method: 'PUT',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ id:1, name:name, subtitle:sub, city:city,
-      icon:pickedBrandEmoji, currency:currency, tvaRate:tva, theme:currentSkin })
+    body: JSON.stringify({ name: name, subtitle: sub, city: city, icon: pickedBrandEmoji })
   }).catch(function() {});
 
   var saved = document.getElementById('settingsSaved');
@@ -3387,41 +3108,6 @@ function updateClock() {
 }
 
 // ═══ START ═══
-
-// ═══ MOBILE CART FAB ══════════════════════════
-var cartMobileOpen = false;
-
-function isMobile() {
-  return window.innerWidth <= 600;
-}
-
-function toggleMobileCart() {
-  if (!isMobile()) return;
-  cartMobileOpen = !cartMobileOpen;
-  var panel   = document.querySelector('.order-panel');
-  var overlay = document.getElementById('cartOverlay');
-  var fab     = document.getElementById('cartFab');
-  if (panel)   panel.classList.toggle('mobile-open', cartMobileOpen);
-  if (overlay) overlay.classList.toggle('show', cartMobileOpen);
-  if (fab) {
-    document.getElementById('cartFabIcon').textContent = cartMobileOpen ? '✕' : '🛒';
-  }
-}
-
-function updateCartFab() {
-  if (!isMobile()) return;
-  var fab = document.getElementById('cartFab');
-  if (!fab) return;
-  var count = oItems.reduce(function(s,i){return s+i.qty;}, 0);
-  var total = oItems.reduce(function(s,i){return s+i.item.price*i.qty;}, 0);
-  fab.style.display = 'flex';
-  document.getElementById('cartFabCount').textContent = count + ' art.';
-  document.getElementById('cartFabTotal').textContent = total.toFixed(getCur()==='DT'?3:2) + ' ' + getCur();
-  // Changer couleur si articles dans le panier
-  fab.style.background = count > 0 ? 'var(--sky)' : 'var(--ink3)';
-  fab.style.boxShadow  = count > 0 ? '0 6px 20px rgba(61,122,71,.45)' : 'none';
-}
-
 document.addEventListener('DOMContentLoaded', function() {
   window.RESTO_NAME     = 'La Perla';
   window.RESTO_SUB      = 'Saveurs Authentiques de Tunisie';
@@ -3438,10 +3124,7 @@ document.addEventListener('DOMContentLoaded', function() {
   buildAdminMenu();
   buildAdminTables();
 
-  loadSettingsFromAPI();
-  loadCategories();
-
-  // Charger menu et tables
+  // Charger le menu et les tables depuis l'API
   loadFromAPI();
 
   // Vérifier si une session existe déjà
@@ -3527,86 +3210,6 @@ function scheduleTokenRefresh() {
     }
   }, delay);
   console.log('⏰ Prochain refresh dans', Math.round(delay/60000), 'minutes');
-}
-
-function loadSettingsFromAPI() {
-  fetch(window.API_URL + '/settings')
-    .then(function(r) { if (!r.ok) return null; return r.json(); })
-    .then(function(s) {
-      if (!s || !s.name) return;
-      window.RESTO_NAME = s.name; window.RESTO_SUB = s.subtitle||''; window.RESTO_CITY = s.city||'';
-      window.RESTO_ICON = s.icon||''; window.RESTO_CURRENCY = s.currency||'DT';
-      window.RESTO_TVA = (s.tvaRate !== undefined) ? s.tvaRate : 10;
-      var e = document.getElementById('brandName'); if(e) e.textContent = s.name;
-      e = document.getElementById('brandSub'); if(e) e.textContent = s.subtitle||'';
-      e = document.getElementById('brandIcon'); if(e) e.textContent = s.icon||'';
-      e = document.getElementById('loginRestoName'); if(e) e.textContent = s.name;
-      e = document.getElementById('loginLogo'); if(e) e.textContent = s.icon||'';
-      document.title = s.name + ' POS';
-      if (s.theme) applySkin(s.theme);
-    }).catch(function() {});
-}
-
-function loadCategories() {
-  fetch(window.API_URL + '/settings/categories')
-    .then(function(r) { if (!r.ok) return []; return r.json(); })
-    .then(function(data) {
-      window.API_CATS = data || [];
-      buildCatManagerList();
-      CATS = [{k:'all',l:'Tout',e:'*'}].concat(
-        window.API_CATS.map(function(c) { return {k:c.code,l:c.label,e:c.emoji||''}; })
-      );
-      buildCatBtns();
-    }).catch(function() {});
-}
-
-function buildCatManagerList() {
-  var list = document.getElementById('catManagerList');
-  if (!list) return;
-  var cats = window.API_CATS || [];
-  if (!cats.length) { list.innerHTML = '<p style="text-align:center;color:var(--ink3);padding:16px">Aucune categorie</p>'; return; }
-  list.innerHTML = cats.map(function(c) {
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">' +
-      '<span style="font-size:20px;width:28px;text-align:center">'+(c.emoji||'')+'</span>' +
-      '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+c.label+'</div>' +
-      '<div style="font-size:11px;color:var(--ink3);font-family:monospace">'+c.code+'</div></div>' +
-      '<button onclick="deleteCategory('+c.id+')" style="width:28px;height:28px;border-radius:7px;background:var(--terra-light);color:var(--terracotta);border:1.5px solid var(--terracotta);cursor:pointer">x</button>' +
-    '</div>';
-  }).join('');
-}
-
-function addCategory() {
-  var emoji = document.getElementById('newCatEmoji').value.trim();
-  var label = document.getElementById('newCatLabel').value.trim();
-  var code = document.getElementById('newCatCode').value.trim().toUpperCase().replace(/\s+/g,'_');
-  if (!label||!code) { alert('Remplissez le nom et le code'); return; }
-  authFetch(window.API_URL+'/settings/categories', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({label:label,code:code,emoji:emoji,sortOrder:(window.API_CATS||[]).length+1,active:true})
-  }).then(function(r){if(!r.ok)throw new Error();return r.json();})
-  .then(function(){
-    document.getElementById('newCatEmoji').value='';
-    document.getElementById('newCatLabel').value='';
-    document.getElementById('newCatCode').value='';
-    loadCategories();
-  }).catch(function(){alert('Erreur - categorie existe peut-etre deja');});
-}
-
-function deleteCategory(id) {
-  if (!confirm('Supprimer cette categorie ?')) return;
-  authFetch(window.API_URL+'/settings/categories/'+id,{method:'DELETE'})
-  .then(function(){loadCategories();}).catch(function(){alert('Erreur');});
-}
-
-function buildCatSelect(selected) {
-  var sel = document.getElementById('artCat'); if (!sel) return;
-  var cats = (window.API_CATS&&window.API_CATS.length)?window.API_CATS:[
-    {code:'ENTREE',label:'Entrees',emoji:''},{code:'SANDWICH',label:'Sandwichs',emoji:''},
-    {code:'PLAT',label:'Pain Pizzas',emoji:''},{code:'BOISSON',label:'Boissons',emoji:''}
-  ];
-  sel.innerHTML = cats.map(function(c){
-    return '<option value="'+c.code+'"'+(c.code===selected?' selected':'')+'>'+(c.emoji||'')+' '+c.label+'</option>';
-  }).join('');
 }
 
 function loadFromAPI() {
@@ -3705,25 +3308,5 @@ function loadFromAPI() {
   </div>
 </div>
 
-
-<!-- MODAL CATEGORIES -->
-<div class="modal-ov" id="categoryModal">
-  <div class="modal-box" style="max-width:420px;padding:0;overflow:hidden;border-top:5px solid var(--sky)">
-    <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-      <div style="font-family:'Tajawal',sans-serif;font-size:16px;font-weight:800;color:var(--ink)">Catégories du menu</div>
-      <button onclick="closeModal('categoryModal')" style="background:var(--cream);border:2px solid var(--sand);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:13px">✕</button>
-    </div>
-    <div style="padding:14px 20px;max-height:280px;overflow-y:auto" id="catManagerList"></div>
-    <div style="padding:12px 20px 20px;border-top:1px solid var(--border)">
-      <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--ink3);margin-bottom:10px">Ajouter</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <input id="newCatEmoji" placeholder="Emoji" style="width:50px;text-align:center;padding:8px;border-radius:9px;border:2px solid var(--border);background:var(--ivory);outline:none">
-        <input id="newCatLabel" placeholder="Nom" style="flex:1;min-width:100px;padding:8px;border-radius:9px;border:2px solid var(--border);background:var(--ivory);font-family:Cairo,sans-serif;outline:none">
-        <input id="newCatCode" placeholder="CODE" style="flex:1;min-width:100px;padding:8px;border-radius:9px;border:2px solid var(--border);background:var(--ivory);font-family:monospace;outline:none;text-transform:uppercase">
-        <button onclick="addCategory()" style="padding:8px 14px;border-radius:9px;border:none;background:var(--sky);color:#fff;font-weight:700;cursor:pointer;white-space:nowrap">+ Ajouter</button>
-      </div>
-    </div>
-  </div>
-</div>
 </body>
 </html>
