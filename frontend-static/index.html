@@ -1375,7 +1375,9 @@ button {
     <!-- ═══════════════════════
          COMMANDES
     ═══════════════════════ -->
-    <div class="page active" id="page-server">
+    <div class="cart-overlay" id="cartOverlay" onclick="toggleMobileCart()"></div>
+<button class="cart-fab" id="cartFab" onclick="toggleMobileCart()" style="display:none"><span id="cartFabIcon">🛒</span><span class="cart-fab-count" id="cartFabCount">0 art.</span><span class="cart-fab-total" id="cartFabTotal">0 DT</span></button>
+<div class="page active" id="page-server">
       <div class="srv-grid">
 
         <!-- Menu -->
@@ -3108,6 +3110,37 @@ function updateClock() {
 }
 
 // ═══ START ═══
+// ═══ MOBILE CART ════════════════
+var cartMobileOpen=false;
+function isMobile(){return window.innerWidth<=600;}
+function toggleMobileCart(){
+  if(!isMobile())return;
+  cartMobileOpen=!cartMobileOpen;
+  var p=document.querySelector('.order-panel');
+  var o=document.getElementById('cartOverlay');
+  if(p)p.classList.toggle('mobile-open',cartMobileOpen);
+  if(o)o.classList.toggle('show',cartMobileOpen);
+  var i=document.getElementById('cartFabIcon');
+  if(i)i.textContent=cartMobileOpen?'✕':'🛒';
+}
+function updateCartFab(){
+  if(!isMobile())return;
+  var fab=document.getElementById('cartFab'); if(!fab)return;
+  var cnt=oItems.reduce(function(s,i){return s+i.qty;},0);
+  var tot=oItems.reduce(function(s,i){return s+i.item.price*i.qty;},0);
+  fab.style.display='flex';
+  var c=document.getElementById('cartFabCount'); if(c)c.textContent=cnt+' art.';
+  var t=document.getElementById('cartFabTotal'); if(t)t.textContent=tot.toFixed(getCur()==='DT'?3:2)+' '+getCur();
+  fab.style.opacity=cnt>0?'1':'0.6';
+}
+function showAddToast(name){
+  if(!isMobile())return;
+  var t=document.createElement('div');
+  t.className='add-toast'; t.textContent='+ '+name;
+  document.body.appendChild(t);
+  setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},1700);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   window.RESTO_NAME     = 'La Perla';
   window.RESTO_SUB      = 'Saveurs Authentiques de Tunisie';
