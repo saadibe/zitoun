@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+
+  if (typeof updateCartBadge === 'function') updateCartBadge();
+}<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -1284,6 +1286,133 @@ button {
 .user-add-select { padding:8px 11px; border-radius:9px; border:2px solid var(--border); background:var(--ivory); font-size:13px; font-family:'Cairo',sans-serif; cursor:pointer; outline:none; }
 .user-add-btn { padding:9px 16px; border-radius:9px; border:none; background:var(--sky); color:#fff; font-size:12.5px; font-weight:700; cursor:pointer; font-family:'Cairo',sans-serif; white-space:nowrap; }
 .user-add-btn:hover { background:var(--sky2); }
+
+/* ═══ MOBILE — Onglets Menu / Panier ═══════════════════════ */
+@media screen and (max-width: 600px) {
+
+  /* Barre d'onglets en haut de la page commandes */
+  .mobile-tabs {
+    display: flex;
+    background: var(--white);
+    border-bottom: 2px solid var(--border);
+    flex-shrink: 0;
+  }
+  .mobile-tab {
+    flex: 1; padding: 13px 8px; border: none; background: transparent;
+    font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 700;
+    color: var(--ink3); cursor: pointer; position: relative;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    transition: color .15s;
+  }
+  .mobile-tab.active { color: var(--sky); }
+  .mobile-tab.active::after {
+    content: ''; position: absolute; bottom: -2px; left: 20%; right: 20%;
+    height: 3px; background: var(--sky); border-radius: 2px 2px 0 0;
+  }
+  .mobile-tab-ico { font-size: 20px; }
+  .mobile-tab-badge {
+    position: absolute; top: 6px; right: calc(50% - 20px);
+    background: var(--terracotta); color: #fff;
+    font-size: 10px; font-weight: 800; border-radius: 10px;
+    padding: 1px 5px; min-width: 16px; text-align: center;
+  }
+
+  /* Layout : plein écran, pas de colonne */
+  .srv-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  /* Panel menu : visible ou caché selon onglet actif */
+  .menu-panel {
+    flex: 1 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    border-right: none !important;
+  }
+  .menu-panel.tab-hidden { display: none !important; }
+
+  /* Panel panier : visible ou caché */
+  .order-panel {
+    flex: 1 !important;
+    display: none !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    max-height: none !important;
+    position: static !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+  }
+  .order-panel.tab-visible {
+    display: flex !important;
+  }
+  .order-panel::before { display: none !important; }
+
+  /* Menu items 2 colonnes */
+  .menu-items {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    padding: 12px !important;
+    flex: 1 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .m-card {
+    padding: 14px 10px 12px !important;
+    min-height: 115px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  .m-card:active { transform: scale(.93) !important; }
+  .mc-em { font-size: 36px !important; margin-bottom: 6px !important; }
+  .mc-nm { font-size: 13px !important; font-weight: 700 !important; line-height: 1.25 !important; }
+  .mc-pr { font-size: 15px !important; font-weight: 900 !important; margin-top: 6px !important; color: var(--sky) !important; }
+
+  /* Barre table + catégories */
+  .menu-bar {
+    padding: 10px 12px 8px !important;
+    gap: 8px !important;
+    flex-direction: column !important;
+    flex-shrink: 0 !important;
+  }
+  .tbl-btns { display: flex !important; flex-wrap: wrap !important; gap: 5px !important; }
+  .tbl-btn { width: 42px !important; height: 42px !important; font-size: 14px !important; }
+  .cats {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 6px !important;
+    padding-bottom: 2px !important;
+  }
+  .cat-btn { padding: 8px 14px !important; font-size: 13px !important; white-space: nowrap !important; flex-shrink: 0 !important; }
+
+  /* Topbar */
+  .topbar { padding: 10px 14px !important; flex-shrink: 0 !important; }
+  .tp-title { font-size: 16px !important; }
+  .tp-sub { font-size: 11px !important; }
+
+  /* Panier : footer collé en bas */
+  .o-list { flex: 1 !important; overflow-y: auto !important; }
+  .o-head { padding-top: 14px !important; padding-bottom: 10px !important; }
+  .o-foot { padding: 12px 14px 16px !important; gap: 10px !important; flex-shrink: 0 !important; }
+  .o-tval { font-size: 26px !important; }
+  #sendBtn { padding: 14px !important; font-size: 15px !important; }
+  .o-item { padding: 12px !important; }
+  .oi-nm { font-size: 14px !important; }
+  .o-qty-btn { width: 32px !important; height: 32px !important; font-size: 17px !important; }
+}
+
+@media screen and (max-width: 360px) {
+  .menu-items { gap: 8px !important; padding: 8px !important; }
+  .mc-em { font-size: 30px !important; }
+  .tbl-btn { width: 38px !important; height: 38px !important; }
+}
 </style>
 </head>
 <body>
@@ -1375,9 +1504,19 @@ button {
     <!-- ═══════════════════════
          COMMANDES
     ═══════════════════════ -->
-    <div class="cart-overlay" id="cartOverlay" onclick="toggleMobileCart()"></div>
-<button class="cart-fab" id="cartFab" onclick="toggleMobileCart()" style="display:none"><span id="cartFabIcon">🛒</span><span class="cart-fab-count" id="cartFabCount">0 art.</span><span class="cart-fab-total" id="cartFabTotal">0 DT</span></button>
-<div class="page active" id="page-server">
+    <div class="page active" id="page-server">
+      <!-- Onglets mobile Menu / Panier -->
+      <div class="mobile-tabs" id="mobileTabs" style="display:none">
+        <button class="mobile-tab active" id="tabMenu" onclick="switchMobileTab('menu')">
+          <span class="mobile-tab-ico">🍽️</span>
+          <span>Menu</span>
+        </button>
+        <button class="mobile-tab" id="tabCart" onclick="switchMobileTab('cart')">
+          <span class="mobile-tab-ico">🛒</span>
+          <span>Panier</span>
+          <span class="mobile-tab-badge" id="cartBadge" style="display:none">0</span>
+        </button>
+      </div>
       <div class="srv-grid">
 
         <!-- Menu -->
@@ -1969,7 +2108,7 @@ function updateBtns() {
   var ok = oItems.length > 0 && selTable !== null;
   document.getElementById('printBtn').disabled = !ok;
   document.getElementById('sendBtn').disabled = !ok;
-  updateCartFab();
+  if (typeof updateCartBadge === 'function') updateCartBadge();
 }
 
 function sendKitchen() {
@@ -3110,35 +3249,45 @@ function updateClock() {
 }
 
 // ═══ START ═══
-// ═══ MOBILE CART ════════════════
-var cartMobileOpen=false;
-function isMobile(){return window.innerWidth<=600;}
-function toggleMobileCart(){
-  if(!isMobile())return;
-  cartMobileOpen=!cartMobileOpen;
-  var p=document.querySelector('.order-panel');
-  var o=document.getElementById('cartOverlay');
-  if(p)p.classList.toggle('mobile-open',cartMobileOpen);
-  if(o)o.classList.toggle('show',cartMobileOpen);
-  var i=document.getElementById('cartFabIcon');
-  if(i)i.textContent=cartMobileOpen?'✕':'🛒';
+// ═══ MOBILE TABS ════════════════════════
+var mobileTab = 'menu';
+function isMobile() { return window.innerWidth <= 600; }
+
+function initMobileTabs() {
+  if (!isMobile()) return;
+  var tabs = document.getElementById('mobileTabs');
+  if (tabs) tabs.style.display = 'flex';
+  switchMobileTab('menu');
 }
-function updateCartFab(){
-  if(!isMobile())return;
-  var fab=document.getElementById('cartFab'); if(!fab)return;
-  var cnt=oItems.reduce(function(s,i){return s+i.qty;},0);
-  var tot=oItems.reduce(function(s,i){return s+i.item.price*i.qty;},0);
-  fab.style.display='flex';
-  var c=document.getElementById('cartFabCount'); if(c)c.textContent=cnt+' art.';
-  var t=document.getElementById('cartFabTotal'); if(t)t.textContent=tot.toFixed(getCur()==='DT'?3:2)+' '+getCur();
-  fab.style.opacity=cnt>0?'1':'0.6';
+
+function switchMobileTab(tab) {
+  if (!isMobile()) return;
+  mobileTab = tab;
+  var menu  = document.querySelector('.menu-panel');
+  var cart  = document.querySelector('.order-panel');
+  var tMenu = document.getElementById('tabMenu');
+  var tCart = document.getElementById('tabCart');
+  if (tab === 'menu') {
+    if (menu) { menu.classList.remove('tab-hidden'); }
+    if (cart) { cart.classList.remove('tab-visible'); }
+    if (tMenu) tMenu.classList.add('active');
+    if (tCart) tCart.classList.remove('active');
+  } else {
+    if (menu) { menu.classList.add('tab-hidden'); }
+    if (cart) { cart.classList.add('tab-visible'); }
+    if (tMenu) tMenu.classList.remove('active');
+    if (tCart) tCart.classList.add('active');
+  }
 }
-function showAddToast(name){
-  if(!isMobile())return;
-  var t=document.createElement('div');
-  t.className='add-toast'; t.textContent='+ '+name;
-  document.body.appendChild(t);
-  setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},1700);
+
+function updateCartBadge() {
+  if (!isMobile()) return;
+  var count = oItems.reduce(function(s,i){return s+i.qty;}, 0);
+  var badge = document.getElementById('cartBadge');
+  if (!badge) return;
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'block' : 'none';
+  // Basculer auto vers panier si premier article ajouté
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -3154,11 +3303,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
   applySkin('vert');
   init();
+  initMobileTabs();
   buildAdminMenu();
   buildAdminTables();
 
   // Charger le menu et les tables depuis l'API
   loadFromAPI();
+
+  // Réinitialiser les onglets si resize
+  window.addEventListener('resize', function() {
+    if (isMobile()) initMobileTabs();
+    else {
+      var menu = document.querySelector('.menu-panel');
+      var cart = document.querySelector('.order-panel');
+      var tabs = document.getElementById('mobileTabs');
+      if (menu) { menu.classList.remove('tab-hidden'); }
+      if (cart) { cart.classList.remove('tab-visible'); }
+      if (tabs) tabs.style.display = 'none';
+    }
+  });
 
   // Vérifier si une session existe déjà
   if (!checkExistingSession()) {
