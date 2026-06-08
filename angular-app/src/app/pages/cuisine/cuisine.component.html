@@ -1,0 +1,77 @@
+<div class="page-cuisine">
+  <div class="topbar">
+    <div>
+      <div class="tp-title">🍳 Cuisine</div>
+      <div class="tp-sub">{{ orders().length }} commande(s) active(s)</div>
+    </div>
+    <button class="k-refresh" (click)="load()">🔄 Actualiser</button>
+  </div>
+
+  <div class="k-cols">
+    <!-- Nouvelles -->
+    <div class="k-col">
+      <div class="k-col-head k-new">🔔 Nouvelles <span class="k-badge">{{ sent.length }}</span></div>
+      @for (o of sent; track o.id) {
+        <div class="kcard k-urg">
+          <div class="kc-top">
+            <div class="kc-table" [class.emporter]="o.tableNumber===0">{{ tableLabel(o) }}</div>
+          </div>
+          <div class="kc-items">
+            @for (item of o.items; track item.id) {
+              <div class="k-line">
+                <span class="k-qt">×{{ item.quantity }}</span>
+                <span>{{ item.emoji }}</span>
+                <div>{{ item.name }}<span class="k-note">{{ item.note }}</span></div>
+              </div>
+            }
+          </div>
+          <button class="kb kb-acc" (click)="action(o.id,'PREPARING')">✅ Accepter</button>
+        </div>
+      }
+    </div>
+
+    <!-- En préparation -->
+    <div class="k-col">
+      <div class="k-col-head k-prep">🔥 En préparation <span class="k-badge">{{ preparing.length }}</span></div>
+      @for (o of preparing; track o.id) {
+        <div class="kcard">
+          <div class="kc-top">
+            <div class="kc-table" [class.emporter]="o.tableNumber===0">{{ tableLabel(o) }}</div>
+          </div>
+          <div class="kc-items">
+            @for (item of o.items; track item.id) {
+              <div class="k-line">
+                <span class="k-qt">×{{ item.quantity }}</span>
+                <span>{{ item.emoji }}</span>
+                <div>{{ item.name }}</div>
+              </div>
+            }
+          </div>
+          <button class="kb kb-rdy" (click)="action(o.id,'READY')">🔔 Prêt</button>
+        </div>
+      }
+    </div>
+
+    <!-- Prêtes -->
+    <div class="k-col">
+      <div class="k-col-head k-ready">✓ Prêtes <span class="k-badge">{{ ready.length }}</span></div>
+      @for (o of ready; track o.id) {
+        <div class="kcard k-glow">
+          <div class="kc-top">
+            <div class="kc-table" [class.emporter]="o.tableNumber===0">{{ tableLabel(o) }}</div>
+          </div>
+          <div class="kc-items">
+            @for (item of o.items; track item.id) {
+              <div class="k-line">
+                <span class="k-qt">×{{ item.quantity }}</span>
+                <span>{{ item.emoji }}</span>
+                <div>{{ item.name }}</div>
+              </div>
+            }
+          </div>
+          <button class="kb kb-srv" (click)="action(o.id,'SERVED')">✓ Servi</button>
+        </div>
+      }
+    </div>
+  </div>
+</div>
