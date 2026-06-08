@@ -1,0 +1,12 @@
+export interface MenuItem {
+  id: number; name: string; price: number;
+  category: string; emoji: string; available: boolean;
+}
+export interface CartItem { item: MenuItem; qty: number; note: string; }
+export interface OrderItem { id: number; name: string; emoji: string; price: number; quantity: number; note: string; }
+export interface Order { id: number; tableNumber: number; status: string; items: OrderItem[]; total: number; createdAt: string; }
+export interface RestaurantTable { id: number; number: number; seats: number; status: 'FREE'|'OCCUPIED'|'RESERVED'; }
+export interface RestaurantSettings { id: number; name: string; subtitle: string; city: string; icon: string; taxNumber: string; currency: string; tvaRate: number; theme: string; }
+export interface Category { id: number; code: string; label: string; emoji: string; sortOrder: number; active: boolean; }
+export interface HistoryEntry { id: string; table: number|null; date: string; time: string; method: string; total: number; items: {id:number;name:string;emoji:string;price:number;qty:number}[]; }
+export interface Session { user: string; role: string; token: string; refreshToken: string; expiresAt: number; }
