@@ -1,0 +1,16 @@
+{
+  "appId": "com.laperla.pos",
+  "appName": "La Perla POS",
+  "webDir": "frontend-static",
+  "server": {
+    "url": "https://zitoun-pos-frontend.onrender.com",
+    "cleartext": false
+  },
+  "android": {
+    "buildOptions": {
+      "keystorePath": "release.keystore",
+      "keystoreAlias": "laperla",
+      "releaseType": "APK"
+    }
+  }
+}
