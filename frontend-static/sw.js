@@ -1,64 +1,39 @@
-const CACHE_NAME = 'laperla-pos-v1';
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap'
-];
+const CACHE = 'laperla-v2';
+const ASSETS = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
-// Installation - mise en cache des assets statiques
-self.addEventListener('install', function(event) {
+self.addEventListener('install', e => {
   self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(STATIC_ASSETS).catch(function() {});
-    })
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(() => {})));
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
   );
 });
 
-// Activation - nettoyer les anciens caches
-self.addEventListener('activate', function(event) {
-  event.waitUntil(
-    caches.keys().then(function(keys) {
-      return Promise.all(
-        keys.filter(function(k) { return k !== CACHE_NAME; })
-            .map(function(k) { return caches.delete(k); })
-      );
-    }).then(function() { return self.clients.claim(); })
-  );
-});
-
-// Fetch - stratégie Network First pour l'API, Cache First pour les assets
-self.addEventListener('fetch', function(event) {
-  var url = new URL(event.request.url);
-
-  // API calls → toujours réseau (pas de cache)
-  if (url.pathname.startsWith('/api/') || url.hostname.includes('onrender.com')) {
-    event.respondWith(
-      fetch(event.request).catch(function() {
-        return new Response(JSON.stringify({error:'offline'}),
-          {headers:{'Content-Type':'application/json'}});
-      })
-    );
+self.addEventListener('fetch', e => {
+  const url = new URL(e.request.url);
+  // API → réseau uniquement
+  if (url.hostname.includes('onrender.com') && url.pathname.startsWith('/api')) {
+    e.respondWith(fetch(e.request).catch(() =>
+      new Response('{"error":"offline"}', {headers:{'Content-Type':'application/json'}})
+    ));
     return;
   }
-
-  // Assets statiques → Cache First
-  event.respondWith(
-    caches.match(event.request).then(function(cached) {
+  // Assets → cache first
+  e.respondWith(
+    caches.match(e.request).then(cached => {
       if (cached) return cached;
-      return fetch(event.request).then(function(response) {
-        if (response && response.status === 200) {
-          var clone = response.clone();
-          caches.open(CACHE_NAME).then(function(cache) {
-            cache.put(event.request, clone);
-          });
+      return fetch(e.request).then(res => {
+        if (res && res.status === 200 && res.type === 'basic') {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
         }
-        return response;
-      }).catch(function() {
-        // Offline fallback → retourner index.html
-        return caches.match('/index.html');
-      });
+        return res;
+      }).catch(() => caches.match('/index.html'));
     })
   );
 });
