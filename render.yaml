@@ -1,4 +1,5 @@
 services:
+  # ── Backend Spring Boot ───────────────────────
   - type: web
     name: zitoun-pos-api
     runtime: docker
@@ -13,10 +14,24 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: FRONTEND_URL
-        value: https://zitoun-pos-frontend.onrender.com
+        value: https://zitoun-pos-angular.onrender.com
       - key: JWT_SECRET
         sync: false
 
+  # ── Frontend Angular 19 ───────────────────────
+  - type: web
+    name: zitoun-pos-angular
+    runtime: node
+    region: frankfurt
+    rootDir: ./angular-app
+    buildCommand: npm install && npm run build -- --configuration=production
+    startCommand: npx serve dist/zitoun-angular/browser -p $PORT --no-clipboard
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+  # ── Frontend HTML/JS (legacy) ─────────────────
   - type: web
     name: zitoun-pos-frontend
     runtime: static
