@@ -2196,6 +2196,54 @@ function updateBtns() {
 
 function sendKitchen() {
   if (!tableSelected() || oItems.length === 0) return;
+
+  // ── Commande EMPORTER : encaisser d'abord ──────────
+  if (selTable === 0) {
+    var total = oItems.reduce(function(s,o){return s+o.item.price*o.qty;},0);
+    // Stocker temporairement les articles à emporter
+    window._emporterItems = oItems.slice();
+    // Ouvrir l'encaissement directement sur les articles en cours
+    openEncaisserEmporter();
+    return;
+  }
+
+  // ── Commande normale (table) ─────────────────────
+  sendKitchenExecute();
+}
+
+// Encaissement spécial pour emporter — calcule depuis oItems
+function openEncaisserEmporter() {
+  encTable = 0;
+  encMethod = 'especes';
+  document.getElementById('encSub').textContent =
+    '🥡 À emporter · ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+
+  var container = document.getElementById('encItems');
+  var total = 0;
+  var html = '';
+  oItems.forEach(function(i) {
+    var subtotal = i.item.price * i.qty;
+    total += subtotal;
+    html += '<div class="enc-row">' +
+      '<div class="enc-row-name"><span class="enc-row-qty">×' + i.qty + '</span>' +
+      '<span>' + i.item.emoji + ' ' + i.item.name + '</span></div>' +
+      '<span style="font-weight:700;color:var(--ink)">' + fmt(subtotal) + '</span>' +
+    '</div>';
+  });
+
+  container.innerHTML = html;
+  encTotalVal = total;
+  document.getElementById('encTotal').textContent = fmt(total);
+  document.getElementById('encRecu').value = '';
+  document.getElementById('encRendu').textContent = '';
+  document.getElementById('encRendu').classList.remove('show');
+  selectMethod('especes');
+  // Marquer que c'est un encaissement emporter (envoi cuisine après)
+  window._encEmporter = true;
+  document.getElementById('encModal').classList.add('open');
+}
+
+function sendKitchenExecute() {
   var btn = document.getElementById('sendBtn');
   btn.disabled = true; btn.textContent = '⏳ Envoi...';
 
@@ -2207,7 +2255,6 @@ function sendKitchen() {
   };
 
   function onSuccess(orderId) {
-    // Envoyer en cuisine
     var url = window.API_URL + '/orders';
     if (orderId) url = window.API_URL + '/orders/' + orderId + '/send-kitchen';
     if (orderId) {
@@ -2219,7 +2266,7 @@ function sendKitchen() {
       status: 'sent', time: Date.now()
     });
     var t = TABLES.find(function(t) { return t.n === selTable; });
-    if (t && selTable !== 0) t.st = 'occupied';  // seulement si table réelle
+    if (t && selTable !== 0) t.st = 'occupied';
     updateKBadge();
     var label = selTable === 0 ? '🥡 À emporter' : 'Table ' + selTable;
     document.getElementById('sucSlot').innerHTML =
@@ -2227,11 +2274,10 @@ function sendKitchen() {
     oItems = []; selTable = null;
     buildTableBtns(); renderOrder();
     document.getElementById('ohSub').textContent = 'Aucune table sélectionnée';
-    btn.textContent = 'Envoyer en cuisine →';
+    btn.textContent = '🍳 Envoyer en cuisine';
     setTimeout(function() { document.getElementById('sucSlot').innerHTML = ''; }, 3500);
   }
 
-  // Essayer l'API, sinon mode local
   authFetch(window.API_URL + '/orders', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
@@ -2239,7 +2285,7 @@ function sendKitchen() {
   })
   .then(function(r) { return r.json(); })
   .then(function(order) { onSuccess(order.id); })
-  .catch(function() { onSuccess(null); }); // mode offline
+  .catch(function() { onSuccess(null); });
 }
 
 // ═══ TICKET MODAL ═══
@@ -2767,12 +2813,27 @@ function confirmerEncaissement() {
   buildTables();
 
   // Flash confirmation
-  var msg = '✅ Table ' + encTable + ' encaissée — ' + encTotalVal.toFixed(3) + ' DT (' + methodLabels[encMethod] + ')';
+  var isEmporter = (encTable === 0);
+  var tableLabel = isEmporter ? '🥡 Emporter' : 'Table ' + encTable;
+  var msg = '✅ ' + tableLabel + ' encaissée — ' + fmt(encTotalVal) + ' (' + methodLabels[encMethod] + ')';
   var flash = document.createElement('div');
   flash.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:13px 24px;border-radius:12px;font-weight:700;font-size:14px;z-index:999;box-shadow:0 4px 20px rgba(46,125,82,.4);animation:pop .3s ease';
   flash.textContent = msg;
   document.body.appendChild(flash);
   setTimeout(function() { flash.remove(); }, 3500);
+
+  // ── Emporter : envoyer en cuisine après paiement ──
+  if (isEmporter && window._encEmporter && window._emporterItems) {
+    window._encEmporter = false;
+    var savedItems = window._emporterItems;
+    window._emporterItems = null;
+    // Réinjecter les articles et envoyer
+    oItems = savedItems;
+    selTable = 0;
+    setTimeout(function() {
+      sendKitchenExecute();
+    }, 300);
+  }
 
   encTable = null;
 }
