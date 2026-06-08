@@ -1,0 +1,68 @@
+<div class="page-historique">
+  <div class="topbar">
+    <div><div class="tp-title">📜 Historique des factures</div></div>
+    <button class="hist-clear" (click)="clearHistory()">🗑 Effacer</button>
+  </div>
+
+  <div class="hist-list">
+    @if (cart.history().length === 0) {
+      <div class="hist-empty">Aucune facture pour le moment</div>
+    }
+    @for (entry of cart.history(); track entry.id) {
+      <div class="hist-card" (click)="open(entry)">
+        <div class="hist-card-top">
+          <span class="hist-table">{{ entry.table ? 'Table '+entry.table : '🥡 Emporter' }}</span>
+          <span class="hist-date">{{ entry.date }} {{ entry.time }}</span>
+          <span class="hist-method">{{ methodIcons[entry.method] }}</span>
+          <span class="hist-total">{{ settings.fmt(entry.total) }}</span>
+        </div>
+        <div class="hist-card-sub">{{ entry.id }} — {{ getPreview(entry) }}</div>
+      </div>
+    }
+  </div>
+</div>
+
+@if (selected()) {
+  <div class="modal-ov open" (click)="close()">
+    <div class="modal-box" style="max-width:500px;padding:0;overflow:hidden" (click)="$event.stopPropagation()">
+      <div style="padding:16px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:800;font-size:17px">📄 Facture {{ selected()!.id }}</div>
+        <button (click)="close()" style="border:none;background:none;font-size:18px;cursor:pointer">✕</button>
+      </div>
+      <div style="padding:10px 22px;border-bottom:1px solid var(--border);background:var(--ivory);display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;font-weight:700">Modifier total :</span>
+          <input type="number" [(ngModel)]="newTotal" placeholder="Laisser vide"
+            style="flex:1;padding:8px;border-radius:9px;border:2px solid var(--border);outline:none">
+          <span style="font-size:13px;font-weight:700">{{ settings.settings().currency }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;font-weight:700">Nb repas (sans détail) :</span>
+          <input type="number" [(ngModel)]="newQty" placeholder="Auto"
+            style="flex:1;padding:8px;border-radius:9px;border:2px solid var(--border);outline:none">
+        </div>
+      </div>
+      <div style="padding:16px 22px;max-height:46vh;overflow-y:auto">
+        <div style="font-family:monospace;font-size:13px">
+          <div style="text-align:center;font-weight:bold;font-size:16px;text-transform:uppercase">{{ settings.settings().name }}</div>
+          <div style="text-align:center;font-size:11px;color:#888">{{ selected()!.date }} {{ selected()!.time }}</div>
+          <hr style="border:none;border-top:1px dashed #ccc;margin:8px 0">
+          @for (item of selected()!.items; track item.id) {
+            <div style="display:flex;justify-content:space-between;margin:3px 0">
+              <span>{{ item.emoji }} {{ item.name }} ×{{ item.qty }}</span>
+              <span>{{ settings.fmt(item.price * item.qty) }}</span>
+            </div>
+          }
+          <hr style="border:none;border-top:1px dashed #ccc;margin:8px 0">
+          <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:15px">
+            <span>TOTAL</span><span>{{ settings.fmt(selected()!.total) }}</span>
+          </div>
+        </div>
+      </div>
+      <div style="padding:0 22px 20px;display:flex;gap:8px">
+        <button (click)="printFacture(false)" style="flex:1;padding:12px;border-radius:11px;background:var(--sky);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">🖨️ Avec détail</button>
+        <button (click)="printFacture(true)"  style="flex:1;padding:12px;border-radius:11px;background:var(--ink2);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">📋 Sans détail</button>
+      </div>
+    </div>
+  </div>
+}
