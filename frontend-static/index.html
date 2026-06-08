@@ -2182,15 +2182,20 @@ function chQty(i, d) {
 
 function clearOrder() { oItems = []; renderOrder(); }
 
+function tableSelected() {
+  // true si une table ou "Emporter" est sélectionné
+  return selTable === 0 || (selTable !== null && selTable !== undefined);
+}
+
 function updateBtns() {
-  var ok = oItems.length > 0 && (selTable === 0 || selTable !== null);
+  var ok = oItems.length > 0 && tableSelected();
   document.getElementById('printBtn').disabled = !ok;
   document.getElementById('sendBtn').disabled = !ok;
   if (typeof updateCartBadge === 'function') updateCartBadge();
 }
 
 function sendKitchen() {
-  if (selTable === null || selTable === undefined || oItems.length === 0) return;
+  if (!tableSelected() || oItems.length === 0) return;
   var btn = document.getElementById('sendBtn');
   btn.disabled = true; btn.textContent = '⏳ Envoi...';
 
@@ -2238,7 +2243,7 @@ function sendKitchen() {
 
 // ═══ TICKET MODAL ═══
 function openTicket() {
-  if (!selTable || oItems.length === 0) return;
+  if (!tableSelected() || oItems.length === 0) return;
   var total   = oItems.reduce(function(s,o){return s+o.item.price*o.qty;},0);
   var tvaRate = getTVA();
   var tva     = tvaRate>0 ? (total*tvaRate/100/(1+tvaRate/100)).toFixed(getCur()==='DT'?3:2) : null;
@@ -2252,7 +2257,8 @@ function openTicket() {
   var rCity   = window.RESTO_CITY || '';
   var rTax    = window.RESTO_TAX  || '';
 
-  document.getElementById('tkSub').textContent = 'Table '+selTable+' · '+timeStr;
+  var tableLabel = selTable === 0 ? 'À emporter' : 'Table ' + selTable;
+  document.getElementById('tkSub').textContent = tableLabel + ' · ' + timeStr;
 
   var rows = oItems.map(function(o){
     return '<div class="rc-row"><span>'+o.qty+'×  '+o.item.emoji+' '+o.item.name+'</span><span>'+fmt(o.item.price*o.qty)+'</span></div>' +
@@ -2273,7 +2279,7 @@ function openTicket() {
     '</div>'+
     '<hr class="rc-div">'+
     '<div class="rc-meta">'+dateStr+' '+timeStr+'</div>'+
-    '<div class="rc-meta">Table '+selTable+' · N° '+orderNum+'</div>'+
+    '<div class="rc-meta">'+tableLabel+' · N° '+orderNum+'</div>'+
     '<hr class="rc-div">'+
     rows+
     '<hr class="rc-div">'+
