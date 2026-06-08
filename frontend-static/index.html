@@ -2225,68 +2225,140 @@ function sendKitchen() {
 // ═══ TICKET MODAL ═══
 function openTicket() {
   if (!selTable || oItems.length === 0) return;
-  var total = oItems.reduce(function(s, o) { return s + o.item.price * o.qty; }, 0);
-  var tvaRate = getTVA() / 100;
-  var tva = tvaRate > 0 ? (total * tvaRate / (1 + tvaRate)).toFixed(getCur()==='DT'?3:2) : '0';
-  var ht  = tvaRate > 0 ? (total / (1 + tvaRate)).toFixed(getCur()==='DT'?3:2) : total.toFixed(getCur()==='DT'?3:2);
-  var now = new Date();
+  var total   = oItems.reduce(function(s,o){return s+o.item.price*o.qty;},0);
+  var tvaRate = getTVA();
+  var tva     = tvaRate>0 ? (total*tvaRate/100/(1+tvaRate/100)).toFixed(getCur()==='DT'?3:2) : null;
+  var ht      = tvaRate>0 ? (total/(1+tvaRate/100)).toFixed(getCur()==='DT'?3:2) : null;
+  var now     = new Date();
   var dateStr = now.toLocaleDateString('fr-FR');
-  var timeStr = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-  var orderNum = String(nid + 100).padStart(4, '0');
+  var timeStr = now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  var orderNum = String(nid+100).padStart(4,'0');
+  var rName   = window.RESTO_NAME || 'La Perla';
+  var rSub    = window.RESTO_SUB  || '';
+  var rCity   = window.RESTO_CITY || '';
+  var rTax    = window.RESTO_TAX  || '';
 
-  document.getElementById('tkSub').textContent = 'Table ' + selTable + ' · ' + timeStr;
+  document.getElementById('tkSub').textContent = 'Table '+selTable+' · '+timeStr;
 
-  var rows = oItems.map(function(o) {
-    return '<div class="rc-row"><span>' + o.qty + '×  ' + o.item.name + '</span><span>' + (o.item.price * o.qty).toFixed(3) + ' DT</span></div>' +
-      (o.note ? '<div class="rc-note">↳ ' + o.note + '</div>' : '');
+  var rows = oItems.map(function(o){
+    return '<div class="rc-row"><span>'+o.qty+'×  '+o.item.emoji+' '+o.item.name+'</span><span>'+fmt(o.item.price*o.qty)+'</span></div>' +
+      (o.note?'<div class="rc-note">↳ '+o.note+'</div>':'');
   }).join('');
 
-  var rName = window.RESTO_NAME || 'La Perla';
-  var rSub  = window.RESTO_SUB  || 'Restaurant & Terrasse';
-  var rCity = window.RESTO_CITY || 'Sidi Bou Saïd, Tunisie';
+  var tvaLine = '';
+  if (tva) {
+    tvaLine =
+      '<div class="rc-row" style="font-size:11px;color:#888"><span>Sous-total HT</span><span>'+ht+' '+getCur()+'</span></div>'+
+      '<div class="rc-row" style="font-size:11px;color:#888"><span>TVA ('+tvaRate+'%)</span><span>'+tva+' '+getCur()+'</span></div>';
+  }
 
   document.getElementById('rcPreview').innerHTML =
-    '<div class="rc-logo"><div class="rc-name">' + rName + '</div><div class="rc-tag">' + rSub + ' · ' + rCity + '</div></div>' +
-    '<hr class="rc-div">' +
-    '<div class="rc-meta">' + dateStr + ' ' + timeStr + '</div>' +
-    '<div class="rc-meta">Table ' + selTable + ' · N° ' + orderNum + '</div>' +
-    '<hr class="rc-div">' +
-    rows +
-    '<hr class="rc-div">' +
-    '<div class="rc-row" style="font-size:11px;color:#888"><span>Sous-total HT</span><span>' + ht + ' ' + getCur() + '</span></div>' +
-    (getTVA() > 0 ? '<div class="rc-row" style="font-size:11px;color:#888"><span>TVA (' + getTVA() + '%)</span><span>' + tva + ' ' + getCur() + '</span></div>' : '') +
-    '<hr class="rc-div">' +
-    '<div class="rc-total"><span>TOTAL TTC</span><span>' + fmt(total) + '</span></div>' +
-    '<div class="rc-footer">Merci de votre visite 🙏<br><b>' + rName + '</b> · ' + rCity + '<br>MF: 123456/A/M/000</div>';
+    '<div class="rc-logo">'+
+      '<div class="rc-name">'+rName+'</div>'+
+      (rSub?'<div class="rc-tag">'+rSub+(rCity?' · '+rCity:'')+'</div>':'')+
+    '</div>'+
+    '<hr class="rc-div">'+
+    '<div class="rc-meta">'+dateStr+' '+timeStr+'</div>'+
+    '<div class="rc-meta">Table '+selTable+' · N° '+orderNum+'</div>'+
+    '<hr class="rc-div">'+
+    rows+
+    '<hr class="rc-div">'+
+    tvaLine+
+    (tvaLine?'<hr class="rc-div">':'')+
+    '<div class="rc-total"><span>TOTAL TTC</span><span>'+fmt(total)+'</span></div>'+
+    (rTax?'<div class="rc-footer">Merci de votre visite 🙏<br><b>'+rName+'</b>'+(rCity?' · '+rCity:'')+'<br>'+rTax+'</div>':
+          '<div class="rc-footer">Merci de votre visite 🙏<br><b>'+rName+'</b>'+(rCity?' · '+rCity:'')+'</div>');
 
   document.getElementById('ticketModal').classList.add('open');
+}
+
+// ── Fonction partagée d'impression de reçu ──
+function getReceiptCSS() {
+  return (
+    '*{margin:0;padding:0;box-sizing:border-box}'+
+    'body{font-family:"Courier New",monospace;max-width:300px;margin:0 auto;padding:16px 12px;color:#111;background:#fff}'+
+    '.rc-logo{text-align:center;margin-bottom:10px}'+
+    '.rc-name{font-size:17px;font-weight:bold;letter-spacing:2px;text-transform:uppercase}'+
+    '.rc-tag{font-size:10px;color:#888;margin-top:2px}'+
+    '.rc-div{border:none;border-top:1px dashed #bbb;margin:8px 0}'+
+    '.rc-meta{font-size:11px;color:#666;text-align:center;margin:2px 0}'+
+    '.rc-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}'+
+    '.rc-note{font-size:10px;color:#888;padding-left:14px;font-style:italic;margin-bottom:2px}'+
+    '.rc-total{display:flex;justify-content:space-between;font-size:15px;font-weight:bold;padding:5px 0;border-top:2px solid #333}'+
+    '.rc-footer{text-align:center;font-size:10px;color:#999;margin-top:12px;padding-top:8px;border-top:1px dashed #ddd;line-height:1.6}'+
+    '.rc-footer b{color:#555}'+
+    '.no-print{display:none}'+
+    '@media print{body{padding:4px}.no-print{display:none}}'
+  );
+}
+
+function openPrintWindow(bodyHTML, title) {
+  var w = window.open('','_blank','width=420,height=700');
+  if (!w) { alert('Popup bloqué — autorisez les popups pour ce site'); return; }
+  w.document.write(
+    '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+title+'</title>'+
+    '<style>'+getReceiptCSS()+'<\/style></head><body>'+
+    bodyHTML+
+    '<div class="no-print" style="text-align:center;margin-top:20px">'+
+    '<button onclick="window.print()" style="padding:10px 28px;font-size:14px;cursor:pointer;'+
+    'background:#3d7a47;color:#fff;border:none;border-radius:8px;font-family:monospace">'+
+    '🖨 Imprimer</button>'+
+    '</div></body></html>'
+  );
+  w.document.close();
+  setTimeout(function(){ w.print(); }, 500);
+}
+
+function buildReceiptHTML(opts) {
+  // opts: { rName, rSub, rCity, rTax, date, time, table, orderNum, rows, total, tvaRate, cur }
+  var tva = opts.tvaRate>0 ? (opts.total*opts.tvaRate/100/(1+opts.tvaRate/100)).toFixed(opts.cur==='DT'?3:2) : null;
+  var ht  = opts.tvaRate>0 ? (opts.total/(1+opts.tvaRate/100)).toFixed(opts.cur==='DT'?3:2) : null;
+  var body =
+    '<div class="rc-logo">'+
+      '<div class="rc-name">'+opts.rName+'</div>'+
+      (opts.rSub?'<div class="rc-tag">'+opts.rSub+(opts.rCity?' · '+opts.rCity:'')+'</div>':'')+
+    '</div>'+
+    '<div class="rc-div"></div>'+
+    '<div class="rc-meta">'+opts.date+' '+opts.time+'</div>'+
+    '<div class="rc-meta">Table '+opts.table+' · N° '+opts.orderNum+'</div>'+
+    '<div class="rc-div"></div>'+
+    opts.rows+
+    '<div class="rc-div"></div>'+
+    (tva?
+      '<div class="rc-row"><span>Sous-total HT</span><span>'+ht+' '+opts.cur+'</span></div>'+
+      '<div class="rc-row"><span>TVA ('+opts.tvaRate+'%)</span><span>'+tva+' '+opts.cur+'</span></div>'+
+      '<div class="rc-div"></div>':
+    '')+
+    '<div class="rc-total"><span>TOTAL TTC</span><span>'+fmt(opts.total)+'</span></div>'+
+    '<div class="rc-footer">Merci de votre visite 🙏<br><b>'+opts.rName+'</b>'+
+      (opts.rCity?'<br>'+opts.rCity:'')+
+      (opts.rTax?'<br>'+opts.rTax:'')+
+    '</div>';
+  return body;
+}
+
+function printReceiptWindow(opts) {
+  var rName   = window.RESTO_NAME || 'La Perla';
+  var rSub    = window.RESTO_SUB  || '';
+  var rCity   = window.RESTO_CITY || '';
+  var rTax    = window.RESTO_TAX  || '';
+  var cur     = getCur();
+  var tvaRate = getTVA();
+  var now     = new Date();
+  var body = buildReceiptHTML({
+    rName: rName, rSub: rSub, rCity: rCity, rTax: rTax,
+    date: now.toLocaleDateString('fr-FR'),
+    time: now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
+    table: opts.table, orderNum: opts.orderNum || String(opts.table).padStart(3,'0')+'-'+now.getHours()+now.getMinutes(),
+    rows: opts.rows, total: opts.total, tvaRate: tvaRate, cur: cur
+  });
+  openPrintWindow(body, rName+' · Table '+opts.table);
 }
 
 function printTicket() {
   var html = document.getElementById('rcPreview').innerHTML;
   var rName = window.RESTO_NAME || 'La Perla';
-  var rSub  = window.RESTO_SUB  || 'Restaurant & Terrasse';
-  var rCity = window.RESTO_CITY || 'Sidi Bou Saïd, Tunisie';
-  var w = window.open('', '_blank', 'width=420,height=680');
-  w.document.write('<!DOCTYPE html><html><head><title>Ticket ' + rName + '</title><style>' +
-    '*{margin:0;padding:0;box-sizing:border-box}' +
-    'body{font-family:"Courier New",monospace;max-width:300px;margin:0 auto;padding:20px 12px;color:#111;background:#fff}' +
-    '.rc-name{text-align:center;font-size:17px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;margin-bottom:3px}' +
-    '.rc-tag{text-align:center;font-size:10px;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}' +
-    '.rc-div{border:none;border-top:1px dashed #ccc;margin:10px 0}' +
-    '.rc-meta{font-size:11px;color:#666;text-align:center;margin:3px 0}' +
-    '.rc-row{display:flex;justify-content:space-between;font-size:13px;padding:2px 0}' +
-    '.rc-note{font-size:10px;color:#888;padding-left:16px;font-style:italic;margin-bottom:3px}' +
-    '.rc-total{display:flex;justify-content:space-between;font-size:16px;font-weight:bold;padding:4px 0}' +
-    '.rc-footer{text-align:center;font-size:10px;color:#aaa;margin-top:14px;padding-top:10px;border-top:1px dashed #eee;line-height:1.7}' +
-    '.rc-footer b{color:#555}' +
-    '@media print{.no-print{display:none}body{padding:4px}}' +
-    '</style></head><body>' + html +
-    '<div class="no-print" style="text-align:center;margin-top:20px">' +
-    '<button onclick="window.print()" style="padding:10px 30px;font-size:14px;cursor:pointer;font-family:Cairo,sans-serif;background:#1a6eb5;color:#fff;border:none;border-radius:8px">🖨 Imprimer</button>' +
-    '</div></body></html>');
-  w.document.close();
-  setTimeout(function() { w.print(); }, 400);
+  openPrintWindow(html, rName);
 }
 
 // ═══ KITCHEN ═══
@@ -2638,67 +2710,29 @@ function confirmerEncaissement() {
 }
 
 function printTableTicket(n) {
-  var orders = kOrders.filter(function(o) { return o.table === n && o.status !== 'served'; });
-  var rName = window.RESTO_NAME || 'La Perla';
-  var rSub  = window.RESTO_SUB  || '';
-  var rCity = window.RESTO_CITY || '';
-  var cur   = getCur();
-  var tvaRate = getTVA();
-
-  // Compiler tous les articles
+  var orders = kOrders.filter(function(o){ return o.table===n && o.status!=='served'; });
   var allItems = {};
-  orders.forEach(function(order) {
-    order.items.forEach(function(item) {
+  orders.forEach(function(order){
+    order.items.forEach(function(item){
       var key = item.item.id;
       if (allItems[key]) allItems[key].qty += item.qty;
-      else allItems[key] = { item: item.item, qty: item.qty };
+      else allItems[key] = { item:item.item, qty:item.qty };
     });
   });
-
-  var now = new Date();
-  var dateStr = now.toLocaleDateString('fr-FR');
-  var timeStr = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-  var orderNum = String(n).padStart(3,'0') + '-' + now.getHours() + now.getMinutes();
-
   var total = 0;
   var rows = '';
-  Object.values(allItems).forEach(function(i) {
+  Object.values(allItems).forEach(function(i){
     var sub = i.item.price * i.qty;
     total += sub;
-    rows += '<div class="rc-row"><span>' + i.item.emoji + ' ' + i.item.name + ' ×' + i.qty + '</span><span>' + fmt(sub) + '</span></div>';
+    rows += '<div class="rc-row"><span>'+i.item.emoji+' '+i.item.name+' ×'+i.qty+'</span><span>'+fmt(sub)+'</span></div>';
   });
-
-  var tva  = tvaRate > 0 ? (total * tvaRate / (1 + tvaRate)).toFixed(cur==='DT'?3:2) : '0';
-  var ht   = tvaRate > 0 ? (total / (1 + tvaRate)).toFixed(cur==='DT'?3:2) : fmt(total);
-
-  var w = window.open('', '_blank', 'width=420,height=680');
-  w.document.write('<!DOCTYPE html><html><head><title>Ticket ' + rName + '</title><style>' +
-    'body{font-family:monospace;font-size:13px;padding:20px;max-width:320px;margin:0 auto}' +
-    '.rc-logo{text-align:center;margin-bottom:14px}' +
-    '.rc-name{font-size:20px;font-weight:bold}' +
-    '.rc-tag{font-size:11px;color:#666;margin-top:2px}' +
-    'hr{border:none;border-top:1px dashed #ccc;margin:10px 0}' +
-    '.rc-meta{font-size:12px;color:#555;text-align:center;margin:3px 0}' +
-    '.rc-row{display:flex;justify-content:space-between;margin:4px 0;font-size:13px}' +
-    '.rc-total{display:flex;justify-content:space-between;font-size:16px;font-weight:bold;margin:8px 0}' +
-    '.rc-footer{text-align:center;font-size:11px;color:#888;margin-top:16px;line-height:1.6}' +
-    '@media print{body{padding:4px}}' +
-    '</style></head><body>' +
-    '<div class="rc-logo"><div class="rc-name">' + rName + '</div>' +
-    (rSub ? '<div class="rc-tag">' + rSub + (rCity ? ' · ' + rCity : '') + '</div>' : '') +
-    '</div><hr>' +
-    '<div class="rc-meta">' + dateStr + ' ' + timeStr + '</div>' +
-    '<div class="rc-meta">Table ' + n + ' · N° ' + orderNum + '</div>' +
-    '<hr>' + rows + '<hr>' +
-    (tvaRate > 0 ?
-      '<div class="rc-row" style="font-size:11px;color:#888"><span>Sous-total HT</span><span>' + ht + ' ' + cur + '</span></div>' +
-      '<div class="rc-row" style="font-size:11px;color:#888"><span>TVA (' + tvaRate + '%)</span><span>' + tva + ' ' + cur + '</span></div><hr>'
-      : '') +
-    '<div class="rc-total"><span>TOTAL TTC</span><span>' + fmt(total) + '</span></div><hr>' +
-    '<div class="rc-footer">Merci de votre visite 🙏<br><b>' + rName + '</b><br>' + rCity + '<br>' + (window.RESTO_TAX || '') + '</div>' +
-    '</body></html>');
-  w.document.close();
-  setTimeout(function() { w.print(); }, 400);
+  printReceiptWindow({
+    title:    'Table '+n,
+    table:    n,
+    total:    total,
+    rows:     rows,
+    noDetail: false
+  });
 }
 
 function askFree(n, from) {
@@ -2818,23 +2852,14 @@ function updateFactureTotal(val) {
 function printFacture(noDetail) {
   if (!currentHistEntry) return;
   var inp = document.getElementById('facturePriceInput');
-  if (inp && inp.value) currentHistEntry.total = parseFloat(inp.value) || currentHistEntry.total;
+  if (inp && inp.value) {
+    var newTotal = parseFloat(inp.value);
+    if (!isNaN(newTotal) && newTotal > 0) currentHistEntry.total = newTotal;
+  }
   buildFacturePreview(currentHistEntry, noDetail);
   var content = document.getElementById('facturePreview').innerHTML;
   var rName = window.RESTO_NAME||'La Perla';
-  var w = window.open('','_blank','width=420,height=680');
-  w.document.write('<!DOCTYPE html><html><head><title>Facture</title><style>'+
-    'body{font-family:monospace;font-size:13px;padding:20px;max-width:320px;margin:0 auto}'+
-    '.rc-logo{text-align:center;margin-bottom:14px}.rc-name{font-size:18px;font-weight:bold}'+
-    '.rc-tag,.rc-meta{font-size:11px;color:#666;text-align:center;margin:2px 0}'+
-    'hr{border:none;border-top:1px dashed #ccc;margin:8px 0}'+
-    '.rc-row{display:flex;justify-content:space-between;margin:4px 0;font-size:13px}'+
-    '.rc-total{display:flex;justify-content:space-between;font-size:16px;font-weight:bold;margin:8px 0}'+
-    '.rc-footer{text-align:center;font-size:11px;color:#888;margin-top:14px}'+
-    '@media print{body{padding:4px}}'+
-    '<\/style></head><body>'+content+'</body></html>');
-  w.document.close();
-  setTimeout(function(){w.print();},400);
+  openPrintWindow(content, rName+' · Facture '+currentHistEntry.id);
 }
 
 function closeModal(id) {
@@ -3535,6 +3560,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.RESTO_ICON     = '🌶️';
   window.RESTO_CURRENCY = 'DT';    // devise par défaut
   window.RESTO_TVA      = 10;      // TVA en % (0 = pas de TVA)
+  window.RESTO_TAX      = '';      // numéro fiscal
 
   // ── URL du backend Render ──────────────────
   window.API_URL = 'https://zitoun-pos-api.onrender.com/api';
@@ -3664,6 +3690,7 @@ function loadSettingsFromAPI() {
       window.RESTO_ICON     = s.icon      || '🌶️';
       window.RESTO_CURRENCY = s.currency  || 'DT';
       window.RESTO_TVA      = (s.tvaRate !== undefined) ? s.tvaRate : 10;
+      window.RESTO_TAX      = s.taxNumber || '';
       // Mettre à jour l'interface
       var e;
       e = document.getElementById('brandName');      if(e) e.textContent = s.name;
