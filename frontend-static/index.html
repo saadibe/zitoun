@@ -476,10 +476,11 @@ button {
 }
 
 .o-foot {
-  padding: 14px 16px 18px;
+  padding: 14px 16px 20px;
   border-top: 2px solid var(--border);
   background: var(--white);
   display: flex; flex-direction: column; gap: 12px;
+  flex-shrink: 0;
 }
 .o-total { display: flex; justify-content: space-between; align-items: baseline; }
 .o-tlbl { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--ink3); }
@@ -496,24 +497,28 @@ button {
   animation: pop .2s ease;
 }
 @keyframes pop { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
-.o-acts { display: flex; gap: 7px; }
+.o-acts { display: flex; gap: 10px; align-items: stretch; }
 .act-btn {
-  flex: 1; padding: 7px 8px; border-radius: 10px;
-  font-size: 12px; font-weight: 700; line-height: 1.1;
+  flex: 1; padding: 13px 10px; border-radius: 12px;
+  font-size: 14px; font-weight: 800; line-height: 1.2;
   cursor: pointer; font-family: 'Cairo', sans-serif; transition: all .18s;
   border: 2px solid transparent; white-space: nowrap;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
 }
-.act-btn:disabled { opacity: .3; cursor: not-allowed; transform: none !important; }
+.act-btn:disabled { opacity: .35; cursor: not-allowed; transform: none !important; }
 .act-print {
-  background: var(--cream); color: var(--ink2);
-  border-color: var(--sand);
+  background: var(--white); color: var(--sky);
+  border-color: var(--sky); border-width: 2px;
+  font-size: 13px;
 }
-.act-print:hover:not(:disabled) { background: var(--sand); color: var(--ink); }
+.act-print:hover:not(:disabled) { background: var(--sky-pale); color: var(--sky); }
 .act-send {
-  background: var(--sky); color: #fff;
-  box-shadow: 0 4px 16px rgba(26,110,181,.35);
+  background: linear-gradient(135deg, var(--sky), var(--sky2));
+  color: #fff; flex: 2;
+  box-shadow: 0 4px 16px rgba(61,122,71,.4);
+  font-size: 15px;
 }
-.act-send:hover:not(:disabled) { background: var(--sky2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,110,181,.45); }
+.act-send:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(61,122,71,.5); }
 
 /* ═══════════════════════════════
    KITCHEN
@@ -1575,8 +1580,8 @@ if ('serviceWorker' in navigator) {
             </div>
             <div id="sucSlot"></div>
             <div class="o-acts">
-              <button class="act-btn act-print" id="printBtn" disabled onclick="openTicket()">🖨 Ticket</button>
-              <button class="act-btn act-send" id="sendBtn" disabled onclick="sendKitchen()">Envoyer en cuisine →</button>
+              <button class="act-btn act-print" id="printBtn" disabled onclick="openTicket()">🖨️ Ticket</button>
+              <button class="act-btn act-send" id="sendBtn" disabled onclick="sendKitchen()">🍳 Envoyer en cuisine</button>
             </div>
           </div>
         </div>
