@@ -1,0 +1,107 @@
+<div class="page-admin">
+  <div class="topbar">
+    <div><div class="tp-title">⚙️ Administration</div></div>
+  </div>
+  <div class="admin-tabs">
+    <button class="admin-tab" [class.active]="tab==='settings'" (click)="tab='settings'">⚙️ Paramètres</button>
+    <button class="admin-tab" [class.active]="tab==='menu'"     (click)="tab='menu'">🍽️ Menu</button>
+    <button class="admin-tab" [class.active]="tab==='categories'" (click)="tab='categories'">🏷️ Catégories</button>
+    <button class="admin-tab" [class.active]="tab==='users'"   (click)="tab='users'">👤 Comptes</button>
+  </div>
+  <div class="admin-body">
+    @if (tab==='settings') {
+      <div class="settings-form">
+        <div class="sf-row"><label>Nom</label><input [(ngModel)]="s.name"></div>
+        <div class="sf-row"><label>Sous-titre</label><input [(ngModel)]="s.subtitle"></div>
+        <div class="sf-row"><label>Ville</label><input [(ngModel)]="s.city"></div>
+        <div class="sf-row"><label>Icône</label><input [(ngModel)]="s.icon" style="width:70px"></div>
+        <div class="sf-row"><label>N° fiscal</label><input [(ngModel)]="s.taxNumber"></div>
+        <div class="sf-row"><label>Devise</label>
+          <select [(ngModel)]="s.currency">
+            @for (c of currencies; track c) { <option [value]="c">{{ c }}</option> }
+          </select>
+        </div>
+        <div class="sf-row"><label>TVA (%)</label>
+          <select [(ngModel)]="s.tvaRate">
+            @for (t of tvaOptions; track t) { <option [value]="t">{{ t===0 ? 'Pas de TVA' : t+'%' }}</option> }
+          </select>
+        </div>
+        <div class="sf-row"><label>Thème</label>
+          <select [(ngModel)]="s.theme">
+            <option value="vert">🟢 Vert olivier</option>
+            <option value="bleu">🔵 Bleu méditerranée</option>
+            <option value="blanc">⚪ Blanc minimal</option>
+            <option value="noir">⚫ Noir doré</option>
+          </select>
+        </div>
+        <button class="btn-save" (click)="saveSettings()">{{ saved ? '✓ Enregistré !' : '💾 Enregistrer' }}</button>
+      </div>
+    }
+    @if (tab==='menu') {
+      <div class="admin-menu">
+        <div class="art-form">
+          <input [(ngModel)]="newArt.name" placeholder="Nom de l'article">
+          <input [(ngModel)]="newArt.price" type="number" placeholder="Prix" style="width:80px">
+          <input [(ngModel)]="newArt.emoji" placeholder="🍽️" style="width:55px;text-align:center">
+          <select [(ngModel)]="newArt.category">
+            @for (cat of settings.categories(); track cat.code) {
+              <option [value]="cat.code">{{ cat.emoji }} {{ cat.label }}</option>
+            }
+          </select>
+          <button class="btn-add" (click)="addArticle()">+ Ajouter</button>
+        </div>
+        <div class="art-list">
+          @for (item of menu(); track item.id) {
+            <div class="art-item">
+              <span class="art-em">{{ item.emoji }}</span>
+              <div class="art-info">
+                <div class="art-name">{{ item.name }}</div>
+                <div class="art-meta">{{ item.category }} · {{ settings.fmt(item.price) }}</div>
+              </div>
+              <button class="btn-del" (click)="deleteArticle(item.id)">🗑</button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+    @if (tab==='categories') {
+      <div class="cat-manager">
+        <div class="cat-form">
+          <input [(ngModel)]="newCat.emoji" placeholder="Emoji" style="width:55px;text-align:center">
+          <input [(ngModel)]="newCat.label" placeholder="Nom (ex: Desserts)">
+          <input [(ngModel)]="newCat.code"  placeholder="CODE" style="text-transform:uppercase">
+          <button class="btn-add" (click)="addCategory()">+ Ajouter</button>
+        </div>
+        @for (cat of settings.categories(); track cat.id) {
+          <div class="cat-row">
+            <span>{{ cat.emoji }}</span>
+            <div><div>{{ cat.label }}</div><div style="font-size:11px;font-family:monospace;color:#888">{{ cat.code }}</div></div>
+            <button class="btn-del" (click)="deleteCategory(cat.id)">🗑</button>
+          </div>
+        }
+      </div>
+    }
+    @if (tab==='users') {
+      <div class="user-manager">
+        <div class="user-form">
+          <input [(ngModel)]="newUser.username" placeholder="Identifiant">
+          <input [(ngModel)]="newUser.password" type="password" placeholder="Mot de passe">
+          <select [(ngModel)]="newUser.role">
+            <option value="ADMIN">⚙️ Admin</option>
+            <option value="SERVEUR">📋 Serveur</option>
+            <option value="CUISINE">🍳 Cuisine</option>
+            <option value="CAISSE">💰 Caisse</option>
+          </select>
+          <button class="btn-add" (click)="addUser()">+ Ajouter</button>
+        </div>
+        @for (u of users(); track u.id) {
+          <div class="user-row">
+            <span>{{ getRoleIcon(u.role) }}</span>
+            <div><div>{{ u.username }}</div><div style="font-size:11px;color:#888">{{ u.role }}</div></div>
+            <button class="btn-del" (click)="deleteUser(u.id)">🗑</button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
