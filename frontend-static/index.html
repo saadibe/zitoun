@@ -2067,10 +2067,23 @@ function showPage(name, btn) {
 function buildTableBtns() {
   var c = document.getElementById('tblBtns');
   c.innerHTML = '';
-  for (var i = 1; i <= 10; i++) {
+  // Bouton Emporter (sans table)
+  var emporter = document.createElement('button');
+  emporter.className = 'tbl-btn' + (selTable === 0 ? ' sel' : '');
+  emporter.id = 'tblEmporter';
+  emporter.title = 'Commande à emporter / comptoir';
+  emporter.innerHTML = '🥡';
+  emporter.style.cssText = 'background:' + (selTable===0?'var(--terracotta)':'var(--terra-light)') +
+    ';color:' + (selTable===0?'#fff':'var(--terracotta)') +
+    ';border-color:var(--terracotta);font-size:16px';
+  emporter.onclick = function() { pickTable(0); };
+  c.appendChild(emporter);
+
+  for (var i = 1; i <= TABLES.length; i++) {
     (function(num) {
       var b = document.createElement('button');
       b.className = 'tbl-btn' + (selTable === num ? ' sel' : '');
+      b.id = 'tbl' + num;
       b.textContent = num;
       b.onclick = function() { pickTable(num); };
       c.appendChild(b);
@@ -2081,7 +2094,8 @@ function buildTableBtns() {
 function pickTable(n) {
   selTable = n;
   buildTableBtns();
-  document.getElementById('ohSub').textContent = 'Table ' + n + ' · ' + new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  var label = n === 0 ? 'À emporter · ' : 'Table ' + n + ' · ';
+  document.getElementById('ohSub').textContent = label + new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
   updateBtns();
 }
 
@@ -2169,14 +2183,14 @@ function chQty(i, d) {
 function clearOrder() { oItems = []; renderOrder(); }
 
 function updateBtns() {
-  var ok = oItems.length > 0 && selTable !== null;
+  var ok = oItems.length > 0 && (selTable === 0 || selTable !== null);
   document.getElementById('printBtn').disabled = !ok;
   document.getElementById('sendBtn').disabled = !ok;
   if (typeof updateCartBadge === 'function') updateCartBadge();
 }
 
 function sendKitchen() {
-  if (!selTable || oItems.length === 0) return;
+  if (selTable === null || selTable === undefined || oItems.length === 0) return;
   var btn = document.getElementById('sendBtn');
   btn.disabled = true; btn.textContent = '⏳ Envoi...';
 
@@ -2676,7 +2690,7 @@ function confirmerEncaissement() {
     });
   HISTORY.unshift({
     id:   'F'+String(Date.now()).slice(-6),
-    table: encTable,
+    table:  encTable !== undefined ? encTable : null,
     date:  new Date().toLocaleDateString('fr-FR'),
     time:  new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
     method: encMethod,
@@ -2791,7 +2805,7 @@ function buildHistoryList() {
     return '<div style="background:var(--white);border:2px solid var(--border);border-radius:14px;padding:14px 16px;cursor:pointer" onclick="openHistoryEntry(\''+h.id+'\')">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
         '<div style="display:flex;align-items:center;gap:8px">' +
-          '<span style="background:var(--sky-pale);color:var(--sky);border:1.5px solid var(--sky-light);border-radius:8px;padding:3px 10px;font-size:12px;font-weight:800">Table '+h.table+'</span>' +
+          '<span style="background:var(--sky-pale);color:var(--sky);border:1.5px solid var(--sky-light);border-radius:8px;padding:3px 10px;font-size:12px;font-weight:800">'+(h.table?'Table '+h.table:'🥡 Emporter')+'</span>' +
           '<span style="font-size:12px;color:var(--ink3)">'+h.date+' '+h.time+'</span>' +
           '<span>'+( mIcons[h.method]||'💰')+'</span>' +
         '</div>' +
