@@ -1495,6 +1495,10 @@ if ('serviceWorker' in navigator) {
           </button>
         </li>
         <li>
+          <button class="nav-btn" onclick="showPage('history', this)" data-page="history">
+            <span class="nav-ico">📜</span>
+            <span class="nav-lbl">Historique</span>
+          </button>
           <button class="nav-btn" onclick="showPage('admin', this)" data-page="admin">
             <span class="nav-ico">⚙️</span>
             <span class="nav-lbl">Admin</span>
@@ -1730,6 +1734,20 @@ if ('serviceWorker' in navigator) {
       </div>
     </div>
 
+    <!-- PAGE HISTORIQUE -->
+    <div class="page" id="page-history">
+      <div class="topbar">
+        <div>
+          <div class="tp-title">📜 Historique des factures</div>
+          <div class="tp-sub">Commandes encaissées</div>
+        </div>
+        <button onclick="clearHistory()" style="padding:7px 14px;border-radius:9px;border:2px solid var(--border);background:var(--cream);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;color:var(--ink3)">🗑 Effacer</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px;background:var(--ivory)" id="historyList">
+        <div style="text-align:center;color:var(--ink4);padding:40px 0;font-style:italic">Aucune facture</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1744,6 +1762,9 @@ if ('serviceWorker' in navigator) {
   </button>
   <button class="bn-btn" id="bn-tables" onclick="showPage('tables',this);syncBottomNav('tables')">
     <span class="bn-ico">🪑</span><span>Tables</span>
+  </button>
+  <button class="bn-btn" id="bn-history" onclick="showPage('history',this);syncBottomNav('history')">
+    <span class="bn-ico">📜</span><span>Historique</span>
   </button>
   <button class="bn-btn" id="bn-admin" onclick="showPage('admin',this);syncBottomNav('admin')">
     <span class="bn-ico">⚙️</span><span>Admin</span>
@@ -1898,6 +1919,30 @@ if ('serviceWorker' in navigator) {
   </div>
 </div>
 
+
+<!-- MODAL FACTURE -->
+<div class="modal-ov" id="factureModal">
+  <div class="modal-box" style="max-width:500px;padding:0;overflow:hidden;border-top:5px solid var(--sky)">
+    <div style="padding:16px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div style="font-family:Tajawal,sans-serif;font-size:17px;font-weight:800;color:var(--ink)">📄 Facture</div>
+      <button onclick="closeModal('factureModal')" style="background:var(--cream);border:2px solid var(--sand);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:13px">✕</button>
+    </div>
+    <div style="padding:10px 22px;border-bottom:1px solid var(--border);background:var(--ivory);display:flex;align-items:center;gap:10px">
+      <span style="font-size:12px;font-weight:700;color:var(--ink3)">Modifier le total :</span>
+      <input id="facturePriceInput" type="number" step="0.001" placeholder="Laisser vide pour garder" oninput="updateFactureTotal(this.value)"
+        style="flex:1;padding:8px 12px;border-radius:9px;border:2px solid var(--border);background:var(--white);font-size:14px;font-family:Tajawal,sans-serif;outline:none">
+      <span style="font-size:13px;font-weight:700;color:var(--ink3)" id="factureCurLbl">DT</span>
+    </div>
+    <div style="padding:16px 22px;max-height:46vh;overflow-y:auto">
+      <div class="receipt" id="facturePreview"></div>
+    </div>
+    <div style="padding:0 22px 20px;display:flex;gap:8px">
+      <button onclick="printFacture(false)" style="flex:1;padding:12px;border-radius:11px;background:var(--sky);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif">🖨️ Avec détail</button>
+      <button onclick="printFacture(true)"  style="flex:1;padding:12px;border-radius:11px;background:var(--ink2);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif">📋 Sans détail</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-ov" id="freeModal">
   <div class="modal-box">
     <span class="mb-ico">🔓</span>
@@ -1988,7 +2033,7 @@ const TABLES = [
 ];
 
 // ═══ STATE ═══
-let selTable = null, activeCat = 'all', oItems = [], kOrders = [], nid = 1;
+let selTable = null, activeCat = 'all', oItems = [], kOrders = [], nid = 1, HISTORY = [];
 
 // ═══ INIT ═══
 function init() {
@@ -2014,7 +2059,8 @@ function showPage(name, btn) {
   syncBottomNav(name);
   if (name === 'kitchen') renderKitchen();
   if (name === 'tables') buildTables();
-  if (name === 'admin') { buildAdminMenu(); buildAdminTables(); initSettings(); }
+  if (name === 'admin')   { buildAdminMenu(); buildAdminTables(); initSettings(); }
+  if (name === 'history') { buildHistoryList(); }
 }
 
 // ═══ TABLE BUTTONS ═══
@@ -2513,6 +2559,27 @@ function confirmerEncaissement() {
 
   var methodLabels = { especes: 'Espèces', carte: 'Carte bancaire', cheque: 'Chèque', mixte: 'Paiement mixte' };
 
+  // Sauvegarder dans l'historique
+  var _items = [];
+  kOrders.filter(function(o){return o.table===encTable&&o.status!=='served';})
+    .forEach(function(o){
+      o.items.forEach(function(i){
+        var found=_items.find(function(x){return x.id===i.item.id;});
+        if(found) found.qty+=i.qty;
+        else _items.push({id:i.item.id,name:i.item.name,emoji:i.item.emoji,price:i.item.price,qty:i.qty});
+      });
+    });
+  HISTORY.unshift({
+    id:   'F'+String(Date.now()).slice(-6),
+    table: encTable,
+    date:  new Date().toLocaleDateString('fr-FR'),
+    time:  new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
+    method: encMethod,
+    total:  encTotalVal,
+    items:  _items,
+    paidAt: Date.now()
+  });
+
   // Marquer commandes comme servies
   kOrders.forEach(function(o) {
     if (o.table === encTable && o.status !== 'served') o.status = 'served';
@@ -2602,11 +2669,22 @@ function printTableTicket(n) {
 }
 
 function askFree(n, from) {
+  if (from === 'occupied') {
+    var active = kOrders.filter(function(o){ return o.table===n && o.status!=='served'; });
+    if (active.length > 0) {
+      var tot = 0;
+      active.forEach(function(o){ o.items.forEach(function(i){ tot += i.item.price*i.qty; }); });
+      if (!confirm('⚠ Commandes non encaissées !\nTotal : '+fmt(tot)+'\n\nEncaisser maintenant ?')) return;
+      closeModal('tableDetailModal');
+      openEncaisser(n);
+      return;
+    }
+  }
   pendFree = n;
   document.getElementById('mbTitle').textContent = 'Libérer la table ' + n + ' ?';
   document.getElementById('mbSub').textContent = from === 'occupied'
-    ? 'La commande sera clôturée et la table remise disponible.'
-    : 'La réservation sera annulée et la table remise disponible.';
+    ? 'Toutes les commandes sont encaissées.'
+    : 'La réservation sera annulée.';
   document.getElementById('freeModal').classList.add('open');
 }
 
@@ -2620,6 +2698,103 @@ function confirmFree() {
   pendFree = null;
   closeModal('freeModal');
   buildTables();
+}
+
+// ═══ HISTORIQUE ════════════════════════════════
+var currentHistEntry = null;
+
+function buildHistoryList() {
+  var list = document.getElementById('historyList');
+  if (!list) return;
+  if (!HISTORY.length) {
+    list.innerHTML = '<div style="text-align:center;color:var(--ink4);padding:40px 0;font-style:italic">Aucune facture</div>';
+    return;
+  }
+  var mIcons = {especes:'💵',carte:'💳',cheque:'📝',mixte:'🔀'};
+  list.innerHTML = HISTORY.map(function(h) {
+    var prev = h.items.slice(0,3).map(function(i){return i.emoji+' '+i.name+' x'+i.qty;}).join(', ');
+    if (h.items.length>3) prev += '...';
+    return '<div style="background:var(--white);border:2px solid var(--border);border-radius:14px;padding:14px 16px;cursor:pointer" onclick="openHistoryEntry(\''+h.id+'\')">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+          '<span style="background:var(--sky-pale);color:var(--sky);border:1.5px solid var(--sky-light);border-radius:8px;padding:3px 10px;font-size:12px;font-weight:800">Table '+h.table+'</span>' +
+          '<span style="font-size:12px;color:var(--ink3)">'+h.date+' '+h.time+'</span>' +
+          '<span>'+( mIcons[h.method]||'💰')+'</span>' +
+        '</div>' +
+        '<span style="font-family:Tajawal,sans-serif;font-size:18px;font-weight:900;color:var(--sky)">'+fmt(h.total)+'</span>' +
+      '</div>' +
+      '<div style="font-size:12px;color:var(--ink3)">'+h.id+' — '+prev+'</div>' +
+    '</div>';
+  }).join('');
+}
+
+function clearHistory() {
+  if (!confirm('Effacer tout l\'historique ?')) return;
+  HISTORY = []; buildHistoryList();
+}
+
+function openHistoryEntry(id) {
+  currentHistEntry = HISTORY.find(function(h){return h.id===id;});
+  if (!currentHistEntry) return;
+  document.getElementById('facturePriceInput').value = '';
+  document.getElementById('factureCurLbl').textContent = getCur();
+  buildFacturePreview(currentHistEntry, false);
+  document.getElementById('factureModal').classList.add('open');
+}
+
+function buildFacturePreview(h, noDetail) {
+  var rName=window.RESTO_NAME||'La Perla', rSub=window.RESTO_SUB||'';
+  var cur=getCur(), tvaRate=getTVA();
+  var total = h.total;
+  var rows = '';
+  if (noDetail) {
+    var qty = h.items.reduce(function(s,i){return s+i.qty;},0);
+    rows = '<div class="rc-row"><span>'+qty+' repas</span><span>'+fmt(total)+'</span></div>';
+  } else {
+    h.items.forEach(function(i){
+      rows += '<div class="rc-row"><span>'+i.emoji+' '+i.name+' x'+i.qty+'</span><span>'+fmt(i.price*i.qty)+'</span></div>';
+    });
+  }
+  var tva  = tvaRate>0 ? (total*tvaRate/(1+tvaRate)).toFixed(cur==='DT'?3:2) : null;
+  var ht   = tvaRate>0 ? (total/(1+tvaRate)).toFixed(cur==='DT'?3:2) : null;
+  var preview = document.getElementById('facturePreview');
+  preview.innerHTML =
+    '<div class="rc-logo"><div class="rc-name">'+rName+'</div>'+(rSub?'<div class="rc-tag">'+rSub+'</div>':'')+'</div>'+
+    '<hr class="rc-div">' +
+    '<div class="rc-meta">'+h.date+' '+h.time+'</div>' +
+    '<div class="rc-meta">Table '+h.table+' · Facture '+h.id+'</div>' +
+    '<hr class="rc-div">' + rows + '<hr class="rc-div">' +
+    (tva?'<div class="rc-row" style="font-size:11px;color:#888"><span>HT</span><span>'+ht+' '+cur+'</span></div>'+
+         '<div class="rc-row" style="font-size:11px;color:#888"><span>TVA ('+tvaRate+'%)</span><span>'+tva+' '+cur+'</span></div><hr class="rc-div">':'') +
+    '<div class="rc-total"><span>TOTAL</span><span id="factureTotal">'+fmt(total)+'</span></div>' +
+    '<div class="rc-footer">Merci de votre visite &#x1F64F;<br><b>'+rName+'</b></div>';
+}
+
+function updateFactureTotal(val) {
+  var t=document.getElementById('factureTotal');
+  if (t) t.textContent = val ? fmt(parseFloat(val)||0) : (currentHistEntry?fmt(currentHistEntry.total):'');
+}
+
+function printFacture(noDetail) {
+  if (!currentHistEntry) return;
+  var inp = document.getElementById('facturePriceInput');
+  if (inp && inp.value) currentHistEntry.total = parseFloat(inp.value) || currentHistEntry.total;
+  buildFacturePreview(currentHistEntry, noDetail);
+  var content = document.getElementById('facturePreview').innerHTML;
+  var rName = window.RESTO_NAME||'La Perla';
+  var w = window.open('','_blank','width=420,height=680');
+  w.document.write('<!DOCTYPE html><html><head><title>Facture</title><style>'+
+    'body{font-family:monospace;font-size:13px;padding:20px;max-width:320px;margin:0 auto}'+
+    '.rc-logo{text-align:center;margin-bottom:14px}.rc-name{font-size:18px;font-weight:bold}'+
+    '.rc-tag,.rc-meta{font-size:11px;color:#666;text-align:center;margin:2px 0}'+
+    'hr{border:none;border-top:1px dashed #ccc;margin:8px 0}'+
+    '.rc-row{display:flex;justify-content:space-between;margin:4px 0;font-size:13px}'+
+    '.rc-total{display:flex;justify-content:space-between;font-size:16px;font-weight:bold;margin:8px 0}'+
+    '.rc-footer{text-align:center;font-size:11px;color:#888;margin-top:14px}'+
+    '@media print{body{padding:4px}}'+
+    '<\/style></head><body>'+content+'</body></html>');
+  w.document.close();
+  setTimeout(function(){w.print();},400);
 }
 
 function closeModal(id) {
@@ -2657,14 +2832,14 @@ var ROLE_LABELS = {
 
 // Pages accessibles par rôle (minuscules ET majuscules)
 var ROLE_PAGES = {
-  admin:   ['server','kitchen','tables','admin'],
-  ADMIN:   ['server','kitchen','tables','admin'],
+  admin:   ['server','kitchen','tables','history','admin'],
+  ADMIN:   ['server','kitchen','tables','history','admin'],
   serveur: ['server','tables'],
   SERVEUR: ['server','tables'],
   cuisine: ['kitchen'],
   CUISINE: ['kitchen'],
-  caisse:  ['server','tables'],
-  CAISSE:  ['server','tables'],
+  caisse:  ['server','tables','history'],
+  CAISSE:  ['server','tables','history'],
 };
 
 // Page de démarrage par rôle
