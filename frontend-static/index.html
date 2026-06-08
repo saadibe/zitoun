@@ -2494,7 +2494,37 @@ var currentDetailTable = null;
 function openTableDetail(n) {
   currentDetailTable = n;
   document.getElementById('tdTitle').textContent = 'Table ' + n;
+  document.getElementById('tdSub').textContent = 'Chargement...';
+  document.getElementById('tableDetailModal').classList.add('open');
 
+  // Charger depuis l'API pour avoir les données fraîches
+  var headers = currentSession ? {'Authorization':'Bearer '+currentSession.token} : {};
+  fetch(window.API_URL + '/orders/active', { headers: headers })
+    .then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(apiOrders){
+      // Mettre à jour kOrders
+      apiOrders.filter(function(o){ return o.tableNumber === n && o.status !== 'SERVED'; })
+        .forEach(function(o){
+          var existing = kOrders.find(function(k){ return k.id === o.id; });
+          if (!existing) {
+            kOrders.push({
+              id: o.id, table: o.tableNumber,
+              status: o.status.toLowerCase(),
+              items: (o.items||[]).map(function(i){
+                return { item:{id:i.id,name:i.name,price:i.price,emoji:i.emoji||'🍽️'}, qty:i.quantity, note:i.note||'' };
+              })
+            });
+          } else {
+            // Mettre à jour le statut
+            existing.status = o.status.toLowerCase();
+          }
+        });
+      renderTableDetail(n);
+    })
+    .catch(function(){ renderTableDetail(n); });
+}
+
+function renderTableDetail(n) {
   var orders = kOrders.filter(function(o) { return o.table === n && o.status !== 'served'; });
   var body = document.getElementById('tdBody');
 
@@ -2554,34 +2584,51 @@ var encTotalVal = 0;
 function openEncaisser(n) {
   encTable = n;
   encMethod = 'especes';
-  document.getElementById('encSub').textContent = 'Table ' + n + ' · ' + new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  document.getElementById('encSub').textContent =
+    (n === 0 ? 'À emporter' : 'Table ' + n) + ' · ' +
+    new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
 
-  // Récupérer les commandes de cette table (local + API)
-  var tableOrders = kOrders.filter(function(o) { return o.table === n && o.status !== 'served'; });
-  
-  // Si kOrders vide, essayer de charger depuis l'API
-  if (tableOrders.length === 0 && window.API_URL) {
-    fetch(window.API_URL + '/orders?table=' + n, {
-      headers: currentSession ? {'Authorization':'Bearer '+currentSession.token} : {}
-    })
-    .then(function(r){ return r.ok ? r.json() : []; })
-    .then(function(apiOrders){
-      apiOrders.filter(function(o){ return o.status !== 'SERVED' && o.status !== 'served'; })
-        .forEach(function(o){
+  // Toujours charger depuis l'API pour avoir le total exact
+  if (window.API_URL) {
+    var headers = currentSession ? {'Authorization':'Bearer '+currentSession.token} : {};
+    fetch(window.API_URL + '/orders/active', { headers: headers })
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(apiOrders){
+        // Filtrer les commandes de cette table non servies
+        var tableOrders = apiOrders.filter(function(o){
+          return o.tableNumber === n && o.status !== 'SERVED';
+        });
+
+        // Mettre à jour kOrders avec les données fraîches de l'API
+        tableOrders.forEach(function(o){
           var existing = kOrders.find(function(k){ return k.id === o.id; });
           if (!existing) {
             kOrders.push({
-              id: o.id, table: o.tableNumber || n,
+              id: o.id,
+              table: o.tableNumber,
               status: o.status.toLowerCase(),
               items: (o.items||[]).map(function(i){
-                return { item: { id:i.menuItemId||i.id, name:i.name, price:i.price, emoji:i.emoji||'🍽️' }, qty:i.quantity||i.qty||1, note:i.note||'' };
+                return {
+                  item: {
+                    id:    i.id,
+                    name:  i.name,
+                    price: i.price,
+                    emoji: i.emoji || '🍽️'
+                  },
+                  qty:  i.quantity,
+                  note: i.note || ''
+                };
               })
             });
           }
         });
-      openEncaisserBuild(n);
-    })
-    .catch(function(){ openEncaisserBuild(n); });
+
+        openEncaisserBuild(n);
+      })
+      .catch(function(){
+        // Fallback sur kOrders local
+        openEncaisserBuild(n);
+      });
     return;
   }
 
