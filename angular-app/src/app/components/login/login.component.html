@@ -1,0 +1,30 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-logo">🌶️</div>
+    <h1 class="login-title">La Perla</h1>
+    <p class="login-sub">Entrez vos identifiants pour accéder au système</p>
+
+    <div class="login-fields">
+      <div class="login-field">
+        <label class="login-label">Identifiant</label>
+        <input class="login-input" [(ngModel)]="username" placeholder="Ex: admin"
+               (keydown.enter)="login()" autocomplete="username">
+      </div>
+      <div class="login-field">
+        <label class="login-label">Mot de passe</label>
+        <input class="login-input" type="password" [(ngModel)]="password" placeholder="••••"
+               (keydown.enter)="login()" autocomplete="current-password">
+      </div>
+    </div>
+
+    @if (error()) {
+      <div class="login-error">❌ {{ error() }}</div>
+    }
+
+    <button class="login-btn" (click)="login()" [disabled]="loading()">
+      {{ loading() ? '⏳ Connexion...' : '🔓 Se connecter' }}
+    </button>
+
+    <div class="login-footer">Zitoun POS · v2.0 Angular — JWT 8h + refresh 7j</div>
+  </div>
+</div>
