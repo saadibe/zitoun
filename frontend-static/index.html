@@ -2197,26 +2197,26 @@ function updateBtns() {
 function sendKitchen() {
   if (!tableSelected() || oItems.length === 0) return;
 
-  // ── Commande EMPORTER : encaisser d'abord ──────────
-  if (selTable === 0) {
-    var total = oItems.reduce(function(s,o){return s+o.item.price*o.qty;},0);
-    // Stocker temporairement les articles à emporter
-    window._emporterItems = oItems.slice();
-    // Ouvrir l'encaissement directement sur les articles en cours
-    openEncaisserEmporter();
-    return;
-  }
+  // Toujours encaisser avant d'envoyer en cuisine
+  window._emporterItems = oItems.slice();
+  window._encEmporter   = true;
 
-  // ── Commande normale (table) ─────────────────────
-  sendKitchenExecute();
+  if (selTable === 0) {
+    // Emporter : encaissement depuis oItems directement
+    openEncaisserEmporter();
+  } else {
+    // Table : encaissement depuis oItems (pas encore en base)
+    openEncaisserEmporter();
+  }
 }
 
-// Encaissement spécial pour emporter — calcule depuis oItems
+// Encaissement depuis le panier en cours (avant envoi cuisine)
 function openEncaisserEmporter() {
-  encTable = 0;
+  encTable = selTable;
   encMethod = 'especes';
+  var label = selTable === 0 ? '🥡 À emporter' : 'Table ' + selTable;
   document.getElementById('encSub').textContent =
-    '🥡 À emporter · ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    label + ' · ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
 
   var container = document.getElementById('encItems');
   var total = 0;
@@ -2238,7 +2238,6 @@ function openEncaisserEmporter() {
   document.getElementById('encRendu').textContent = '';
   document.getElementById('encRendu').classList.remove('show');
   selectMethod('especes');
-  // Marquer que c'est un encaissement emporter (envoi cuisine après)
   window._encEmporter = true;
   document.getElementById('encModal').classList.add('open');
 }
@@ -2822,14 +2821,14 @@ function confirmerEncaissement() {
   document.body.appendChild(flash);
   setTimeout(function() { flash.remove(); }, 3500);
 
-  // ── Emporter : envoyer en cuisine après paiement ──
-  if (isEmporter && window._encEmporter && window._emporterItems) {
+  // ── Envoi en cuisine après paiement ──────────────
+  if (window._encEmporter && window._emporterItems) {
     window._encEmporter = false;
     var savedItems = window._emporterItems;
+    var savedTable = encTable;
     window._emporterItems = null;
-    // Réinjecter les articles et envoyer
-    oItems = savedItems;
-    selTable = 0;
+    oItems   = savedItems;
+    selTable = savedTable;
     setTimeout(function() {
       sendKitchenExecute();
     }, 300);
