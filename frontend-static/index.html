@@ -2463,6 +2463,39 @@ function openEncaisser(n) {
   encMethod = 'especes';
   document.getElementById('encSub').textContent = 'Table ' + n + ' · ' + new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
 
+  // Récupérer les commandes de cette table (local + API)
+  var tableOrders = kOrders.filter(function(o) { return o.table === n && o.status !== 'served'; });
+  
+  // Si kOrders vide, essayer de charger depuis l'API
+  if (tableOrders.length === 0 && window.API_URL) {
+    fetch(window.API_URL + '/orders?table=' + n, {
+      headers: currentSession ? {'Authorization':'Bearer '+currentSession.token} : {}
+    })
+    .then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(apiOrders){
+      apiOrders.filter(function(o){ return o.status !== 'SERVED' && o.status !== 'served'; })
+        .forEach(function(o){
+          var existing = kOrders.find(function(k){ return k.id === o.id; });
+          if (!existing) {
+            kOrders.push({
+              id: o.id, table: o.tableNumber || n,
+              status: o.status.toLowerCase(),
+              items: (o.items||[]).map(function(i){
+                return { item: { id:i.menuItemId||i.id, name:i.name, price:i.price, emoji:i.emoji||'🍽️' }, qty:i.quantity||i.qty||1, note:i.note||'' };
+              })
+            });
+          }
+        });
+      openEncaisserBuild(n);
+    })
+    .catch(function(){ openEncaisserBuild(n); });
+    return;
+  }
+
+  openEncaisserBuild(n);
+}
+
+function openEncaisserBuild(n) {
   // Récupérer les commandes de cette table
   var tableOrders = kOrders.filter(function(o) { return o.table === n && o.status !== 'served'; });
 
@@ -2691,8 +2724,15 @@ function askFree(n, from) {
 function confirmFree() {
   var t = TABLES.find(function(t) { return t.n === pendFree; });
   if (t) {
+    // Vérifier une dernière fois qu'il n'y a pas de commandes non encaissées
+    var active = kOrders.filter(function(o){ return o.table===pendFree && o.status!=='served'; });
+    if (active.length > 0) {
+      closeModal('freeModal');
+      openEncaisser(pendFree);
+      pendFree = null;
+      return;
+    }
     t.st = 'free';
-    kOrders.forEach(function(o) { if (o.table === pendFree && o.status !== 'served') o.status = 'served'; });
     updateKBadge();
   }
   pendFree = null;
@@ -2958,6 +2998,11 @@ function doLogin() {
 // ── Après connexion réussie ──
 function onLoginSuccess() {
   var s = currentSession;
+  // Recharger les paramètres du restaurant depuis l'API
+  setTimeout(function() {
+    loadSettingsFromAPI();
+    loadCategories();
+  }, 500);
 
   // Masquer la page de login
   document.getElementById('loginPage').style.display = 'none';
@@ -3500,6 +3545,10 @@ document.addEventListener('DOMContentLoaded', function() {
   buildAdminMenu();
   buildAdminTables();
 
+  // Charger les paramètres depuis la base
+  loadSettingsFromAPI();
+  loadCategories();
+
   // Charger le menu et les tables depuis l'API
   loadFromAPI();
 
@@ -3599,6 +3648,50 @@ function scheduleTokenRefresh() {
     }
   }, delay);
   console.log('⏰ Prochain refresh dans', Math.round(delay/60000), 'minutes');
+}
+
+
+// ═══ SETTINGS DEPUIS L'API ════════════════════════
+function loadSettingsFromAPI() {
+  if (!window.API_URL) return;
+  fetch(window.API_URL + '/settings')
+    .then(function(r){ if (!r.ok) return null; return r.json(); })
+    .then(function(s){
+      if (!s || !s.name) return;
+      window.RESTO_NAME     = s.name;
+      window.RESTO_SUB      = s.subtitle  || '';
+      window.RESTO_CITY     = s.city      || '';
+      window.RESTO_ICON     = s.icon      || '🌶️';
+      window.RESTO_CURRENCY = s.currency  || 'DT';
+      window.RESTO_TVA      = (s.tvaRate !== undefined) ? s.tvaRate : 10;
+      // Mettre à jour l'interface
+      var e;
+      e = document.getElementById('brandName');      if(e) e.textContent = s.name;
+      e = document.getElementById('brandSub');       if(e) e.textContent = s.subtitle || '';
+      e = document.getElementById('brandIcon');      if(e) e.textContent = s.icon || '🌶️';
+      e = document.getElementById('loginRestoName'); if(e) e.textContent = s.name;
+      e = document.getElementById('loginLogo');      if(e) e.textContent = s.icon || '🌶️';
+      document.title = s.name + ' POS';
+      if (s.theme) applySkin(s.theme);
+    })
+    .catch(function(){});
+}
+
+function loadCategories() {
+  if (!window.API_URL) return;
+  fetch(window.API_URL + '/settings/categories')
+    .then(function(r){ if (!r.ok) return []; return r.json(); })
+    .then(function(data){
+      window.API_CATS = data || [];
+      // Mettre à jour les filtres du menu
+      if (data && data.length > 0) {
+        CATS = [{k:'all', l:'Tout', e:'✦'}].concat(
+          data.map(function(c){ return {k:c.code, l:c.label, e:c.emoji||''}; })
+        );
+        buildCatBtns();
+      }
+    })
+    .catch(function(){});
 }
 
 function loadFromAPI() {
