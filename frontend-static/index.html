@@ -2219,10 +2219,11 @@ function sendKitchen() {
       status: 'sent', time: Date.now()
     });
     var t = TABLES.find(function(t) { return t.n === selTable; });
-    if (t) t.st = 'occupied';
+    if (t && selTable !== 0) t.st = 'occupied';  // seulement si table réelle
     updateKBadge();
+    var label = selTable === 0 ? '🥡 À emporter' : 'Table ' + selTable;
     document.getElementById('sucSlot').innerHTML =
-      '<div class="suc-flash">✓ Commande envoyée — Table ' + selTable + '</div>';
+      '<div class="suc-flash">✓ Commande envoyée — ' + label + '</div>';
     oItems = []; selTable = null;
     buildTableBtns(); renderOrder();
     document.getElementById('ohSub').textContent = 'Aucune table sélectionnée';
@@ -2418,7 +2419,7 @@ function renderKCol(id, orders, type) {
     }).join('');
     d.innerHTML =
       '<div class="kc-top">' +
-        '<div><div class="kc-table">Table ' + order.table + '</div>' +
+        '<div><div class="kc-table">' + (order.table === 0 ? '🥡 <span style="color:var(--terracotta)">EMPORTER</span>' : 'Table ' + order.table) + '</div>' +
         '<div class="kc-time' + (type === 'ready' ? ' ready' : '') + '">' + (type === 'ready' ? '● Prêt à servir' : tt) + '</div></div>' +
         btn +
       '</div>' +
@@ -3339,16 +3340,40 @@ function saveSettings() {
   renderOrder();
   buildMenuItems();
 
-  // API
+  // ── Sauvegarder TOUT dans la base ──
   authFetch(window.API_URL + '/settings', {
     method: 'PUT',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ name: name, subtitle: sub, city: city, icon: pickedBrandEmoji })
-  }).catch(function() {});
+    body: JSON.stringify({
+      id:        1,
+      name:      name,
+      subtitle:  sub,
+      city:      city,
+      icon:      pickedBrandEmoji,
+      currency:  currency,
+      tvaRate:   tva,
+      theme:     currentSkin,
+      taxNumber: window.RESTO_TAX || ''
+    })
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('save failed');
+    return r.json();
+  })
+  .then(function(saved) {
+    // Confirmer les valeurs sauvegardées
+    window.RESTO_CURRENCY = saved.currency  || currency;
+    window.RESTO_TVA      = saved.tvaRate   !== undefined ? saved.tvaRate : tva;
+    console.log('✅ Paramètres sauvegardés:', saved);
+  })
+  .catch(function(e) {
+    console.warn('⚠ Erreur sauvegarde settings:', e);
+    alert('⚠ Erreur lors de la sauvegarde. Vérifiez votre connexion.');
+  });
 
-  var saved = document.getElementById('settingsSaved');
-  saved.style.display = 'flex';
-  setTimeout(function() { saved.style.display = 'none'; }, 2500);
+  var savedEl = document.getElementById('settingsSaved');
+  savedEl.style.display = 'flex';
+  setTimeout(function() { savedEl.style.display = 'none'; }, 2500);
 }
 
 
