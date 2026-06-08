@@ -1,0 +1,175 @@
+<div class="page-commandes">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <div class="tp-title">📋 Nouvelle Commande</div>
+      <div class="tp-sub">{{ settings.settings().name }} — Sélectionnez une table puis ajoutez les articles</div>
+    </div>
+    <div class="tp-clock">{{ clock }}</div>
+  </div>
+
+  <div class="srv-grid">
+    <!-- Panel menu -->
+    <div class="menu-panel" [class.tab-hidden]="mobileTab === 'cart'">
+      <!-- Sélection table -->
+      <div class="menu-bar">
+        <div class="tbl-row">
+          <span class="tbl-lbl">Table :</span>
+          <div class="tbl-btns">
+            <button class="tbl-btn emporter"
+              [class.sel]="cart.table() === 0"
+              (click)="selectTable(0)" title="À emporter">🥡</button>
+            @for (t of tables(); track t.number) {
+              <button class="tbl-btn"
+                [id]="'tbl'+t.number"
+                [class.sel]="cart.table() === t.number"
+                (click)="selectTable(t.number)">{{ t.number }}</button>
+            }
+          </div>
+        </div>
+        <div class="cats">
+          <button class="cat-btn" [class.active]="activeCat==='all'" (click)="selectCat('all')">
+            ✦ Tout
+          </button>
+          @for (cat of settings.categories(); track cat.code) {
+            <button class="cat-btn" [class.active]="activeCat===cat.code" (click)="selectCat(cat.code)">
+              {{ cat.emoji }} {{ cat.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Articles -->
+      <div class="menu-items">
+        @for (item of filtered(); track item.id) {
+          <div class="m-card" (click)="addItem(item)">
+            <div class="mc-em">{{ item.emoji }}</div>
+            <div class="mc-nm">{{ item.name }}</div>
+            <div class="mc-pr">{{ settings.fmt(item.price) }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Panel panier -->
+    <div class="order-panel" [class.tab-visible]="mobileTab === 'cart'">
+      <div class="o-head">
+        <div>
+          <div class="oh-title">Récapitulatif</div>
+          <div class="oh-sub">{{ tableLabel }}</div>
+        </div>
+        <button class="clr-btn" [disabled]="cart.count()===0" (click)="cart.clear()">🗑 Vider</button>
+      </div>
+
+      <div class="o-list">
+        @if (cart.count() === 0) {
+          <div class="o-empty">
+            <div class="o-empty-ico">🧺</div>
+            <div class="o-empty-txt">Sélectionnez une table<br>puis ajoutez des articles</div>
+          </div>
+        }
+        @for (item of cart.items(); track item.item.id) {
+          <div class="o-item">
+            <div class="oi-em">{{ item.item.emoji }}</div>
+            <div class="oi-info">
+              <div class="oi-nm">{{ item.item.name }}</div>
+              <input class="oi-note" [(ngModel)]="item.note" placeholder="Note spéciale...">
+            </div>
+            <div class="oi-ctrl">
+              <button class="o-qty-btn" (click)="cart.updateQty(item.item.id, item.qty-1)">−</button>
+              <span class="o-qty-val">{{ item.qty }}</span>
+              <button class="o-qty-btn" (click)="cart.updateQty(item.item.id, item.qty+1)">+</button>
+            </div>
+            <div class="oi-price">{{ settings.fmt(item.item.price * item.qty) }}</div>
+          </div>
+        }
+        <div id="sucSlot">
+          @if (sentMsg) {
+            <div class="suc-flash">{{ sentMsg }}</div>
+          }
+        </div>
+      </div>
+
+      <div class="o-foot">
+        <div class="o-total">
+          <span class="o-tlbl">Total</span>
+          <span class="o-tval">{{ settings.fmt(cart.total()) }} <span>{{ settings.settings().currency }}</span></span>
+        </div>
+        <div class="o-acts">
+          <button class="act-btn act-print" [disabled]="!canSend()" (click)="openTicket()">🖨️ Ticket</button>
+          <button class="act-btn act-send" [disabled]="!canSend() || sending()" (click)="send()">
+            {{ sending() ? '⏳ Envoi...' : '🍳 Envoyer en cuisine' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Onglets mobile -->
+  <div class="mobile-tabs">
+    <button class="mobile-tab" [class.active]="mobileTab==='menu'" (click)="mobileTab='menu'">
+      <span class="mobile-tab-ico">🍽️</span><span>Menu</span>
+    </button>
+    <button class="mobile-tab" [class.active]="mobileTab==='cart'" (click)="mobileTab='cart'">
+      <span class="mobile-tab-ico">🛒</span><span>Panier</span>
+      @if (cart.count() > 0) {
+        <span class="mobile-tab-badge">{{ cart.count() }}</span>
+      }
+    </button>
+  </div>
+</div>
+
+<!-- Modal Encaissement -->
+@if (showEnc) {
+  <div class="modal-ov open" (click)="closeEnc($event)">
+    <div class="modal-box enc-modal" style="max-width:480px;padding:0;overflow:hidden">
+      <div class="enc-header">
+        <div>
+          <div class="enc-header-title">💰 Encaissement</div>
+          <div class="enc-sub">{{ tableLabel }}</div>
+        </div>
+        <button class="enc-x" (click)="showEnc=false">✕</button>
+      </div>
+      <div class="enc-body">
+        <div class="enc-items">
+          @for (item of cart.items(); track item.item.id) {
+            <div class="enc-row">
+              <div class="enc-row-name">
+                <span class="enc-row-qty">×{{ item.qty }}</span>
+                <span>{{ item.item.emoji }} {{ item.item.name }}</span>
+              </div>
+              <span>{{ settings.fmt(item.item.price * item.qty) }}</span>
+            </div>
+          }
+        </div>
+        <div class="enc-total-bar">
+          <span class="enc-total-lbl">Total à payer</span>
+          <span class="enc-total-val" id="encTotal">{{ settings.fmt(cart.total()) }}</span>
+        </div>
+        <div class="enc-methods">
+          @for (m of payMethods; track m.key) {
+            <button class="enc-method-btn" [class.active]="payMethod===m.key" (click)="payMethod=m.key">
+              <span class="em">{{ m.icon }}</span>{{ m.label }}
+            </button>
+          }
+        </div>
+        @if (payMethod === 'especes') {
+          <div class="enc-cash-row">
+            <label>Montant reçu :</label>
+            <input class="enc-input" type="number" [(ngModel)]="received" (input)="calcChange()" placeholder="0.000">
+            <span>{{ settings.settings().currency }}</span>
+          </div>
+          @if (change !== null) {
+            <div class="enc-rendu" [class.show]="true">
+              Rendu : <strong>{{ settings.fmt(change) }}</strong>
+            </div>
+          }
+        }
+      </div>
+      <div class="enc-footer">
+        <button class="enc-cancel" (click)="showEnc=false">Annuler</button>
+        <button class="enc-confirm" (click)="confirmer()">✓ Valider l'encaissement</button>
+      </div>
+    </div>
+  </div>
+}
