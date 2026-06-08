@@ -5,7 +5,7 @@ import lombok.*;
 import java.util.List;
 public class OrderDTO {
     @Data public static class CreateRequest {
-        @NotNull @Min(1) private Integer tableNumber;
+        @NotNull @Min(0) private Integer tableNumber; // 0 = emporter
         @NotEmpty private List<OrderItemRequest> items;
         private String serverName;
     }
