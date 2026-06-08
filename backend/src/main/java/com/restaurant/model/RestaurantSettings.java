@@ -21,17 +21,17 @@ public class RestaurantSettings {
     private String city = "Tunisie";
 
     @Column(length = 10)
-    private String icon = "🌶️";
+    private String icon = "\uD83C\uDF36";
 
-    @Column(length = 50)
-    private String taxNumber = "MF: 123456/A/M/000";
+    @Column(name = "tax_number", length = 50)
+    private String taxNumber = "";
 
-    @Column(length = 10)
+    @Column(name = "currency", length = 10)
     private String currency = "DT";
 
-    @Column(nullable = false)
+    @Column(name = "tva_rate")
     private Double tvaRate = 10.0;
 
-    @Column(length = 20)
+    @Column(name = "theme", length = 20)
     private String theme = "vert";
 }
