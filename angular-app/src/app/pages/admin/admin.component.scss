@@ -1,0 +1,34 @@
+.page-admin { display:flex; flex-direction:column; height:100%; overflow:hidden; }
+.admin-tabs { display:flex; background:var(--white); border-bottom:2px solid var(--border); flex-shrink:0; }
+.admin-tab {
+  flex:1; padding:13px 8px; border:none; background:transparent;
+  font-family:'Cairo',sans-serif; font-size:13px; font-weight:700;
+  color:var(--ink3); cursor:pointer; transition:color .15s; border-bottom:3px solid transparent;
+  &.active { color:var(--sky); border-bottom-color:var(--sky); }
+}
+.admin-body { flex:1; overflow-y:auto; padding:20px; }
+.settings-form { display:flex; flex-direction:column; gap:12px; max-width:500px; }
+.sf-row {
+  display:flex; align-items:center; gap:12px;
+  label { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--ink3); width:100px; flex-shrink:0; }
+  input, select {
+    flex:1; padding:9px 12px; border-radius:9px; border:2px solid var(--border);
+    background:var(--ivory); font-size:14px; font-family:'Cairo',sans-serif;
+    outline:none; &:focus{border-color:var(--sky);}
+  }
+}
+.art-form, .cat-form, .user-form {
+  display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;
+  align-items:center;
+  input, select { flex:1; min-width:100px; padding:9px 12px; border-radius:9px; border:2px solid var(--border); background:var(--ivory); font-size:13px; font-family:'Cairo',sans-serif; outline:none; &:focus{border-color:var(--sky);} }
+}
+.art-list, .cat-manager, .user-manager { display:flex; flex-direction:column; gap:8px; }
+.art-item, .cat-row, .user-row {
+  display:flex; align-items:center; gap:10px;
+  background:var(--white); border:2px solid var(--border);
+  border-radius:11px; padding:10px 14px;
+}
+.art-em { font-size:22px; }
+.art-info { flex:1; }
+.art-name { font-size:13px; font-weight:700; }
+.art-meta { font-size:11px; color:var(--ink3); }
