@@ -24,7 +24,7 @@ services:
     runtime: node
     region: frankfurt
     rootDir: ./angular-app
-    buildCommand: npm install && npm run build -- --configuration=production
+    buildCommand: npm install && npx ng build --configuration=production
     startCommand: npx serve dist/zitoun-angular/browser -p $PORT --no-clipboard
     plan: free
     envVars:
