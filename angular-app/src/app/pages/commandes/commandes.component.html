@@ -1,36 +1,28 @@
 <div class="page-commandes">
-  <!-- Topbar -->
   <div class="topbar">
     <div>
       <div class="tp-title">📋 Nouvelle Commande</div>
-      <div class="tp-sub">{{ settings.settings().name }} — Sélectionnez une table puis ajoutez les articles</div>
+      <div class="tp-sub">{{ settings.settings().name }} — Sélectionnez une table puis ajoutez des articles</div>
     </div>
     <div class="tp-clock">{{ clock }}</div>
   </div>
 
   <div class="srv-grid">
     <!-- Panel menu -->
-    <div class="menu-panel" [class.tab-hidden]="mobileTab === 'cart'">
-      <!-- Sélection table -->
+    <div class="menu-panel" [class.tab-hidden]="mobileTab==='cart'">
       <div class="menu-bar">
         <div class="tbl-row">
           <span class="tbl-lbl">Table :</span>
           <div class="tbl-btns">
-            <button class="tbl-btn emporter"
-              [class.sel]="cart.table() === 0"
-              (click)="selectTable(0)" title="À emporter">🥡</button>
-            @for (t of tables(); track t.number) {
-              <button class="tbl-btn"
-                [id]="'tbl'+t.number"
-                [class.sel]="cart.table() === t.number"
-                (click)="selectTable(t.number)">{{ t.number }}</button>
+            <button class="tbl-btn emporter" [class.sel]="cart.table()===0" (click)="selectTable(0)" title="À emporter">🥡</button>
+            @for (t of tables(); track t.id) {
+              <button class="tbl-btn" [class.sel]="cart.table()===t.number" (click)="selectTable(t.number)">{{ t.number }}</button>
             }
           </div>
         </div>
         <div class="cats">
-          <button class="cat-btn" [class.active]="activeCat()==='all'" (click)="selectCat('all')">
-            ✦ Tout
-          </button>
+          <button class="cat-btn" [class.active]="activeCat()==='all'" (click)="selectCat('all')">✦ Tout</button>
+          <button class="cat-btn menu-cat" [class.active]="activeCat()==='MENU'" (click)="selectCat('MENU')">🍽️ Menus</button>
           @for (cat of settings.categories(); track cat.code) {
             <button class="cat-btn" [class.active]="activeCat()===cat.code" (click)="selectCat(cat.code)">
               {{ cat.emoji }} {{ cat.label }}
@@ -38,21 +30,21 @@
           }
         </div>
       </div>
-
-      <!-- Articles -->
       <div class="menu-items">
         @for (item of filtered(); track item.id) {
-          <div class="m-card" (click)="addItem(item)">
+          <div class="m-card" [class.composite]="item.isComposite" (click)="addItem(item)">
+            @if (item.isComposite) { <span class="composite-badge">Menu</span> }
             <div class="mc-em">{{ item.emoji }}</div>
             <div class="mc-nm">{{ item.name }}</div>
             <div class="mc-pr">{{ settings.fmt(item.price) }}</div>
+            @if (item.isComposite) { <div class="mc-opt-hint">Personnalisable →</div> }
           </div>
         }
       </div>
     </div>
 
     <!-- Panel panier -->
-    <div class="order-panel" [class.tab-visible]="mobileTab === 'cart'">
+    <div class="order-panel" [class.tab-visible]="mobileTab==='cart'">
       <div class="o-head">
         <div>
           <div class="oh-title">Récapitulatif</div>
@@ -60,45 +52,42 @@
         </div>
         <button class="clr-btn" [disabled]="cart.count()===0" (click)="cart.clear()">🗑 Vider</button>
       </div>
-
       <div class="o-list">
-        @if (cart.count() === 0) {
+        @if (cart.count()===0) {
           <div class="o-empty">
             <div class="o-empty-ico">🧺</div>
             <div class="o-empty-txt">Sélectionnez une table<br>puis ajoutez des articles</div>
           </div>
         }
-        @for (item of cart.items(); track item.item.id) {
+        @for (item of cart.items(); track $index; let idx = $index) {
           <div class="o-item">
             <div class="oi-em">{{ item.item.emoji }}</div>
             <div class="oi-info">
               <div class="oi-nm">{{ item.item.name }}</div>
+              @if (item.selectedOptions?.length) {
+                <div class="oi-opts">{{ optionLabel(item.item, item.selectedOptions) }}</div>
+              }
               <input class="oi-note" [(ngModel)]="item.note" placeholder="Note spéciale...">
             </div>
             <div class="oi-ctrl">
-              <button class="o-qty-btn" (click)="cart.updateQty(item.item.id, item.qty-1)">−</button>
+              <button class="o-qty-btn" (click)="cart.updateQty(idx, item.qty-1)">−</button>
               <span class="o-qty-val">{{ item.qty }}</span>
-              <button class="o-qty-btn" (click)="cart.updateQty(item.item.id, item.qty+1)">+</button>
+              <button class="o-qty-btn" (click)="cart.updateQty(idx, item.qty+1)">+</button>
             </div>
             <div class="oi-price">{{ settings.fmt(item.item.price * item.qty) }}</div>
           </div>
         }
-        <div id="sucSlot">
-          @if (sentMsg) {
-            <div class="suc-flash">{{ sentMsg }}</div>
-          }
-        </div>
+        @if (sentMsg) { <div class="suc-flash">{{ sentMsg }}</div> }
       </div>
-
       <div class="o-foot">
         <div class="o-total">
           <span class="o-tlbl">Total</span>
-          <span class="o-tval">{{ settings.fmt(cart.total()) }} <span>{{ settings.settings().currency }}</span></span>
+          <span class="o-tval">{{ settings.fmt(cart.total()) }}</span>
         </div>
         <div class="o-acts">
           <button class="act-btn act-print" [disabled]="!canSend()" (click)="openTicket()">🖨️ Ticket</button>
-          <button class="act-btn act-send" [disabled]="!canSend() || sending()" (click)="send()">
-            {{ sending() ? '⏳ Envoi...' : '🍳 Envoyer en cuisine' }}
+          <button class="act-btn act-send" [disabled]="!canSend()||sending()" (click)="send()">
+            {{ sending() ? '⏳ Envoi...' : '🍳 Envoyer' }}
           </button>
         </div>
       </div>
@@ -112,63 +101,45 @@
     </button>
     <button class="mobile-tab" [class.active]="mobileTab==='cart'" (click)="mobileTab='cart'">
       <span class="mobile-tab-ico">🛒</span><span>Panier</span>
-      @if (cart.count() > 0) {
-        <span class="mobile-tab-badge">{{ cart.count() }}</span>
-      }
+      @if (cart.count()>0) { <span class="mobile-tab-badge">{{ cart.count() }}</span> }
     </button>
   </div>
 </div>
 
-<!-- Modal Encaissement -->
-@if (showEnc) {
+<!-- Modal composite -->
+@if (showComposite && compositeItem) {
   <div class="modal-ov open" (click)="closeModal($event)">
-    <div class="modal-box enc-modal" style="max-width:480px;padding:0;overflow:hidden">
-      <div class="enc-header">
+    <div class="modal-box composite-modal" (click)="$event.stopPropagation()">
+      <div class="comp-header">
+        <div class="comp-emoji">{{ compositeItem.emoji }}</div>
         <div>
-          <div class="enc-header-title">💰 Encaissement</div>
-          <div class="enc-sub">{{ tableLabel }}</div>
+          <div class="comp-name">{{ compositeItem.name }}</div>
+          <div class="comp-price">{{ settings.fmt(compositeItem.price) }}</div>
         </div>
-        <button class="enc-x" (click)="showEnc=false">✕</button>
+        <button class="enc-x" (click)="showComposite=false">✕</button>
       </div>
-      <div class="enc-body">
-        <div class="enc-items">
-          @for (item of cart.items(); track item.item.id) {
-            <div class="enc-row">
-              <div class="enc-row-name">
-                <span class="enc-row-qty">×{{ item.qty }}</span>
-                <span>{{ item.item.emoji }} {{ item.item.name }}</span>
-              </div>
-              <span>{{ settings.fmt(item.item.price * item.qty) }}</span>
+      <div class="comp-body">
+        @for (opt of compositeItem.options!; track opt.id) {
+          <div class="comp-option">
+            <div class="comp-opt-label">{{ opt.label }} @if (opt.required) { <span class="req">*</span> }</div>
+            <div class="comp-choices">
+              @for (choice of opt.choices; track choice.id) {
+                <button class="comp-choice"
+                  [class.selected]="selectedOpts[opt.id]===choice.id"
+                  (click)="selectOpt(opt.id, choice.id)">
+                  {{ choice.label }}
+                  @if (choice.priceAdjust > 0) { <span class="choice-extra">+{{ settings.fmt(choice.priceAdjust) }}</span> }
+                </button>
+              }
             </div>
-          }
-        </div>
-        <div class="enc-total-bar">
-          <span class="enc-total-lbl">Total à payer</span>
-          <span class="enc-total-val" id="encTotal">{{ settings.fmt(cart.total()) }}</span>
-        </div>
-        <div class="enc-methods">
-          @for (m of payMethods; track m.key) {
-            <button class="enc-method-btn" [class.active]="payMethod===m.key" (click)="payMethod=m.key">
-              <span class="em">{{ m.icon }}</span>{{ m.label }}
-            </button>
-          }
-        </div>
-        @if (payMethod === 'especes') {
-          <div class="enc-cash-row">
-            <label>Montant reçu :</label>
-            <input class="enc-input" type="number" [(ngModel)]="received" (input)="calcChange()" placeholder="0.000">
-            <span>{{ settings.settings().currency }}</span>
           </div>
-          @if (change !== null) {
-            <div class="enc-rendu" [class.show]="true">
-              Rendu : <strong>{{ settings.fmt(change) }}</strong>
-            </div>
-          }
         }
       </div>
-      <div class="enc-footer">
-        <button class="enc-cancel" (click)="showEnc=false">Annuler</button>
-        <button class="enc-confirm" (click)="confirmer()">✓ Valider l'encaissement</button>
+      <div class="comp-footer">
+        <button class="enc-cancel" (click)="showComposite=false">Annuler</button>
+        <button class="enc-confirm" [disabled]="!isOptValid()" (click)="confirmComposite()">
+          ✓ Ajouter au panier
+        </button>
       </div>
     </div>
   </div>
@@ -179,25 +150,93 @@
   <div class="modal-ov open" (click)="closeModal($event)">
     <div class="modal-box pay-choice-modal" (click)="$event.stopPropagation()">
       <div class="pay-choice-header">
-        <div class="pay-choice-title">💰 Mode de paiement</div>
-        <div class="pay-choice-sub">{{ tableLabel }}</div>
+        <div>
+          <div class="pay-choice-title">💰 Mode de paiement</div>
+          <div class="pay-choice-sub">{{ tableLabel }}</div>
+        </div>
         <button class="enc-x" (click)="showPayChoice=false">✕</button>
       </div>
       <div class="pay-choice-total">
-        <span>Total</span>
+        <span>Total commande</span>
         <span class="pay-choice-amount">{{ settings.fmt(cart.total()) }}</span>
       </div>
       <div class="pay-choice-btns">
         <button class="pay-choice-btn pay-now" (click)="choosePayNow()">
           <span class="pay-choice-icon">💵</span>
           <span class="pay-choice-lbl">Payer maintenant</span>
-          <span class="pay-choice-hint">Encaissement immédiat</span>
+          <span class="pay-choice-hint">Encaissement immédiat avant envoi cuisine</span>
         </button>
         <button class="pay-choice-btn pay-after" (click)="choosePayAfter()">
           <span class="pay-choice-icon">🍽️</span>
           <span class="pay-choice-lbl">Payer après manger</span>
-          <span class="pay-choice-hint">Envoi cuisine direct</span>
+          <span class="pay-choice-hint">Envoi cuisine direct, encaissement à la fin</span>
         </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal encaissement -->
+@if (showEnc) {
+  <div class="modal-ov open" (click)="closeModal($event)">
+    <div class="modal-box enc-modal" (click)="$event.stopPropagation()">
+      <div class="enc-header">
+        <div>
+          <div class="enc-header-title">💰 Encaissement</div>
+          <div class="enc-sub">{{ tableLabel }}</div>
+        </div>
+        <button class="enc-x" (click)="showEnc=false">✕</button>
+      </div>
+      <div class="enc-body">
+        <div class="enc-items">
+          @if (encPending) {
+            @for (item of encPending.items; track item.id) {
+              <div class="enc-row">
+                <div class="enc-row-name">
+                  <span class="enc-row-qty">×{{ item.qty }}</span>
+                  <span>{{ item.emoji }} {{ item.name }}</span>
+                  @if (item.options) { <span class="enc-opt">{{ item.options }}</span> }
+                </div>
+                <span>{{ settings.fmt(item.price * item.qty) }}</span>
+              </div>
+            }
+          } @else {
+            @for (item of cart.items(); track $index) {
+              <div class="enc-row">
+                <div class="enc-row-name">
+                  <span class="enc-row-qty">×{{ item.qty }}</span>
+                  <span>{{ item.item.emoji }} {{ item.item.name }}</span>
+                </div>
+                <span>{{ settings.fmt(item.item.price * item.qty) }}</span>
+              </div>
+            }
+          }
+        </div>
+        <div class="enc-total-bar">
+          <span class="enc-total-lbl">Total à payer</span>
+          <span class="enc-total-val">{{ settings.fmt(encTotal()) }}</span>
+        </div>
+        <div class="enc-methods">
+          @for (m of payMethods; track m.key) {
+            <button class="enc-method-btn" [class.active]="payMethod===m.key" (click)="payMethod=m.key">
+              <span class="em">{{ m.icon }}</span>{{ m.label }}
+            </button>
+          }
+        </div>
+        @if (payMethod==='especes') {
+          <div class="enc-cash-row">
+            <label>Montant reçu :</label>
+            <input class="enc-input" type="number" [(ngModel)]="received" (input)="calcChange()" placeholder="0">
+            <span>{{ settings.settings().currency }}</span>
+          </div>
+          @if (change !== null) {
+            <div class="enc-rendu">Rendu : <strong>{{ settings.fmt(change) }}</strong></div>
+          }
+        }
+      </div>
+      <div class="enc-footer">
+        <button class="enc-cancel" (click)="showEnc=false">Annuler</button>
+        <button class="enc-confirm" (click)="confirmer()">✓ Valider l'encaissement</button>
       </div>
     </div>
   </div>
