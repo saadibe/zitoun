@@ -11,109 +11,106 @@
              [class.free]="table.status==='FREE'"
              [class.occupied]="table.status==='OCCUPIED'"
              [class.reserved]="table.status==='RESERVED'"
-             [class.clickable]="table.status==='OCCUPIED'"
              (click)="openDetail(table)">
           <div class="tc-num">{{ table.number }}</div>
           <div class="tc-badge">{{ statusLabel(table.status) }}</div>
           <div class="tc-seats">🪑 {{ table.seats }} places</div>
           @if (table.status === 'OCCUPIED') {
-            <div class="tc-click-hint">Voir + Encaisser →</div>
+            <div class="tc-click-hint">💰 Encaisser →</div>
           }
         </div>
       }
     </div>
   </div>
+</div>
 
-  <!-- Modal détail table -->
-  @if (selected()) {
-    <div class="modal-ov open" (click)="close()">
-      <div class="modal-box td-modal" (click)="$event.stopPropagation()">
+<!-- Modal table -->
+@if (selected()) {
+  <div class="modal-ov open" (click)="close()">
+    <div class="modal-box td-modal" (click)="$event.stopPropagation()">
 
-        <!-- Header -->
-        <div class="td-header">
-          <div>
-            <div class="td-title">Table {{ selected()!.number }}</div>
-            <div class="td-sub">{{ tableOrders().length }} commande(s) active(s)</div>
-          </div>
-          <button class="td-x" (click)="close()">✕</button>
+      <div class="td-header">
+        <div>
+          <div class="td-title">Table {{ selected()!.number }}</div>
+          <div class="td-sub">{{ tableOrders().length }} commande(s)</div>
         </div>
+        <button class="td-x" (click)="close()">✕</button>
+      </div>
 
-        <!-- Commandes -->
-        <div class="td-body">
-          @if (tableOrders().length === 0) {
-            <div class="td-empty">⏳ Chargement...</div>
-          }
-          @for (order of tableOrders(); track order.id) {
-            <div class="td-order-block">
-              <div class="td-order-head">
-                <span class="td-order-num">Commande #{{ order.id }}</span>
-                <span class="td-order-status" [class]="order.status.toLowerCase()">
-                  {{ order.status === 'SENT' ? '🔔 Envoyée' :
-                     order.status === 'PREPARING' ? '🔥 En prép.' :
-                     order.status === 'READY' ? '✅ Prête' : order.status }}
-                </span>
-              </div>
-              @for (item of order.items; track item.id) {
-                <div class="td-line">
-                  <span>
-                    {{ item.emoji }} {{ item.name }}
-                    <span class="td-qty">×{{ item.quantity }}</span>
-                    @if (item.note) { <span class="td-note"> — {{ item.note }}</span> }
-                  </span>
-                  <span class="td-price">{{ settings.fmt(item.price * item.quantity) }}</span>
-                </div>
-              }
+      <!-- Liste commandes -->
+      <div class="td-body">
+        @if (tableOrders().length === 0) {
+          <div class="td-empty">⏳ Chargement...</div>
+        }
+        @for (order of tableOrders(); track order.id) {
+          <div class="td-order-block">
+            <div class="td-order-head">
+              <span class="td-order-num">#{{ order.id }}</span>
+              <span class="td-order-status" [class]="order.status.toLowerCase()">
+                {{ order.status === 'SENT' ? '🔔 Envoyée' :
+                   order.status === 'PREPARING' ? '🔥 En préparation' :
+                   order.status === 'READY' ? '✅ Prête' : order.status }}
+              </span>
             </div>
+            @for (item of order.items; track item.id) {
+              <div class="td-line">
+                <span>{{ item.emoji }} {{ item.name }}
+                  <span class="td-qty">×{{ item.quantity }}</span>
+                  @if (item.note) { <span class="td-note"> — {{ item.note }}</span> }
+                </span>
+                <span class="td-price">{{ settings.fmt(item.price * item.quantity) }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Total -->
+      <div class="td-total-bar">
+        <span>Total table</span>
+        <span class="td-total-val">{{ settings.fmt(tableTotal) }}</span>
+      </div>
+
+      <!-- Bouton encaisser -->
+      @if (!showEnc) {
+        <div class="td-footer">
+          <button class="td-btn-close" (click)="close()">Fermer</button>
+          <button class="td-btn-enc" (click)="openEncaissement()" [disabled]="tableOrders().length===0">
+            💰 Encaisser et libérer
+          </button>
+        </div>
+      }
+
+      <!-- Zone encaissement -->
+      @if (showEnc) {
+        <div class="td-enc-zone">
+          <div class="enc-methods">
+            @for (m of payMethods; track m.key) {
+              <button class="enc-method-btn" [class.active]="payMethod===m.key" (click)="payMethod=m.key">
+                <span class="em">{{ m.icon }}</span>{{ m.label }}
+              </button>
+            }
+          </div>
+          @if (payMethod === 'especes') {
+            <div class="enc-cash-row">
+              <label>Montant reçu :</label>
+              <input class="enc-input" type="number" [(ngModel)]="received"
+                     (input)="calcChange()" placeholder="0">
+              <span>{{ settings.settings().currency }}</span>
+            </div>
+            @if (change !== null) {
+              <div class="enc-rendu">Rendu : <strong>{{ settings.fmt(change) }}</strong></div>
+            }
           }
-        </div>
-
-        <!-- Total -->
-        <div class="td-total-bar">
-          <span>Total table</span>
-          <span class="td-total-val">{{ settings.fmt(tableTotal) }}</span>
-        </div>
-
-        <!-- Actions -->
-        @if (!showEnc) {
-          <div class="td-footer">
-            <button class="td-btn-close" (click)="close()">Fermer</button>
-            <button class="td-btn-enc" (click)="openEncaissement()">
-              💰 Encaisser et libérer
+          <div class="enc-footer">
+            <button class="enc-cancel" (click)="showEnc=false">Annuler</button>
+            <button class="enc-confirm" (click)="confirmerEnc()">
+              ✓ Valider — {{ settings.fmt(tableTotal) }}
             </button>
           </div>
-        }
+        </div>
+      }
 
-        <!-- Encaissement inline -->
-        @if (showEnc) {
-          <div class="td-enc-zone">
-            <div class="enc-methods">
-              @for (m of payMethods; track m.key) {
-                <button class="enc-method-btn" [class.active]="payMethod===m.key" (click)="payMethod=m.key">
-                  <span class="em">{{ m.icon }}</span>{{ m.label }}
-                </button>
-              }
-            </div>
-            @if (payMethod === 'especes') {
-              <div class="enc-cash-row">
-                <label>Montant reçu :</label>
-                <input class="enc-input" type="number" [(ngModel)]="received"
-                       (input)="calcChange()" placeholder="0">
-                <span>{{ settings.settings().currency }}</span>
-              </div>
-              @if (change !== null) {
-                <div class="enc-rendu">Rendu : <strong>{{ settings.fmt(change) }}</strong></div>
-              }
-            }
-            <div style="display:flex;gap:8px;margin-top:4px">
-              <button class="enc-cancel" (click)="showEnc=false">Annuler</button>
-              <button class="enc-confirm" (click)="confirmerEnc()">
-                ✓ Valider — {{ settings.fmt(tableTotal) }}
-              </button>
-            </div>
-          </div>
-        }
-
-      </div>
     </div>
-  }
-</div>
+  </div>
+}
