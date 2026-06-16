@@ -138,6 +138,6 @@ export class HistoriqueComponent {
   }
 
   clearHistory() {
-    if (confirm("Effacer tout l'historique ?")) this.cart.history.set([]);
+    if (confirm("Effacer tout l'historique ?")) this.cart.clearHistory();
   }
 }
