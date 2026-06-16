@@ -29,6 +29,7 @@ export class ApiService {
   // ── Tables ────────────────────────────────────────
   getTables()                        { return this.http.get<RestaurantTable[]>(`${this.base}/tables`); }
   createTable(t: any)                { return this.http.post<RestaurantTable>(`${this.base}/tables`, t, { headers: this.headers() }); }
+  getTableOrders(number: number)          { return this.http.get<Order[]>(`${this.base}/tables/${number}/orders`, { headers: this.headers() }); }
   deleteTable(id: number)            { return this.http.delete(`${this.base}/tables/${id}`, { headers: this.headers() }); }
 
   // ── Settings ──────────────────────────────────────
