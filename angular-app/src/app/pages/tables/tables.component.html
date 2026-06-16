@@ -1,17 +1,24 @@
 <div class="page-tables">
   <div class="topbar">
-    <div class="tp-title">🪑 Plan de salle</div>
+    <div><div class="tp-title">🪑 Plan de salle</div></div>
+    <button class="k-refresh" (click)="load()">🔄 Actualiser</button>
   </div>
 
   <div class="tables-wrap">
     <div class="t-grid">
       @for (table of tables(); track table.id) {
-        <div class="tcard" [class]="table.status.toLowerCase()"
+        <div class="tcard"
+             [class.free]="table.status==='FREE'"
+             [class.occupied]="table.status==='OCCUPIED'"
+             [class.reserved]="table.status==='RESERVED'"
              [class.clickable]="table.status==='OCCUPIED'"
-             (click)="table.status==='OCCUPIED' && openDetail(table)">
+             (click)="openDetail(table)">
           <div class="tc-num">{{ table.number }}</div>
-          <div class="tc-badge">{{ table.status === 'FREE' ? 'Libre' : table.status === 'OCCUPIED' ? 'Occupée' : 'Réservée' }}</div>
+          <div class="tc-badge">{{ statusLabel(table.status) }}</div>
           <div class="tc-seats">🪑 {{ table.seats }} places</div>
+          @if (table.status === 'OCCUPIED') {
+            <div class="tc-click-hint">Voir commandes →</div>
+          }
         </div>
       }
     </div>
@@ -20,37 +27,48 @@
   <!-- Modal détail table -->
   @if (selected()) {
     <div class="modal-ov open" (click)="close()">
-      <div class="modal-box" style="max-width:500px;padding:0" (click)="$event.stopPropagation()">
+      <div class="modal-box" style="max-width:520px;padding:0;overflow:hidden" (click)="$event.stopPropagation()">
         <div class="td-header">
           <div>
             <div class="td-title">Table {{ selected()!.number }}</div>
-            <div class="td-sub">{{ tableOrders().length }} commande(s)</div>
+            <div class="td-sub">{{ tableOrders().length }} commande(s) active(s)</div>
           </div>
           <button class="td-x" (click)="close()">✕</button>
         </div>
+
         <div class="td-body">
           @if (tableOrders().length === 0) {
-            <div class="td-empty">Aucune commande active</div>
+            <div class="td-empty">⏳ Chargement...</div>
           }
           @for (order of tableOrders(); track order.id) {
             <div class="td-order-block">
               <div class="td-order-head">
                 <span class="td-order-num">Commande #{{ order.id }}</span>
-                <span class="td-order-status" [class]="order.status.toLowerCase()">{{ order.status }}</span>
+                <span class="td-order-status" [class]="order.status.toLowerCase()">
+                  {{ order.status === 'SENT' ? '🔔 Envoyée' :
+                     order.status === 'PREPARING' ? '🔥 En préparation' :
+                     order.status === 'READY' ? '✅ Prête' : order.status }}
+                </span>
+                <span class="td-order-time">{{ order.createdAt }}</span>
               </div>
               @for (item of order.items; track item.id) {
                 <div class="td-line">
-                  <span>{{ item.emoji }} {{ item.name }} ×{{ item.quantity }}</span>
-                  <span>{{ settings.fmt(item.price * item.quantity) }}</span>
+                  <span>{{ item.emoji }} {{ item.name }}
+                    <span class="td-qty">×{{ item.quantity }}</span>
+                    @if (item.note) { <span class="td-note"> — {{ item.note }}</span> }
+                  </span>
+                  <span class="td-price">{{ settings.fmt(item.price * item.quantity) }}</span>
                 </div>
               }
             </div>
           }
-          <div class="td-total-bar">
-            <span>Total</span>
-            <span class="td-total-val">{{ settings.fmt(tableTotal) }}</span>
-          </div>
         </div>
+
+        <div class="td-total-bar">
+          <span>Total table</span>
+          <span class="td-total-val">{{ settings.fmt(tableTotal) }}</span>
+        </div>
+
         <div class="td-footer">
           <button class="td-btn-close" (click)="close()">Fermer</button>
         </div>
