@@ -16,5 +16,6 @@
     <include file="db/changelog/v9-reload-menu-final.xml"/>
     <include file="db/changelog/v10-settings-categories.xml"/>
     <include file="db/changelog/v11-add-menu-price.xml"/>
+    <include file="db/changelog/v12-index-orders.xml"/>
 
 </databaseChangeLog>
