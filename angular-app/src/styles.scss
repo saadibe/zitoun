@@ -262,3 +262,114 @@ html, body {
   .tp-title { font-size: 16px; }
   .tp-sub   { font-size: 11px; }
 }
+
+// ═══ STYLES PARTAGÉS — Encaissement + Modals ══════════════
+
+// Modal overlay
+.modal-ov {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,.5);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  backdrop-filter: blur(2px);
+}
+.modal-box {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  max-width: 420px; width: 100%;
+  box-shadow: 0 24px 64px rgba(0,0,0,.2);
+  animation: modal-in .22s cubic-bezier(.34,1.3,.64,1);
+}
+@keyframes modal-in {
+  from { opacity:0; transform: scale(.9) translateY(16px); }
+  to   { opacity:1; transform: scale(1)  translateY(0); }
+}
+
+// Encaissement modal
+.enc-modal { max-width: 480px !important; padding: 0 !important; overflow: hidden !important; border-top: 5px solid var(--sky) !important; }
+.enc-header {
+  display: flex; justify-content: space-between; align-items: center;
+  background: linear-gradient(135deg, var(--sky), var(--sky2));
+  padding: 18px 22px;
+}
+.enc-header-title { font-family:'Tajawal',sans-serif; font-size: 18px; font-weight: 800; color: #fff; }
+.enc-sub   { font-size: 12px; color: rgba(255,255,255,.7); margin-top: 2px; }
+.enc-x {
+  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+  border: none; background: rgba(255,255,255,.15); color: #fff;
+  font-size: 16px; cursor: pointer;
+  &:hover { background: rgba(255,255,255,.28); }
+}
+.enc-body     { padding: 16px 22px; display: flex; flex-direction: column; gap: 14px; }
+.enc-items    { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; }
+.enc-row      { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+.enc-row-name { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; flex-wrap: wrap; }
+.enc-row-qty  {
+  background: var(--sky-pale); color: var(--sky); border: 1.5px solid var(--sky-light);
+  font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 6px; flex-shrink: 0;
+}
+.enc-opt { font-size: 10px; color: var(--ink3); font-style: italic; }
+.enc-total-bar {
+  background: linear-gradient(135deg, var(--sky), var(--sky2));
+  border-radius: 12px; padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.enc-total-lbl { font-size: 12px; font-weight: 700; color: rgba(255,255,255,.8); text-transform: uppercase; }
+.enc-total-val { font-family:'Tajawal',sans-serif; font-size: 24px; font-weight: 900; color: #fff; }
+.enc-methods   { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.enc-method-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 12px 8px; border-radius: 11px;
+  border: 2px solid var(--border); background: var(--cream);
+  font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Cairo',sans-serif;
+  .em { font-size: 22px; }
+  &.active { border-color: var(--sky); background: var(--sky-pale); color: var(--sky); }
+}
+.enc-cash-row {
+  display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700;
+  label { flex-shrink: 0; }
+  input { flex: 1; }
+}
+.enc-input {
+  width: 100%; padding: 11px 14px; border-radius: 10px;
+  border: 2px solid var(--border); background: var(--ivory);
+  font-size: 16px; font-family:'Tajawal',sans-serif; outline: none;
+  &:focus { border-color: var(--sky); }
+}
+.enc-rendu {
+  background: var(--green-dim); border: 2px solid var(--green);
+  border-radius: 10px; padding: 10px 14px;
+  font-size: 14px; font-weight: 700; color: var(--green); text-align: center;
+}
+.enc-footer { display: flex; gap: 8px; padding: 0 22px 20px; }
+.enc-cancel  {
+  flex: 1; padding: 12px; border-radius: 11px;
+  border: 2px solid var(--border); background: var(--cream);
+  font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Cairo',sans-serif;
+}
+.enc-confirm {
+  flex: 2; padding: 12px; border-radius: 11px; border: none;
+  background: linear-gradient(135deg, var(--green), #246b42);
+  color: #fff; font-size: 14px; font-weight: 800; cursor: pointer;
+  font-family: 'Cairo',sans-serif;
+  box-shadow: 0 4px 16px rgba(46,125,82,.35);
+  &:hover { transform: translateY(-1px); }
+  &:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+}
+
+// Topbar partagé
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 24px 12px;
+  background: var(--white);
+  border-bottom: 2px solid var(--border);
+  flex-shrink: 0;
+  .tp-title { font-family:'Tajawal',sans-serif; font-size: 20px; font-weight: 800; }
+  .tp-sub   { font-size: 12px; color: var(--ink3); margin-top: 2px; }
+  .tp-clock {
+    font-family:'Tajawal',sans-serif; font-size: 18px; font-weight: 700;
+    background: var(--sky-pale); border: 2px solid var(--sky-light);
+    color: var(--sky); padding: 6px 14px; border-radius: 10px;
+  }
+}
