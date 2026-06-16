@@ -1,5 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { CartItem, MenuItem, HistoryEntry, SelectedOption } from '../models';
+import { CartItem, MenuItem, HistoryEntry } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
@@ -7,24 +7,30 @@ export class CartService {
   table   = signal<number | null>(null);
   history = signal<HistoryEntry[]>([]);
 
+  // menuPrice injecté depuis SettingsService
+  menuPrice = 2.0;
+
   total = computed(() =>
     this.items().reduce((s, i) => {
-      const optExtra = (i.selectedOptions || []).reduce((os, o) => os + o.priceAdjust, 0);
-      return s + (i.item.price + optExtra) * i.qty;
+      const extra = i.withMenu ? this.menuPrice : 0;
+      return s + (i.item.price + extra) * i.qty;
     }, 0)
   );
   count = computed(() => this.items().reduce((s, i) => s + i.qty, 0));
 
-  addItem(item: MenuItem, options?: SelectedOption[]) {
+  addItem(item: MenuItem, piment?: string, withMenu?: boolean) {
     this.items.update(list => {
-      // Si composite avec options, toujours ajouter une nouvelle ligne
-      if (options && options.length > 0) {
-        return [...list, { item, qty: 1, note: '', selectedOptions: options }];
-      }
-      const found = list.find(i => i.item.id === item.id && !i.selectedOptions?.length);
-      if (found) return list.map(i => i.item.id === item.id && !i.selectedOptions?.length
-        ? { ...i, qty: i.qty + 1 } : i);
-      return [...list, { item, qty: 1, note: '', selectedOptions: [] }];
+      // Même article + mêmes options → incrémenter
+      const found = list.find(i =>
+        i.item.id === item.id &&
+        i.piment === (piment || 'normal') &&
+        !!i.withMenu === !!withMenu
+      );
+      if (found) return list.map(i =>
+        i.item.id === item.id && i.piment === (piment||'normal') && !!i.withMenu === !!withMenu
+          ? { ...i, qty: i.qty + 1 } : i
+      );
+      return [...list, { item, qty: 1, note: '', piment: piment || 'normal', withMenu: !!withMenu }];
     });
   }
 
@@ -37,24 +43,11 @@ export class CartService {
     this.items.update(list => list.map((item, i) => i === index ? { ...item, qty } : item));
   }
 
-  updateNote(index: number, note: string) {
-    this.items.update(list => list.map((item, i) => i === index ? { ...item, note } : item));
-  }
-
   setTable(n: number | null) { this.table.set(n); }
   clear() { this.items.set([]); this.table.set(null); }
 
-  addToHistory(entry: HistoryEntry) {
-    this.history.update(h => [entry, ...h]);
-  }
-
-  // Mettre à jour une entrée d'historique (ex: encaissement après manger)
+  addToHistory(entry: HistoryEntry) { this.history.update(h => [entry, ...h]); }
   updateHistory(id: string, updates: Partial<HistoryEntry>) {
     this.history.update(h => h.map(e => e.id === id ? { ...e, ...updates } : e));
-  }
-
-  // Trouver les entrées en attente d'encaissement pour une table
-  pendingForTable(table: number): HistoryEntry[] {
-    return this.history().filter(e => e.table === table && e.status === 'pending');
   }
 }
