@@ -324,3 +324,48 @@
 .pay-choice-icon { font-size: 32px; }
 .pay-choice-lbl  { font-size: 13px; font-weight: 800; }
 .pay-choice-hint { font-size: 11px; color: var(--ink3); text-align: center; line-height: 1.3; }
+
+// ── Composite items ───────────────────────────────────
+.m-card.composite {
+  border-color: var(--sky-light);
+  background: linear-gradient(135deg, var(--white), var(--sky-pale));
+  position: relative;
+}
+.composite-badge {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--sky); color: #fff;
+  font-size: 9px; font-weight: 800; padding: 2px 6px;
+  border-radius: 6px; text-transform: uppercase; letter-spacing: .5px;
+}
+.mc-opt-hint { font-size: 10px; color: var(--sky); font-weight: 700; margin-top: 4px; }
+.oi-opts { font-size: 11px; color: var(--sky); font-weight: 600; font-style: italic; }
+.menu-cat { background: var(--sky-pale) !important; color: var(--sky) !important; border-color: var(--sky-light) !important; }
+
+// ── Modal composite ────────────────────────────────────
+.composite-modal { max-width: 440px; padding: 0; overflow: hidden; }
+.comp-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 22px; border-bottom: 1px solid var(--border);
+  background: var(--sky-pale);
+}
+.comp-emoji  { font-size: 36px; }
+.comp-name   { font-size: 17px; font-weight: 800; }
+.comp-price  { font-size: 14px; color: var(--sky); font-weight: 700; margin-top: 2px; }
+.comp-body   { padding: 16px 22px; display: flex; flex-direction: column; gap: 16px; max-height: 50vh; overflow-y: auto; }
+.comp-option { display: flex; flex-direction: column; gap: 8px; }
+.comp-opt-label {
+  font-size: 12px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--ink2);
+  .req { color: var(--terracotta); margin-left: 3px; }
+}
+.comp-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+.comp-choice {
+  padding: 9px 14px; border-radius: 10px; border: 2px solid var(--border);
+  background: var(--cream); font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'Cairo',sans-serif; transition: all .15s;
+  &:hover  { border-color: var(--sky-light); }
+  &.selected { background: var(--sky); color: #fff; border-color: var(--sky); }
+}
+.choice-extra { font-size: 11px; font-weight: 800; margin-left: 4px; opacity: .8; }
+.comp-footer { display: flex; gap: 8px; padding: 0 22px 20px; }
+.enc-opt { font-size: 10px; color: var(--ink3); font-style: italic; margin-left: 6px; }
