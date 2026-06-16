@@ -28,11 +28,11 @@
           </div>
         </div>
         <div class="cats">
-          <button class="cat-btn" [class.active]="activeCat==='all'" (click)="selectCat('all')">
+          <button class="cat-btn" [class.active]="activeCat()==='all'" (click)="selectCat('all')">
             ✦ Tout
           </button>
           @for (cat of settings.categories(); track cat.code) {
-            <button class="cat-btn" [class.active]="activeCat===cat.code" (click)="selectCat(cat.code)">
+            <button class="cat-btn" [class.active]="activeCat()===cat.code" (click)="selectCat(cat.code)">
               {{ cat.emoji }} {{ cat.label }}
             </button>
           }
