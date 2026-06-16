@@ -1,13 +1,15 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, effect } from '@angular/core';
 import { CartItem, MenuItem, HistoryEntry } from '../models';
+
+const HISTORY_KEY = 'laperla_history';
+const MAX_HISTORY = 200;
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
   items   = signal<CartItem[]>([]);
   table   = signal<number | null>(null);
-  history = signal<HistoryEntry[]>([]);
+  history = signal<HistoryEntry[]>(this.loadHistory());
 
-  // menuPrice injecté depuis SettingsService
   menuPrice = 2.0;
 
   total = computed(() =>
@@ -18,9 +20,27 @@ export class CartService {
   );
   count = computed(() => this.items().reduce((s, i) => s + i.qty, 0));
 
+  constructor() {
+    // Persister l'historique à chaque changement
+    effect(() => {
+      const h = this.history();
+      try {
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(0, MAX_HISTORY)));
+      } catch (e) {}
+    });
+  }
+
+  private loadHistory(): HistoryEntry[] {
+    try {
+      const saved = localStorage.getItem(HISTORY_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  }
+
   addItem(item: MenuItem, piment?: string, withMenu?: boolean) {
     this.items.update(list => {
-      // Même article + mêmes options → incrémenter
       const found = list.find(i =>
         i.item.id === item.id &&
         i.piment === (piment || 'normal') &&
@@ -46,8 +66,16 @@ export class CartService {
   setTable(n: number | null) { this.table.set(n); }
   clear() { this.items.set([]); this.table.set(null); }
 
-  addToHistory(entry: HistoryEntry) { this.history.update(h => [entry, ...h]); }
+  addToHistory(entry: HistoryEntry) {
+    this.history.update(h => [entry, ...h].slice(0, MAX_HISTORY));
+  }
+
   updateHistory(id: string, updates: Partial<HistoryEntry>) {
     this.history.update(h => h.map(e => e.id === id ? { ...e, ...updates } : e));
+  }
+
+  clearHistory() {
+    this.history.set([]);
+    try { localStorage.removeItem(HISTORY_KEY); } catch {}
   }
 }
