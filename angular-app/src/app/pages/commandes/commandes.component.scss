@@ -369,3 +369,34 @@
 .choice-extra { font-size: 11px; font-weight: 800; margin-left: 4px; opacity: .8; }
 .comp-footer { display: flex; gap: 8px; padding: 0 22px 20px; }
 .enc-opt { font-size: 10px; color: var(--ink3); font-style: italic; margin-left: 6px; }
+
+// ── Modal options (piment + menu) ─────────────────────
+.options-modal { max-width: 420px; padding: 0; overflow: hidden; }
+.opt-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px; border-bottom: 2px solid var(--border);
+  background: var(--sky-pale);
+}
+.opt-emoji      { font-size: 36px; }
+.opt-name       { font-size: 17px; font-weight: 800; }
+.opt-base-price { font-size: 14px; color: var(--sky); font-weight: 700; }
+.opt-body       { padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; }
+.opt-section    { display: flex; flex-direction: column; gap: 8px; }
+.opt-section-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .8px; color: var(--ink2); }
+.opt-choices    { display: flex; gap: 8px; flex-wrap: wrap; }
+.opt-choice {
+  padding: 10px 16px; border-radius: 10px; border: 2px solid var(--border);
+  background: var(--cream); font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'Cairo',sans-serif; transition: all .15s;
+  &:hover { border-color: var(--sky-light); }
+  &.sel { background: var(--sky); color: #fff; border-color: var(--sky); }
+  &.menu-btn.sel { background: var(--green); border-color: var(--green); }
+}
+.opt-extra { font-size: 11px; font-weight: 800; margin-left: 4px; opacity: .85; }
+.opt-summary {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--sky-pale); border-radius: 10px; padding: 12px 16px;
+  font-size: 13px; font-weight: 700; color: var(--ink2);
+}
+.opt-total { font-family:'Tajawal',sans-serif; font-size: 20px; font-weight: 900; color: var(--sky); }
+.oi-opts   { font-size: 11px; color: var(--sky); font-weight: 600; font-style: italic; margin-bottom: 2px; }
