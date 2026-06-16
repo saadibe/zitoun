@@ -82,7 +82,7 @@
           <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:4px 0;font-size:13px;border-bottom:1px solid var(--border)">
             <div>
               <span>{{ item.emoji }} {{ item.name }} ×{{ item.qty }}</span>
-              @if (item.options) { <div style="font-size:11px;color:var(--ink3);font-style:italic">{{ item.options }}</div> }
+              @if (item.note) { <div style="font-size:11px;color:var(--ink3);font-style:italic">{{ item.note }}</div> }
             </div>
             <span style="font-weight:700;flex-shrink:0">{{ settings.fmt(item.price * item.qty) }}</span>
           </div>
