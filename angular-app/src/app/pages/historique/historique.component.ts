@@ -102,7 +102,7 @@ export class HistoriqueComponent {
       rows = `<div class="r"><span>${customQty} repas</span><span>${fmt(h.total)}</span></div>`;
     } else {
       h.items.forEach(i => {
-        rows += `<div class="r"><span>${i.emoji} ${i.name}${i.options?' <em>'+i.options+'</em>':''} ×${i.qty}</span><span>${fmt(i.price*i.qty)}</span></div>`;
+        rows += `<div class="r"><span>${i.emoji} ${i.name}${i.note?' <em>'+i.note+'</em>':''} ×${i.qty}</span><span>${fmt(i.price*i.qty)}</span></div>`;
       });
     }
 
