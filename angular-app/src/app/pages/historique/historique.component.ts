@@ -1,13 +1,14 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../services/cart.service';
 import { SettingsService } from '../../services/settings.service';
+import { AuthService } from '../../services/auth.service';
 import { HistoryEntry } from '../../models';
 
 @Component({ selector:'app-historique', standalone:true, imports:[CommonModule,FormsModule],
   templateUrl:'./historique.component.html', styleUrl:'./historique.component.scss' })
-export class HistoriqueComponent {
+export class HistoriqueComponent implements OnInit {
   selected   = signal<HistoryEntry | null>(null);
   newTotal   = '';
   newQty     = '';
@@ -16,7 +17,9 @@ export class HistoriqueComponent {
   received   = 0;
   change: number | null = null;
 
-  readonly methodIcons: {[k:string]:string} = { especes:'💵', carte:'💳', cheque:'📝', mixte:'🔀' };
+  readonly methodIcons: {[k:string]:string} = {
+    especes:'💵', carte:'💳', cheque:'📝', mixte:'🔀'
+  };
   payMethods = [
     { key:'especes', icon:'💵', label:'Espèces' },
     { key:'carte',   icon:'💳', label:'Carte'   },
@@ -24,7 +27,17 @@ export class HistoriqueComponent {
     { key:'mixte',   icon:'🔀', label:'Mixte'   },
   ];
 
-  constructor(public cart: CartService, public settings: SettingsService) {}
+  constructor(
+    public cart: CartService,
+    public settings: SettingsService,
+    private auth: AuthService
+  ) {}
+
+  ngOnInit() {
+    // Charger l'historique depuis la base
+    this.cart.setToken(this.auth.token);
+    this.cart.loadHistoryFromApi();
+  }
 
   get pending() { return this.cart.history().filter(e => e.status === 'pending'); }
   get paid()    { return this.cart.history().filter(e => e.status === 'paid'); }
@@ -36,19 +49,14 @@ export class HistoriqueComponent {
 
   open(entry: HistoryEntry) {
     this.selected.set({ ...entry, items: [...entry.items] });
-    this.newTotal = '';
-    this.newQty   = '';
-    this.showEnc  = false;
+    this.newTotal = ''; this.newQty = ''; this.showEnc = false;
   }
 
   close() { this.selected.set(null); }
 
-  // Encaisser une facture en attente
   openEncForEntry() {
-    this.showEnc  = true;
-    this.payMethod = 'especes';
-    this.received  = 0;
-    this.change    = null;
+    this.showEnc = true; this.payMethod = 'especes';
+    this.received = 0; this.change = null;
   }
 
   encTotal(): number {
@@ -70,10 +78,7 @@ export class HistoriqueComponent {
     }
     if (this.newTotal) {
       const t = parseFloat(this.newTotal);
-      if (t > 0) {
-        h.total = t;
-        this.selected.set({ ...h });
-      }
+      if (t > 0) h.total = t;
     }
     this.cart.updateHistory(h.id, { method: this.payMethod, status: 'paid', total: h.total });
     this.showEnc = false;
@@ -102,7 +107,9 @@ export class HistoriqueComponent {
       rows = `<div class="r"><span>${customQty} repas</span><span>${fmt(h.total)}</span></div>`;
     } else {
       h.items.forEach(i => {
-        rows += `<div class="r"><span>${i.emoji} ${i.name}${i.note?' <em>'+i.note+'</em>':''} ×${i.qty}</span><span>${fmt(i.price*i.qty)}</span></div>`;
+        rows += `<div class="r"><span>${i.emoji} ${i.name} ×${i.qty}` +
+          (i.note ? ` <em>${i.note}</em>` : '') +
+          `</span><span>${fmt(i.price * i.qty)}</span></div>`;
       });
     }
 
@@ -118,20 +125,23 @@ export class HistoriqueComponent {
       .r{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}
       .total{display:flex;justify-content:space-between;font-size:15px;font-weight:bold;padding:5px 0;border-top:2px solid #333}
       .footer{text-align:center;font-size:10px;color:#999;margin-top:12px}
-      em{font-size:10px;color:#666}
+      em{font-size:10px;color:#666;font-style:italic}
       @media print{body{padding:4px}}
     </style></head><body>
     <div class="name">${s.name}</div>
-    ${s.subtitle?`<div class="tag">${s.subtitle}${s.city?' · '+s.city:''}</div>`:''}
+    ${s.subtitle ? `<div class="tag">${s.subtitle}${s.city?' · '+s.city:''}</div>` : ''}
     <hr>
     <div class="meta">${h.date} ${h.time}</div>
     <div class="meta">${tableInfo}Facture ${h.id}</div>
     <hr>${rows}<hr>
-    ${tva?`<div class="r"><span>HT</span><span>${ht} ${s.currency}</span></div>
-           <div class="r"><span>TVA (${s.tvaRate}%)</span><span>${tva} ${s.currency}</span></div><hr>`:''}
+    ${tva ? `<div class="r"><span>HT</span><span>${ht} ${s.currency}</span></div>
+             <div class="r"><span>TVA (${s.tvaRate}%)</span><span>${tva} ${s.currency}</span></div><hr>` : ''}
     <div class="total"><span>TOTAL</span><span>${fmt(h.total)}</span></div>
-    ${h.method?`<div class="meta">${this.methodIcons[h.method]||''} ${h.method.toUpperCase()}</div>`:''}
-    <div class="footer">Merci de votre visite 🙏<br><b>${s.name}</b>${s.city?'<br>'+s.city:''}${s.taxNumber?'<br>'+s.taxNumber:''}</div>
+    ${h.method ? `<div class="meta">${this.methodIcons[h.method]||''} ${h.method.toUpperCase()}</div>` : ''}
+    <div class="footer">Merci de votre visite 🙏<br><b>${s.name}</b>
+      ${s.city ? '<br>'+s.city : ''}
+      ${s.taxNumber ? '<br>'+s.taxNumber : ''}
+    </div>
     </body></html>`);
     w.document.close();
     setTimeout(() => w.print(), 400);
