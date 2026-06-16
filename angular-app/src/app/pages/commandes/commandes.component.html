@@ -2,13 +2,12 @@
   <div class="topbar">
     <div>
       <div class="tp-title">📋 Nouvelle Commande</div>
-      <div class="tp-sub">{{ settings.settings().name }} — Sélectionnez une table puis ajoutez des articles</div>
+      <div class="tp-sub">{{ settings.settings().name }} — Sélectionnez une table puis ajoutez les articles</div>
     </div>
     <div class="tp-clock">{{ clock }}</div>
   </div>
 
   <div class="srv-grid">
-    <!-- Panel menu -->
     <div class="menu-panel" [class.tab-hidden]="mobileTab==='cart'">
       <div class="menu-bar">
         <div class="tbl-row">
@@ -22,7 +21,6 @@
         </div>
         <div class="cats">
           <button class="cat-btn" [class.active]="activeCat()==='all'" (click)="selectCat('all')">✦ Tout</button>
-          <button class="cat-btn menu-cat" [class.active]="activeCat()==='MENU'" (click)="selectCat('MENU')">🍽️ Menus</button>
           @for (cat of settings.categories(); track cat.code) {
             <button class="cat-btn" [class.active]="activeCat()===cat.code" (click)="selectCat(cat.code)">
               {{ cat.emoji }} {{ cat.label }}
@@ -32,18 +30,18 @@
       </div>
       <div class="menu-items">
         @for (item of filtered(); track item.id) {
-          <div class="m-card" [class.composite]="item.isComposite" (click)="addItem(item)">
-            @if (item.isComposite) { <span class="composite-badge">Menu</span> }
+          <div class="m-card" [class.sandwich-card]="settings.isSandwich(item.category)" (click)="addItem(item)">
             <div class="mc-em">{{ item.emoji }}</div>
             <div class="mc-nm">{{ item.name }}</div>
             <div class="mc-pr">{{ settings.fmt(item.price) }}</div>
-            @if (item.isComposite) { <div class="mc-opt-hint">Personnalisable →</div> }
+            @if (settings.isSandwich(item.category)) {
+              <div class="mc-opt-hint">🌶️ + Menu dispo</div>
+            }
           </div>
         }
       </div>
     </div>
 
-    <!-- Panel panier -->
     <div class="order-panel" [class.tab-visible]="mobileTab==='cart'">
       <div class="o-head">
         <div>
@@ -64,8 +62,8 @@
             <div class="oi-em">{{ item.item.emoji }}</div>
             <div class="oi-info">
               <div class="oi-nm">{{ item.item.name }}</div>
-              @if (item.selectedOptions?.length) {
-                <div class="oi-opts">{{ optionLabel(item.item, item.selectedOptions) }}</div>
+              @if (itemNote(item)) {
+                <div class="oi-opts">{{ itemNote(item) }}</div>
               }
               <input class="oi-note" [(ngModel)]="item.note" placeholder="Note spéciale...">
             </div>
@@ -74,10 +72,12 @@
               <span class="o-qty-val">{{ item.qty }}</span>
               <button class="o-qty-btn" (click)="cart.updateQty(idx, item.qty+1)">+</button>
             </div>
-            <div class="oi-price">{{ settings.fmt(item.item.price * item.qty) }}</div>
+            <div class="oi-price">{{ settings.fmt((item.item.price + (item.withMenu ? cart.menuPrice : 0)) * item.qty) }}</div>
           </div>
         }
-        @if (sentMsg) { <div class="suc-flash">{{ sentMsg }}</div> }
+        @if (sentMsg) {
+          <div class="suc-flash">{{ sentMsg }}</div>
+        }
       </div>
       <div class="o-foot">
         <div class="o-total">
@@ -94,7 +94,6 @@
     </div>
   </div>
 
-  <!-- Onglets mobile -->
   <div class="mobile-tabs">
     <button class="mobile-tab" [class.active]="mobileTab==='menu'" (click)="mobileTab='menu'">
       <span class="mobile-tab-ico">🍽️</span><span>Menu</span>
@@ -106,46 +105,50 @@
   </div>
 </div>
 
-<!-- Modal composite -->
-@if (showComposite && compositeItem) {
+<!-- ══ Modal options (piment + menu) ══ -->
+@if (showOptions && optionItem) {
   <div class="modal-ov open" (click)="closeModal($event)">
-    <div class="modal-box composite-modal" (click)="$event.stopPropagation()">
-      <div class="comp-header">
-        <div class="comp-emoji">{{ compositeItem.emoji }}</div>
+    <div class="modal-box options-modal" (click)="$event.stopPropagation()">
+      <div class="opt-header">
+        <div class="opt-emoji">{{ optionItem.emoji }}</div>
         <div>
-          <div class="comp-name">{{ compositeItem.name }}</div>
-          <div class="comp-price">{{ settings.fmt(compositeItem.price) }}</div>
+          <div class="opt-name">{{ optionItem.name }}</div>
+          <div class="opt-base-price">{{ settings.fmt(optionItem.price) }}</div>
         </div>
-        <button class="enc-x" (click)="showComposite=false">✕</button>
+        <button class="enc-x" (click)="showOptions=false">✕</button>
       </div>
-      <div class="comp-body">
-        @for (opt of compositeItem.options!; track opt.id) {
-          <div class="comp-option">
-            <div class="comp-opt-label">{{ opt.label }} @if (opt.required) { <span class="req">*</span> }</div>
-            <div class="comp-choices">
-              @for (choice of opt.choices; track choice.id) {
-                <button class="comp-choice"
-                  [class.selected]="selectedOpts[opt.id]===choice.id"
-                  (click)="selectOpt(opt.id, choice.id)">
-                  {{ choice.label }}
-                  @if (choice.priceAdjust > 0) { <span class="choice-extra">+{{ settings.fmt(choice.priceAdjust) }}</span> }
-                </button>
-              }
-            </div>
+      <div class="opt-body">
+        <div class="opt-section">
+          <div class="opt-section-title">🌶️ Piment</div>
+          <div class="opt-choices">
+            @for (p of pimentOpts; track p.key) {
+              <button class="opt-choice" [class.sel]="optPiment===p.key" (click)="optPiment=p.key">{{ p.label }}</button>
+            }
           </div>
-        }
+        </div>
+        <div class="opt-section">
+          <div class="opt-section-title">🍽️ Option Menu</div>
+          <div class="opt-choices">
+            <button class="opt-choice" [class.sel]="!optWithMenu" (click)="optWithMenu=false">Seul</button>
+            <button class="opt-choice menu-btn" [class.sel]="optWithMenu" (click)="optWithMenu=true">
+              Menu <span class="opt-extra">+{{ settings.fmt(settings.settings().menuPrice || 2) }}</span>
+            </button>
+          </div>
+        </div>
+        <div class="opt-summary">
+          <span>Total article</span>
+          <span class="opt-total">{{ settings.fmt(optionItem.price + (optWithMenu ? (settings.settings().menuPrice || 2) : 0)) }}</span>
+        </div>
       </div>
       <div class="comp-footer">
-        <button class="enc-cancel" (click)="showComposite=false">Annuler</button>
-        <button class="enc-confirm" [disabled]="!isOptValid()" (click)="confirmComposite()">
-          ✓ Ajouter au panier
-        </button>
+        <button class="enc-cancel" (click)="showOptions=false">Annuler</button>
+        <button class="enc-confirm" (click)="confirmOptions()">✓ Ajouter au panier</button>
       </div>
     </div>
   </div>
 }
 
-<!-- Modal choix paiement -->
+<!-- ══ Modal choix paiement ══ -->
 @if (showPayChoice) {
   <div class="modal-ov open" (click)="closeModal($event)">
     <div class="modal-box pay-choice-modal" (click)="$event.stopPropagation()">
@@ -164,19 +167,19 @@
         <button class="pay-choice-btn pay-now" (click)="choosePayNow()">
           <span class="pay-choice-icon">💵</span>
           <span class="pay-choice-lbl">Payer maintenant</span>
-          <span class="pay-choice-hint">Encaissement immédiat avant envoi cuisine</span>
+          <span class="pay-choice-hint">Encaissement immédiat</span>
         </button>
         <button class="pay-choice-btn pay-after" (click)="choosePayAfter()">
           <span class="pay-choice-icon">🍽️</span>
           <span class="pay-choice-lbl">Payer après manger</span>
-          <span class="pay-choice-hint">Envoi cuisine direct, encaissement à la fin</span>
+          <span class="pay-choice-hint">Envoi cuisine direct</span>
         </button>
       </div>
     </div>
   </div>
 }
 
-<!-- Modal encaissement -->
+<!-- ══ Modal encaissement ══ -->
 @if (showEnc) {
   <div class="modal-ov open" (click)="closeModal($event)">
     <div class="modal-box enc-modal" (click)="$event.stopPropagation()">
@@ -195,7 +198,7 @@
                 <div class="enc-row-name">
                   <span class="enc-row-qty">×{{ item.qty }}</span>
                   <span>{{ item.emoji }} {{ item.name }}</span>
-                  @if (item.options) { <span class="enc-opt">{{ item.options }}</span> }
+                  @if (item.note) { <span class="enc-opt"> · {{ item.note }}</span> }
                 </div>
                 <span>{{ settings.fmt(item.price * item.qty) }}</span>
               </div>
@@ -206,8 +209,9 @@
                 <div class="enc-row-name">
                   <span class="enc-row-qty">×{{ item.qty }}</span>
                   <span>{{ item.item.emoji }} {{ item.item.name }}</span>
+                  @if (itemNote(item)) { <span class="enc-opt"> · {{ itemNote(item) }}</span> }
                 </div>
-                <span>{{ settings.fmt(item.item.price * item.qty) }}</span>
+                <span>{{ settings.fmt((item.item.price + (item.withMenu ? cart.menuPrice : 0)) * item.qty) }}</span>
               </div>
             }
           }
