@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "ng": "node_modules/.bin/ng",
-    "start": "node_modules/.bin/ng serve",
+    "start": "node server.js",
     "build": "node_modules/.bin/ng build --configuration=production",
-    "serve:prod": "node_modules/.bin/serve dist/zitoun-angular/browser -p $PORT --no-clipboard"
+    "serve:dev": "node_modules/.bin/ng serve"
   },
   "private": true,
   "dependencies": {
@@ -25,6 +25,6 @@
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0",
-    "serve": "^14.2.0"
+    "express": "^4.18.0"
   }
 }
