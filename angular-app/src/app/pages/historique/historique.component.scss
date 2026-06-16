@@ -13,3 +13,11 @@
 .hist-method { font-size:16px; }
 .hist-total  { font-family:'Tajawal',sans-serif; font-size:18px; font-weight:900; color:var(--sky); margin-left:auto; }
 .hist-card-sub { font-size:12px; color:var(--ink3); }
+.hist-section-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .8px; color: var(--ink3); padding: 4px 0; }
+.pending-title { color: var(--terracotta); }
+.pending-card  { border-color: var(--terracotta); background: linear-gradient(135deg, var(--white), #fff8f8); }
+.hist-badge {
+  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+  &.pending { background: var(--terra-light); color: var(--terracotta); }
+  &.paid    { background: var(--green-dim);   color: var(--green); }
+}
