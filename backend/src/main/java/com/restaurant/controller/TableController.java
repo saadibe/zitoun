@@ -1,7 +1,9 @@
 package com.restaurant.controller;
-
+import com.restaurant.dto.OrderDTO;
 import com.restaurant.model.RestaurantTable;
+import com.restaurant.repository.OrderRepository;
 import com.restaurant.repository.TableRepository;
+import com.restaurant.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -15,12 +17,20 @@ import java.util.Map;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class TableController {
-
-    private final TableRepository tableRepo;
+    private final TableRepository  tableRepo;
+    private final OrderRepository  orderRepo;
+    private final OrderService     orderService;
 
     @GetMapping
     public List<RestaurantTable> getAll() {
         return tableRepo.findAllByOrderByNumberAsc();
+    }
+
+    // GET /api/tables/{number}/orders — commandes actives d'une table
+    @GetMapping("/{number}/orders")
+    public List<OrderDTO.Response> getTableOrders(@PathVariable Integer number) {
+        return orderRepo.findActiveByTable(number)
+            .stream().map(orderService::toResponse).toList();
     }
 
     @PostMapping
