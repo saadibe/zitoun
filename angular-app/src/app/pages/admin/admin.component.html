@@ -26,6 +26,10 @@
             @for (t of tvaOptions; track t) { <option [value]="t">{{ t===0 ? 'Pas de TVA' : t+'%' }}</option> }
           </select>
         </div>
+        <div class="sf-row"><label>Supplément Menu</label>
+          <input type="number" [(ngModel)]="s.menuPrice" step="0.5" style="width:90px">
+          <span style="font-size:12px;color:var(--ink3)">{{ settings.settings().currency }} (option menu pour sandwichs)</span>
+        </div>
         <div class="sf-row"><label>Thème</label>
           <select [(ngModel)]="s.theme">
             <option value="vert">🟢 Vert olivier</option>
