@@ -9,14 +9,14 @@ import { MenuItem, RestaurantTable } from '../../models';
 @Component({ selector:'app-commandes', standalone:true, imports:[CommonModule,FormsModule],
   templateUrl:'./commandes.component.html', styleUrl:'./commandes.component.scss' })
 export class CommandesComponent implements OnInit, OnDestroy {
-  tables   = signal<RestaurantTable[]>([]);
-  menu     = signal<MenuItem[]>([]);
-  activeCat = 'all';
+  tables    = signal<RestaurantTable[]>([]);
+  menu      = signal<MenuItem[]>([]);
+  activeCat = signal<string>('all');   // ← signal, pas string simple
   mobileTab = 'menu';
-  sending  = signal(false);
-  sentMsg  = '';
-  clock    = '';
-  showEnc  = false;
+  sending   = signal(false);
+  sentMsg   = '';
+  clock     = '';
+  showEnc   = false;
   payMethod = 'especes';
   received  = 0;
   change: number | null = null;
@@ -29,43 +29,58 @@ export class CommandesComponent implements OnInit, OnDestroy {
     { key:'mixte',   icon:'🔀', label:'Mixte'   },
   ];
 
+  // computed réactif sur activeCat signal
   filtered = computed(() => {
+    const cat = this.activeCat();
     const m = this.menu().filter(i => i.available);
-    return this.activeCat === 'all' ? m
-      : m.filter(i => i.category.toUpperCase() === this.activeCat.toUpperCase());
+    return cat === 'all' ? m
+      : m.filter(i => i.category.toUpperCase() === cat.toUpperCase());
   });
 
-  constructor(public cart: CartService, public settings: SettingsService, private api: ApiService) {}
+  constructor(
+    public cart: CartService,
+    public settings: SettingsService,
+    private api: ApiService
+  ) {}
 
   ngOnInit() {
     this.api.getMenu().subscribe(m => this.menu.set(m));
-    this.api.getTables().subscribe(t => this.tables.set(t));
+    this.loadTables();
     this.updateClock();
     this.clockTimer = setInterval(() => this.updateClock(), 1000);
   }
+
   ngOnDestroy() { clearInterval(this.clockTimer); }
+
   updateClock() {
     this.clock = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
   }
 
+  loadTables() {
+    this.api.getTables().subscribe(t => this.tables.set(t));
+  }
+
   get tableLabel(): string {
     const t = this.cart.table();
-    if (t === 0) return '🥡 À emporter';
+    if (t === 0)    return '🥡 À emporter';
     if (t !== null) return `Table ${t} · ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}`;
     return 'Aucune table sélectionnée';
   }
 
   selectTable(n: number) { this.cart.setTable(n); }
-  selectCat(k: string)   { this.activeCat = k; }
+  selectCat(k: string)   { this.activeCat.set(k); }  // ← .set()
   addItem(item: MenuItem){ this.cart.addItem(item); }
-  canSend(): boolean     { return this.cart.table() !== null && this.cart.count() > 0; }
+  canSend(): boolean     {
+    const t = this.cart.table();
+    return (t === 0 || t !== null) && this.cart.count() > 0;
+  }
 
   send() {
     if (!this.canSend()) return;
-    this.showEnc = true;
+    this.showEnc  = true;
     this.payMethod = 'especes';
-    this.received = 0;
-    this.change = null;
+    this.received  = 0;
+    this.change    = null;
   }
 
   calcChange() {
@@ -86,13 +101,18 @@ export class CommandesComponent implements OnInit, OnDestroy {
     const items = this.cart.items();
     const total = this.cart.total();
 
-    // Sauvegarder dans l'historique
+    // Historique
     this.cart.addToHistory({
       id: 'F' + Date.now().toString().slice(-6),
-      table, date: new Date().toLocaleDateString('fr-FR'),
-      time: new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
-      method: this.payMethod, total,
-      items: items.map(i => ({id:i.item.id,name:i.item.name,emoji:i.item.emoji,price:i.item.price,qty:i.qty}))
+      table,
+      date:   new Date().toLocaleDateString('fr-FR'),
+      time:   new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
+      method: this.payMethod,
+      total,
+      items: items.map(i => ({
+        id: i.item.id, name: i.item.name,
+        emoji: i.item.emoji, price: i.item.price, qty: i.qty
+      }))
     });
 
     this.showEnc = false;
@@ -105,7 +125,12 @@ export class CommandesComponent implements OnInit, OnDestroy {
 
     this.api.createOrder(payload).subscribe({
       next: (order) => {
+        // Envoyer en cuisine
         this.api.sendToKitchen(order.id).subscribe();
+
+        // ── Recharger les tables pour mettre à jour le statut ──
+        this.loadTables();
+
         const label = table === 0 ? '🥡 À emporter' : `Table ${table}`;
         this.sentMsg = `✓ Commande envoyée — ${label}`;
         this.cart.clear();
@@ -113,7 +138,12 @@ export class CommandesComponent implements OnInit, OnDestroy {
         setTimeout(() => this.sentMsg = '', 3500);
       },
       error: () => {
-        // Mode offline
+        // Mode offline — mettre à jour localement
+        if (table !== 0) {
+          this.tables.update(list =>
+            list.map(t => t.number === table ? { ...t, status: 'OCCUPIED' as const } : t)
+          );
+        }
         const label = table === 0 ? '🥡 À emporter' : `Table ${table}`;
         this.sentMsg = `✓ Commande enregistrée — ${label}`;
         this.cart.clear();
@@ -123,5 +153,5 @@ export class CommandesComponent implements OnInit, OnDestroy {
     });
   }
 
-  openTicket() { /* TODO: modal ticket */ }
+  openTicket() { /* TODO */ }
 }
