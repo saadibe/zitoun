@@ -11,7 +11,8 @@
 // Menu panel
 .menu-panel {
   display: flex; flex-direction: column;
-  overflow: hidden; border-right: 2px solid var(--border);
+  overflow: hidden;
+  border-right: 2px solid var(--border);
   background: var(--ivory);
 }
 .menu-bar {
