@@ -272,3 +272,55 @@
   .cats { flex-wrap: nowrap !important; overflow-x: auto; }
   .cat-btn { flex-shrink: 0; white-space: nowrap; }
 }
+
+// ── Modal choix paiement ──────────────────────────────
+.pay-choice-modal {
+  max-width: 420px;
+  padding: 0;
+  overflow: hidden;
+  border-top: 5px solid var(--sky);
+}
+.pay-choice-header {
+  display: flex; align-items: flex-start;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+  gap: 10px;
+}
+.pay-choice-title { font-family:'Tajawal',sans-serif; font-size: 18px; font-weight: 800; }
+.pay-choice-sub   { font-size: 12px; color: var(--ink3); margin-top: 2px; }
+.pay-choice-header .enc-x { margin-left: auto; }
+.pay-choice-total {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 22px;
+  background: var(--sky-pale);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px; font-weight: 700; color: var(--ink2);
+}
+.pay-choice-amount {
+  font-family:'Tajawal',sans-serif; font-size: 22px; font-weight: 900; color: var(--sky);
+}
+.pay-choice-btns {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; padding: 18px 22px 22px;
+}
+.pay-choice-btn {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; padding: 20px 12px;
+  border-radius: 16px; border: 2px solid var(--border);
+  background: var(--cream); cursor: pointer;
+  font-family: 'Cairo',sans-serif; transition: all .18s;
+  &:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
+  &.pay-now {
+    border-color: var(--green);
+    background: var(--green-dim);
+    &:hover { background: var(--green); color: #fff; .pay-choice-hint { color: rgba(255,255,255,.7); } }
+  }
+  &.pay-after {
+    border-color: var(--sky-light);
+    background: var(--sky-pale);
+    &:hover { background: var(--sky); color: #fff; .pay-choice-hint { color: rgba(255,255,255,.7); } }
+  }
+}
+.pay-choice-icon { font-size: 32px; }
+.pay-choice-lbl  { font-size: 13px; font-weight: 800; }
+.pay-choice-hint { font-size: 11px; color: var(--ink3); text-align: center; line-height: 1.3; }
