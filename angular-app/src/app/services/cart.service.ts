@@ -1,16 +1,22 @@
-import { Injectable, signal, computed, effect } from '@angular/core';
-import { CartItem, MenuItem, HistoryEntry } from '../models';
+import { Injectable, signal, computed, effect, inject } from '@angular/core';
+import { CartItem, MenuItem, HistoryEntry, Order } from '../models';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 const HISTORY_KEY = 'laperla_history';
 const MAX_HISTORY = 200;
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
+  private http = inject(HttpClient);
+
   items   = signal<CartItem[]>([]);
   table   = signal<number | null>(null);
-  history = signal<HistoryEntry[]>(this.loadHistory());
+  history = signal<HistoryEntry[]>(this.loadLocalHistory());
+  loading = signal(false);
 
   menuPrice = 2.0;
+  private token = '';
 
   total = computed(() =>
     this.items().reduce((s, i) => {
@@ -21,22 +27,57 @@ export class CartService {
   count = computed(() => this.items().reduce((s, i) => s + i.qty, 0));
 
   constructor() {
-    // Persister l'historique à chaque changement
+    // Persister localement à chaque changement
     effect(() => {
-      const h = this.history();
       try {
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(0, MAX_HISTORY)));
-      } catch (e) {}
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(this.history().slice(0, MAX_HISTORY)));
+      } catch {}
     });
   }
 
-  private loadHistory(): HistoryEntry[] {
+  setToken(t: string) { this.token = t; }
+
+  // Charger l'historique depuis la base de données
+  loadHistoryFromApi() {
+    this.loading.set(true);
+    const headers = this.token
+      ? new HttpHeaders({ Authorization: `Bearer ${this.token}` })
+      : new HttpHeaders();
+
+    this.http.get<Order[]>(`${environment.apiUrl}/orders/history`, { headers })
+      .subscribe({
+        next: orders => {
+          const apiEntries: HistoryEntry[] = orders.map(o => ({
+            id:     'F' + o.id,
+            table:  o.tableNumber || null,
+            date:   o.updatedAt ? o.updatedAt.split(' ')[0] : '',
+            time:   o.updatedAt ? o.updatedAt.split(' ')[1] || '' : '',
+            method: 'carte',   // inconnu depuis API
+            total:  o.total || 0,
+            status: 'paid' as const,
+            items:  (o.items || []).map(i => ({
+              id:    i.id, name: i.name, emoji: i.emoji,
+              price: i.price, qty: i.quantity, note: i.note
+            }))
+          }));
+          // Fusionner avec historique local (local = plus récent)
+          const localIds = new Set(this.history().map(h => h.id));
+          const newFromApi = apiEntries.filter(e => !localIds.has(e.id));
+          this.history.update(h => [...h, ...newFromApi]
+            .sort((a, b) => b.id.localeCompare(a.id))
+            .slice(0, MAX_HISTORY)
+          );
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false)
+      });
+  }
+
+  private loadLocalHistory(): HistoryEntry[] {
     try {
       const saved = localStorage.getItem(HISTORY_KEY);
       return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
+    } catch { return []; }
   }
 
   addItem(item: MenuItem, piment?: string, withMenu?: boolean) {
