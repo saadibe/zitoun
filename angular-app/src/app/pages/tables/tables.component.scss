@@ -37,3 +37,19 @@
 .td-total-val { font-family:'Tajawal',sans-serif; font-size:22px; font-weight:900; color:#fff; }
 .td-footer { display:flex; gap:8px; padding:0 20px 20px; }
 .td-btn-close { flex:1; padding:11px; border-radius:10px; background:var(--cream); border:2px solid var(--sand); font-size:13px; font-weight:700; cursor:pointer; font-family:'Cairo',sans-serif; }
+
+.tc-click-hint {
+  font-size: 10px; color: var(--terracotta);
+  font-weight: 700; margin-top: 6px;
+  opacity: .8;
+}
+.td-order-time { font-size: 11px; color: var(--ink4); margin-left: auto; }
+.td-qty   { background: var(--sky-pale); color: var(--sky); border: 1.5px solid var(--sky-light); font-size: 11px; font-weight: 800; padding: 1px 6px; border-radius: 5px; margin-left: 4px; }
+.td-note  { font-size: 11px; color: var(--ink3); font-style: italic; }
+.td-price { font-weight: 700; flex-shrink: 0; }
+.td-order-status {
+  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+  &.sent       { background: var(--yellow-dim); color: #8a6000; }
+  &.preparing  { background: #ffe0d0; color: #c0390b; }
+  &.ready      { background: var(--green-dim); color: var(--green); }
+}
