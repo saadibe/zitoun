@@ -23,7 +23,7 @@ services:
     region: frankfurt
     rootDir: ./angular-app
     buildCommand: npm install --include=dev && node_modules/.bin/ng build --configuration=production
-    startCommand: node_modules/.bin/serve dist/zitoun-angular/browser -p $PORT --no-clipboard
+    startCommand: node server.js
     plan: free
     envVars:
       - key: NODE_ENV
