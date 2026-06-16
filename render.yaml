@@ -22,7 +22,7 @@ services:
     runtime: node
     region: frankfurt
     rootDir: ./angular-app
-    buildCommand: npm install --include=dev && node_modules/.bin/ng build --configuration=production
+    buildCommand: npm install --legacy-peer-deps && node_modules/.bin/ng build --configuration=production
     startCommand: node server.js
     plan: free
     envVars:
