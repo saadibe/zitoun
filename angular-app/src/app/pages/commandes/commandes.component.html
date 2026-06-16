@@ -121,7 +121,7 @@
 
 <!-- Modal Encaissement -->
 @if (showEnc) {
-  <div class="modal-ov open" (click)="closeEnc($event)">
+  <div class="modal-ov open" (click)="closeModal($event)">
     <div class="modal-box enc-modal" style="max-width:480px;padding:0;overflow:hidden">
       <div class="enc-header">
         <div>
@@ -169,6 +169,35 @@
       <div class="enc-footer">
         <button class="enc-cancel" (click)="showEnc=false">Annuler</button>
         <button class="enc-confirm" (click)="confirmer()">✓ Valider l'encaissement</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal choix paiement -->
+@if (showPayChoice) {
+  <div class="modal-ov open" (click)="closeModal($event)">
+    <div class="modal-box pay-choice-modal" (click)="$event.stopPropagation()">
+      <div class="pay-choice-header">
+        <div class="pay-choice-title">💰 Mode de paiement</div>
+        <div class="pay-choice-sub">{{ tableLabel }}</div>
+        <button class="enc-x" (click)="showPayChoice=false">✕</button>
+      </div>
+      <div class="pay-choice-total">
+        <span>Total</span>
+        <span class="pay-choice-amount">{{ settings.fmt(cart.total()) }}</span>
+      </div>
+      <div class="pay-choice-btns">
+        <button class="pay-choice-btn pay-now" (click)="choosePayNow()">
+          <span class="pay-choice-icon">💵</span>
+          <span class="pay-choice-lbl">Payer maintenant</span>
+          <span class="pay-choice-hint">Encaissement immédiat</span>
+        </button>
+        <button class="pay-choice-btn pay-after" (click)="choosePayAfter()">
+          <span class="pay-choice-icon">🍽️</span>
+          <span class="pay-choice-lbl">Payer après manger</span>
+          <span class="pay-choice-hint">Envoi cuisine direct</span>
+        </button>
       </div>
     </div>
   </div>
