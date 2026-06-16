@@ -2,35 +2,49 @@
   <div class="topbar">
     <div>
       <div class="tp-title">🍳 Cuisine</div>
-      <div class="tp-sub">{{ orders().length }} commande(s) active(s)</div>
+      <div class="tp-sub">
+        @if (loading()) { ⏳ Chargement... }
+        @else { {{ orders().length }} commande(s) · Màj {{ lastUpdate }} }
+      </div>
     </div>
-    <button class="k-refresh" (click)="load()">🔄 Actualiser</button>
+    <button class="k-refresh" (click)="load()" [disabled]="loading()">🔄 Actualiser</button>
   </div>
 
+  @if (loading() && orders().length === 0) {
+    <div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--ink3);font-size:14px">
+      ⏳ Chargement des commandes...
+    </div>
+  }
+
   <div class="k-cols">
-    <!-- Nouvelles -->
     <div class="k-col">
       <div class="k-col-head k-new">🔔 Nouvelles <span class="k-badge">{{ sent.length }}</span></div>
       @for (o of sent; track o.id) {
         <div class="kcard k-urg">
           <div class="kc-top">
             <div class="kc-table" [class.emporter]="o.tableNumber===0">{{ tableLabel(o) }}</div>
+            <div style="font-size:11px;color:var(--ink3)">{{ o.createdAt }}</div>
           </div>
           <div class="kc-items">
             @for (item of o.items; track item.id) {
               <div class="k-line">
                 <span class="k-qt">×{{ item.quantity }}</span>
                 <span>{{ item.emoji }}</span>
-                <div>{{ item.name }}<span class="k-note">{{ item.note }}</span></div>
+                <div>
+                  {{ item.name }}
+                  @if (item.note) { <span class="k-note"> — {{ item.note }}</span> }
+                </div>
               </div>
             }
           </div>
           <button class="kb kb-acc" (click)="action(o.id,'PREPARING')">✅ Accepter</button>
         </div>
       }
+      @if (sent.length === 0 && !loading()) {
+        <div style="text-align:center;color:var(--ink4);padding:20px;font-size:13px">Aucune commande</div>
+      }
     </div>
 
-    <!-- En préparation -->
     <div class="k-col">
       <div class="k-col-head k-prep">🔥 En préparation <span class="k-badge">{{ preparing.length }}</span></div>
       @for (o of preparing; track o.id) {
@@ -43,7 +57,9 @@
               <div class="k-line">
                 <span class="k-qt">×{{ item.quantity }}</span>
                 <span>{{ item.emoji }}</span>
-                <div>{{ item.name }}</div>
+                <div>{{ item.name }}
+                  @if (item.note) { <span class="k-note"> — {{ item.note }}</span> }
+                </div>
               </div>
             }
           </div>
@@ -52,7 +68,6 @@
       }
     </div>
 
-    <!-- Prêtes -->
     <div class="k-col">
       <div class="k-col-head k-ready">✓ Prêtes <span class="k-badge">{{ ready.length }}</span></div>
       @for (o of ready; track o.id) {
