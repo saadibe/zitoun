@@ -1,5 +1,4 @@
 services:
-  # ── Backend Spring Boot ───────────────────────
   - type: web
     name: zitoun-pos-api
     runtime: docker
@@ -18,20 +17,20 @@ services:
       - key: JWT_SECRET
         sync: false
 
-  # ── Frontend Angular 19 ───────────────────────
   - type: web
     name: zitoun-pos-angular
     runtime: node
     region: frankfurt
     rootDir: ./angular-app
-    buildCommand: npm install && npx ng build --configuration=production
-    startCommand: npx serve dist/zitoun-angular/browser -p $PORT --no-clipboard
+    buildCommand: npm install && node_modules/.bin/ng build --configuration=production
+    startCommand: node_modules/.bin/serve dist/zitoun-angular/browser -p $PORT --no-clipboard
     plan: free
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=512"
 
-  # ── Frontend HTML/JS (legacy) ─────────────────
   - type: web
     name: zitoun-pos-frontend
     runtime: static
