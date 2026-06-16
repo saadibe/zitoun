@@ -8,8 +8,10 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<Order,Long> {
     List<Order> findByStatusOrderByCreatedAtAsc(Order.OrderStatus status);
     List<Order> findByTableNumberOrderByCreatedAtDesc(Integer tableNumber);
-    @Query("SELECT o FROM Order o WHERE o.status NOT IN ('SERVED','CANCELLED') ORDER BY o.createdAt ASC")
+    @Query("SELECT o FROM Order o WHERE o.status NOT IN (com.restaurant.model.Order.OrderStatus.SERVED, com.restaurant.model.Order.OrderStatus.CANCELLED) ORDER BY o.createdAt ASC")
     List<Order> findActiveOrders();
-    @Query("SELECT COALESCE(SUM(o.totalAmount),0) FROM Order o WHERE o.createdAt>=:start AND o.status='SERVED'")
+    @Query("SELECT o FROM Order o WHERE o.tableNumber = :tableNumber AND o.status NOT IN (com.restaurant.model.Order.OrderStatus.SERVED, com.restaurant.model.Order.OrderStatus.CANCELLED)")
+    List<Order> findActiveByTable(@Param("tableNumber") Integer tableNumber);
+    @Query("SELECT COALESCE(SUM(o.totalAmount),0) FROM Order o WHERE o.createdAt>=:start AND o.status=com.restaurant.model.Order.OrderStatus.SERVED")
     Double sumRevenueToday(@Param("start") LocalDateTime start);
 }
