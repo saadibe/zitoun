@@ -16,7 +16,8 @@ public class OrderService {
     private final MenuItemRepository    menuRepo;
     private final TableRepository       tableRepo;
     private final SimpMessagingTemplate ws;
-    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter FMT =
+        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @Transactional
     public Order createOrder(OrderDTO.CreateRequest req) {
@@ -33,7 +34,7 @@ public class OrderService {
         }).toList();
         order.setItems(items);
         Order saved = orderRepo.save(order);
-        // Mettre la table en OCCUPIED si table réelle (pas emporter)
+        // Mettre la table en OCCUPIED
         if (req.getTableNumber() != null && req.getTableNumber() > 0) {
             tableRepo.findByNumber(req.getTableNumber()).ifPresent(t -> {
                 t.setStatus(RestaurantTable.TableStatus.OCCUPIED);
@@ -41,7 +42,7 @@ public class OrderService {
                 tableRepo.save(t);
             });
         }
-        ws.convertAndSend("/topic/orders", toResponse(saved));
+        try { ws.convertAndSend("/topic/orders", toResponse(saved)); } catch (Exception ignored) {}
         return saved;
     }
 
@@ -50,8 +51,10 @@ public class OrderService {
         Order o = findById(id);
         o.setStatus(Order.OrderStatus.SENT);
         Order saved = orderRepo.save(o);
-        ws.convertAndSend("/topic/kitchen", toResponse(saved));
-        ws.convertAndSend("/topic/orders",  toResponse(saved));
+        try {
+            ws.convertAndSend("/topic/kitchen", toResponse(saved));
+            ws.convertAndSend("/topic/orders",  toResponse(saved));
+        } catch (Exception ignored) {}
         return saved;
     }
 
@@ -60,7 +63,7 @@ public class OrderService {
         Order o = findById(id);
         o.setStatus(status);
         Order saved = orderRepo.save(o);
-        // Si toutes les commandes de cette table sont SERVED → libérer la table
+        // Libérer la table si toutes commandes SERVED
         if (status == Order.OrderStatus.SERVED && o.getTableNumber() > 0) {
             boolean allServed = orderRepo.findActiveOrders().stream()
                 .noneMatch(ord -> ord.getTableNumber().equals(o.getTableNumber()));
@@ -72,16 +75,22 @@ public class OrderService {
                 });
             }
         }
-        ws.convertAndSend("/topic/orders",  toResponse(saved));
-        ws.convertAndSend("/topic/kitchen", toResponse(saved));
+        try {
+            ws.convertAndSend("/topic/orders",  toResponse(saved));
+            ws.convertAndSend("/topic/kitchen", toResponse(saved));
+        } catch (Exception ignored) {}
         return saved;
     }
 
-    public List<Order> getAll()    { return orderRepo.findAll(); }
-    public List<Order> getActive() { return orderRepo.findActiveOrders(); }
+    public List<Order> getAll()            { return orderRepo.findAll(); }
+    public List<Order> getActive()         { return orderRepo.findActiveOrders(); }
+    public List<Order> getHistory()        { return orderRepo.findHistory(); }
+    public List<Order> getPendingPayment() { return orderRepo.findPendingPayment(); }
+
     public List<Order> getByStatus(Order.OrderStatus s) {
         return orderRepo.findByStatusOrderByCreatedAtAsc(s);
     }
+
     public Order findById(Long id) {
         return orderRepo.findById(id)
             .orElseThrow(() -> new RuntimeException("Commande non trouvée: " + id));
@@ -89,17 +98,28 @@ public class OrderService {
 
     public OrderDTO.Response toResponse(Order o) {
         double total = o.getItems() == null ? 0 :
-            o.getItems().stream().mapToDouble(i -> i.getMenuItem().getPrice() * i.getQuantity()).sum();
+            o.getItems().stream()
+                .mapToDouble(i -> i.getMenuItem() != null ?
+                    i.getMenuItem().getPrice() * i.getQuantity() : 0)
+                .sum();
         List<OrderDTO.ItemResponse> items = o.getItems() == null ? List.of() :
             o.getItems().stream().map(i -> OrderDTO.ItemResponse.builder()
-                .id(i.getId()).name(i.getMenuItem().getName())
-                .emoji(i.getMenuItem().getEmoji()).price(i.getMenuItem().getPrice())
-                .quantity(i.getQuantity()).note(i.getNote()).build()).toList();
+                .id(i.getId())
+                .name(i.getMenuItem() != null ? i.getMenuItem().getName() : "?")
+                .emoji(i.getMenuItem() != null ? i.getMenuItem().getEmoji() : "")
+                .price(i.getMenuItem() != null ? i.getMenuItem().getPrice() : 0)
+                .quantity(i.getQuantity())
+                .note(i.getNote())
+                .build()).toList();
         return OrderDTO.Response.builder()
-            .id(o.getId()).tableNumber(o.getTableNumber()).status(o.getStatus())
-            .serverName(o.getServerName()).items(items)
+            .id(o.getId())
+            .tableNumber(o.getTableNumber())
+            .status(o.getStatus())
+            .serverName(o.getServerName())
+            .items(items)
             .createdAt(o.getCreatedAt() != null ? o.getCreatedAt().format(FMT) : null)
             .updatedAt(o.getUpdatedAt() != null ? o.getUpdatedAt().format(FMT) : null)
-            .total(total).build();
+            .total(total)
+            .build();
     }
 }
