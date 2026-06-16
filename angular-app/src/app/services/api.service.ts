@@ -21,7 +21,9 @@ export class ApiService {
   deleteMenuItem(id: number)         { return this.http.delete(`${this.base}/menu/${id}`, { headers: this.headers() }); }
 
   // ── Orders ────────────────────────────────────────
-  getActiveOrders()                  { return this.http.get<Order[]>(`${this.base}/orders/active`, { headers: this.headers() }); }
+  getActiveOrders()     { return this.http.get<Order[]>(`${this.base}/orders/active`,          { headers: this.headers() }); }
+  getOrderHistory()     { return this.http.get<Order[]>(`${this.base}/orders/history`,         { headers: this.headers() }); }
+  getPendingPayment()   { return this.http.get<Order[]>(`${this.base}/orders/pending-payment`, { headers: this.headers() }); }
   createOrder(payload: any)          { return this.http.post<Order>(`${this.base}/orders`, payload, { headers: this.headers() }); }
   sendToKitchen(id: number)          { return this.http.post<Order>(`${this.base}/orders/${id}/send-kitchen`, {}, { headers: this.headers() }); }
   updateOrderStatus(id: number, status: string) { return this.http.patch<Order>(`${this.base}/orders/${id}/status`, { status }, { headers: this.headers() }); }
