@@ -7,15 +7,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController @RequestMapping("/api/orders")
 @RequiredArgsConstructor @CrossOrigin(origins = "*")
 public class OrderController {
-
     private final OrderService orderService;
 
     @GetMapping
-    public List<OrderDTO.Response> getAll(@RequestParam(required = false) String status) {
+    public List<OrderDTO.Response> getAll(@RequestParam(required=false) String status) {
         if (status != null)
             return orderService.getByStatus(Order.OrderStatus.valueOf(status.toUpperCase()))
                 .stream().map(orderService::toResponse).toList();
@@ -27,13 +27,11 @@ public class OrderController {
         return orderService.getActive().stream().map(orderService::toResponse).toList();
     }
 
-    // Historique des commandes servies (pour la page Historique)
     @GetMapping("/history")
     public List<OrderDTO.Response> getHistory() {
         return orderService.getHistory().stream().map(orderService::toResponse).toList();
     }
 
-    // Commandes en attente de paiement (pour la page Tables / Encaissement)
     @GetMapping("/pending-payment")
     public List<OrderDTO.Response> getPendingPayment() {
         return orderService.getPendingPayment().stream().map(orderService::toResponse).toList();
@@ -58,5 +56,20 @@ public class OrderController {
     public OrderDTO.Response updateStatus(@PathVariable Long id,
                                           @RequestBody OrderDTO.StatusUpdate req) {
         return orderService.toResponse(orderService.updateStatus(id, req.getStatus()));
+    }
+
+    // Encaisser une commande
+    @PostMapping("/{id}/pay")
+    public OrderDTO.Response payOrder(@PathVariable Long id,
+                                      @RequestBody OrderDTO.PayRequest req) {
+        return orderService.toResponse(orderService.payOrder(id, req.getPaymentMethod()));
+    }
+
+    // Encaisser toutes les commandes d'une table
+    @PostMapping("/pay-table/{tableNumber}")
+    public ResponseEntity<Void> payTable(@PathVariable Integer tableNumber,
+                                         @RequestBody OrderDTO.PayRequest req) {
+        orderService.payTable(tableNumber, req.getPaymentMethod());
+        return ResponseEntity.ok().build();
     }
 }

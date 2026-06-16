@@ -24,6 +24,8 @@ export class ApiService {
   getActiveOrders()     { return this.http.get<Order[]>(`${this.base}/orders/active`,          { headers: this.headers() }); }
   getOrderHistory()     { return this.http.get<Order[]>(`${this.base}/orders/history`,         { headers: this.headers() }); }
   getPendingPayment()   { return this.http.get<Order[]>(`${this.base}/orders/pending-payment`, { headers: this.headers() }); }
+  payOrder(id: number, method: string) { return this.http.post<Order>(`${this.base}/orders/${id}/pay`, { paymentMethod: method }, { headers: this.headers() }); }
+  payTable(tableNum: number, method: string) { return this.http.post<void>(`${this.base}/orders/pay-table/${tableNum}`, { paymentMethod: method }, { headers: this.headers() }); }
   createOrder(payload: any)          { return this.http.post<Order>(`${this.base}/orders`, payload, { headers: this.headers() }); }
   sendToKitchen(id: number)          { return this.http.post<Order>(`${this.base}/orders/${id}/send-kitchen`, {}, { headers: this.headers() }); }
   updateOrderStatus(id: number, status: string) { return this.http.patch<Order>(`${this.base}/orders/${id}/status`, { status }, { headers: this.headers() }); }

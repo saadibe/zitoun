@@ -34,6 +34,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
   encPending: HistoryEntry | null = null;
 
   private clockTimer: any;
+  private _pendingPayMethod: string | null = null;
 
   payMethods = [
     { key:'especes', icon:'💵', label:'Espèces' },
@@ -188,6 +189,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
       }))
     });
     this.showEnc = false;
+    this._pendingPayMethod = this.payMethod;
     this.execSend(this.payMethod);
   }
 
@@ -206,6 +208,11 @@ export class CommandesComponent implements OnInit, OnDestroy {
     this.api.createOrder(payload).subscribe({
       next: (order) => {
         this.api.sendToKitchen(order.id).subscribe();
+        // Si paiement immédiat, enregistrer en base
+        if (this._pendingPayMethod) {
+          this.api.payOrder(order.id, this._pendingPayMethod).subscribe();
+          this._pendingPayMethod = null;
+        }
         this.loadTables();
         const label = table === 0 ? '🥡 À emporter' : `Table ${table}`;
         this.sentMsg = `✓ Commande envoyée — ${label} — ${payMethod ? '✅ Encaissé' : '💳 À encaisser'}`;

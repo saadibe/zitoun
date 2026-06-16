@@ -50,9 +50,9 @@ export class CartService {
           const apiEntries: HistoryEntry[] = orders.map(o => ({
             id:     'F' + o.id,
             table:  o.tableNumber || null,
-            date:   o.updatedAt ? o.updatedAt.split(' ')[0] : '',
-            time:   o.updatedAt ? o.updatedAt.split(' ')[1] || '' : '',
-            method: 'carte',   // inconnu depuis API
+            date:   (o.paidAt || o.updatedAt || o.createdAt || '').split(' ')[0] || '',
+            time:   (o.paidAt || o.updatedAt || o.createdAt || '').split(' ')[1] || '',
+            method: o.paymentMethod || 'carte',
             total:  o.total || 0,
             status: 'paid' as const,
             items:  (o.items || []).map(i => ({

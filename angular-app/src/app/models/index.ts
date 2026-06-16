@@ -8,7 +8,7 @@ export interface CartItem {
   withMenu?: boolean; // option menu (+menuPrice)
 }
 export interface OrderItem { id: number; name: string; emoji: string; price: number; quantity: number; note: string; }
-export interface Order { id: number; tableNumber: number; status: string; items: OrderItem[]; total: number; createdAt: string; updatedAt?: string; }
+export interface Order { id: number; tableNumber: number; status: string; items: OrderItem[]; total: number; createdAt: string; updatedAt?: string; paymentMethod?: string; paidAt?: string; }
 export interface RestaurantTable { id: number; number: number; seats: number; status: 'FREE'|'OCCUPIED'|'RESERVED'; }
 export interface RestaurantSettings {
   id: number; name: string; subtitle: string; city: string;
