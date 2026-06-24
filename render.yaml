@@ -13,6 +13,10 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
+    # Rebuilder seulement si backend change
+    buildFilter:
+      paths:
+        - backend/**
 
   - type: web
     name: zitoun-pos-angular
@@ -22,3 +26,12 @@ services:
     buildCommand: npm install && node_modules/.bin/ng build --configuration=production
     startCommand: node server.js
     plan: free
+    envVars:
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=1024"
+      - key: NODE_ENV
+        value: production
+    # Rebuilder seulement si Angular change
+    buildFilter:
+      paths:
+        - angular-app/**
