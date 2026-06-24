@@ -5,8 +5,6 @@ import com.restaurant.model.RefreshToken;
 import com.restaurant.repository.AppUserRepository;
 import com.restaurant.security.JwtService;
 import com.restaurant.service.RefreshTokenService;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +15,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class AuthController {
 
@@ -26,9 +23,13 @@ public class AuthController {
     private final RefreshTokenService refreshService;
     private final PasswordEncoder     encoder;
 
-    @Data static class LoginRequest   { String username; String password; }
-    @Data static class RefreshRequest { String refreshToken; }
-    @Data static class RegisterRequest { String username; String password; String role; }
+    public AuthController(RefreshTokenService refreshService) {
+        this.refreshService = refreshService;
+    }
+
+    @SuppressWarnings("unused") static class LoginRequest { private String username; private String password; public String getUsername(){return username;} public void setUsername(String v){this.username=v;} public String getPassword(){return password;} public void setPassword(String v){this.password=v;} }
+    static class RefreshRequest { private String refreshToken; public String getRefreshToken(){return refreshToken;} public void setRefreshToken(String v){this.refreshToken=v;} }
+    static class RegisterRequest { private String username; private String password; private String role; public String getUsername(){return username;} public void setUsername(String v){this.username=v;} public String getPassword(){return password;} public void setPassword(String v){this.password=v;} public String getRole(){return role;} public void setRole(String v){this.role=v;} }
 
     // ════════════════════════════════════════════
     //  POST /api/auth/login

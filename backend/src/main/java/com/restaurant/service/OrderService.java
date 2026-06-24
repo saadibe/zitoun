@@ -2,7 +2,6 @@ package com.restaurant.service;
 import com.restaurant.dto.OrderDTO;
 import com.restaurant.model.*;
 import com.restaurant.repository.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,12 +9,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@Service @RequiredArgsConstructor
-public class OrderService {
+@Service public class OrderService {
     private final OrderRepository       orderRepo;
     private final MenuItemRepository    menuRepo;
     private final TableRepository       tableRepo;
     private final SimpMessagingTemplate ws;
+
+    public OrderService(SimpMessagingTemplate ws) {
+        this.ws = ws;
+    }
     private static final DateTimeFormatter FMT =
         DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 

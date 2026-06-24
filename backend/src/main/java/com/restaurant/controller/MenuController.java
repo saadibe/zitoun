@@ -3,7 +3,6 @@ package com.restaurant.controller;
 import com.restaurant.model.MenuItem;
 import com.restaurant.repository.MenuItemRepository;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -12,11 +11,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/menu")
-@RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class MenuController {
 
     private final MenuItemRepository menuRepo;
+
+    public MenuController(MenuItemRepository menuRepo) {
+        this.menuRepo = menuRepo;
+    }
 
     @GetMapping
     public List<MenuItem> getAll() {

@@ -3,7 +3,6 @@ package com.restaurant.service;
 import com.restaurant.model.AppUser;
 import com.restaurant.model.RefreshToken;
 import com.restaurant.repository.RefreshTokenRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,10 +12,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshRepo;
+
+    public RefreshTokenService(RefreshTokenRepository refreshRepo) {
+        this.refreshRepo = refreshRepo;
+    }
 
     @Value("${jwt.refresh-expiration-ms:604800000}") // 7 jours
     private long refreshExpirationMs;
