@@ -6,14 +6,11 @@ services:
     dockerContext: .
     plan: free
     region: frankfurt
-    healthCheckPath: /api/menu
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
       - key: DATABASE_URL
         sync: false
-      - key: FRONTEND_URL
-        value: https://zitoun-pos-angular.onrender.com
       - key: JWT_SECRET
         sync: false
 
@@ -25,8 +22,3 @@ services:
     buildCommand: npm install && node_modules/.bin/ng build --configuration=production
     startCommand: node server.js
     plan: free
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: NODE_OPTIONS
-        value: "--max-old-space-size=1024"
