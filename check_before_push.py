@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script de vérification avant push - simule les erreurs de compilation Java
+Script de vérification avant push - détecte les erreurs de compilation Java
 Usage: python3 check_before_push.py
 """
 import os, re, sys
@@ -17,9 +17,9 @@ for root, dirs, files in os.walk(BACKEND):
         classname = f.replace('.java', '')
         checked += 1
 
-        # 1. Package déclaration
-        first_nonblank = next((l for l in content.split('\n') if l.strip()), '')
-        if not first_nonblank.startswith('package '):
+        # 1. Package correct
+        first = next((l for l in content.split('\n') if l.strip()), '')
+        if not first.startswith('package '):
             errors.append(f"❌ {f}:1 — package manquant")
 
         # 2. Accolades équilibrées
@@ -27,30 +27,39 @@ for root, dirs, files in os.walk(BACKEND):
         if o != c:
             errors.append(f"❌ {f} — accolades: {o}{{ vs {c}}}")
 
-        # 3. Champs final non initialisés dans constructeur incomplet
-        #    (uniquement classe principale, pas inner classes)
+        # 3. Champs final niveau classe principale SANS @RequiredArgsConstructor NI constructeur
         finals = re.findall(r'^\s{4}private final \S+ (\w+);', content, re.MULTILINE)
-        if finals and '@RequiredArgsConstructor' not in content:
-            ctors = re.findall(
-                rf'public {classname}\([^)]*\)\s*\{{(.*?)\}}',
-                content, re.DOTALL
-            )
-            if ctors:
-                all_assigned = set()
-                for body in ctors:
-                    all_assigned.update(re.findall(r'this\.(\w+)\s*=', body))
+        if finals:
+            has_required = '@RequiredArgsConstructor' in content
+            has_ctor = bool(re.search(rf'public {classname}\s*\(', content))
+            
+            if not has_required and not has_ctor:
+                errors.append(
+                    f"❌ {f} — champs final sans constructeur ni @RequiredArgsConstructor: {finals}\n"
+                    f"   Fix: ajouter import lombok.RequiredArgsConstructor; + @RequiredArgsConstructor"
+                )
+            elif has_ctor and not has_required:
+                # Constructeur manuel — vérifier qu'il initialise tout
+                all_assigned = set(re.findall(r'this\.(\w+)\s*=', content))
                 uninit = [fd for fd in finals if fd not in all_assigned]
                 if uninit:
                     errors.append(
-                        f"❌ {f} — champs non initialisés dans constructeur: {uninit}\n"
+                        f"❌ {f} — constructeur n'initialise pas: {uninit}\n"
                         f"   Fix: @RequiredArgsConstructor + supprimer constructeur manuel"
                     )
 
-        # 4. Méthodes dupliquées dans la CLASSE PRINCIPALE seulement
-        #    Extraire seulement le corps de la classe principale (pas les inner classes)
-        # Trouver la classe principale (indentation niveau 0 des méthodes = 4 espaces)
+        # 4. @RequiredArgsConstructor sans import
+        if '@RequiredArgsConstructor' in content:
+            if 'import lombok.RequiredArgsConstructor' not in content and \
+               'import lombok.*' not in content:
+                errors.append(
+                    f"❌ {f} — @RequiredArgsConstructor sans import lombok\n"
+                    f"   Fix: ajouter import lombok.RequiredArgsConstructor;"
+                )
+
+        # 5. Méthodes dupliquées dans la classe principale (4 espaces = niveau 1)
         main_methods = re.findall(
-            r'^    public\s+\S+\s+(\w+)\s*\([^)]*\)\s*(?:throws[^{]+)?\{',
+            r'^    public\s+\S+\s+(\w+)\s*\([^)]*\)\s*(?:throws[^{{]+)?\{{',
             content, re.MULTILINE
         )
         seen = {}
@@ -58,18 +67,12 @@ for root, dirs, files in os.walk(BACKEND):
             seen[m] = seen.get(m, 0) + 1
         for m, cnt in seen.items():
             if cnt > 1:
-                errors.append(f"❌ {f} — méthode dupliquée dans classe principale: '{m}()' ({cnt}x)")
-
-        # 5. @RequiredArgsConstructor sans import
-        if '@RequiredArgsConstructor' in content:
-            if 'import lombok.RequiredArgsConstructor' not in content and \
-               'import lombok.*' not in content:
-                errors.append(f"❌ {f} — @RequiredArgsConstructor sans import lombok")
+                errors.append(f"❌ {f} — méthode dupliquée: '{m}()' ({cnt}x)")
 
 print(f"Vérification de {checked} fichiers Java...\n")
 
 if errors:
-    print("═══ ERREURS — NE PAS POUSSER ═══════════════")
+    print("═══ ERREURS — NE PAS POUSSER ════════════════")
     for e in errors:
         print(e)
     print(f"\n💥 {len(errors)} erreur(s) — Corriger avant git push")

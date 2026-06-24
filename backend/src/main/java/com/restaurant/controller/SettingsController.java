@@ -7,12 +7,14 @@ import com.restaurant.repository.SettingsRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/settings")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class SettingsController {
 
     private final SettingsRepository   settingsRepo;
