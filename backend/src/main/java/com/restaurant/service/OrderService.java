@@ -162,6 +162,4 @@ import java.util.List;
         });
     }
 
-    public List<Order> getHistory() { return orderRepo.findHistory(); }
-    public List<Order> getPendingPayment() { return orderRepo.findPendingPayment(); }
 }
