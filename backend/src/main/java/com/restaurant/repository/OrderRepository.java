@@ -21,12 +21,10 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
            "com.restaurant.model.Order.OrderStatus.CANCELLED)")
     List<Order> findActiveByTable(@Param("tableNumber") Integer tableNumber);
 
-    // Historique : commandes SERVED triées par date desc
     @Query("SELECT o FROM Order o WHERE o.status = com.restaurant.model.Order.OrderStatus.SERVED " +
            "ORDER BY o.updatedAt DESC")
     List<Order> findHistory();
 
-    // Commandes non encore encaissées (payer après manger)
     @Query("SELECT o FROM Order o WHERE o.status = com.restaurant.model.Order.OrderStatus.READY " +
            "OR o.status = com.restaurant.model.Order.OrderStatus.SENT " +
            "OR o.status = com.restaurant.model.Order.OrderStatus.PREPARING " +

@@ -3,10 +3,9 @@ import com.restaurant.model.Order;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import java.util.List;
-
 public class OrderDTO {
     @Data public static class CreateRequest {
-        @NotNull @Min(0) private Integer tableNumber;
+        @NotNull @Min(0) private Integer tableNumber; // 0 = emporter
         @NotEmpty private List<OrderItemRequest> items;
         private String serverName;
     }
@@ -15,31 +14,14 @@ public class OrderDTO {
         @Min(1) private Integer quantity;
         private String note;
     }
-    @Data public static class StatusUpdate {
-        @NotNull private Order.OrderStatus status;
-    }
-    // Nouvel objet pour encaissement
-    @Data public static class PayRequest {
-        @NotNull private String paymentMethod;  // especes, carte, cheque, mixte
-    }
+    @Data public static class StatusUpdate { @NotNull private Order.OrderStatus status; }
     @Data @Builder public static class Response {
-        private Long id;
-        private Integer tableNumber;
-        private Order.OrderStatus status;
-        private String serverName;
-        private String paymentMethod;
-        private String paidAt;
-        private List<ItemResponse> items;
-        private String createdAt;
-        private String updatedAt;
-        private Double total;
+        private Long id; private Integer tableNumber; private Order.OrderStatus status;
+        private String serverName; private List<ItemResponse> items;
+        private String createdAt; private String updatedAt; private Double total;
     }
     @Data @Builder public static class ItemResponse {
-        private Long id;
-        private String name;
-        private String emoji;
-        private Double price;
-        private Integer quantity;
-        private String note;
+        private Long id; private String name; private String emoji;
+        private Double price; private Integer quantity; private String note;
     }
 }
