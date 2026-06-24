@@ -12,11 +12,12 @@ export class TablesComponent implements OnInit, OnDestroy {
   tables      = signal<RestaurantTable[]>([]);
   selected    = signal<RestaurantTable | null>(null);
   tableOrders = signal<Order[]>([]);
+  loadingOrders = false;
   private timer: any;
 
-  showEnc   = false;
-  payMethod = 'especes';
-  received  = 0;
+  showEnc    = false;
+  payMethod  = 'especes';
+  received   = 0;
   change: number | null = null;
   processing = false;
 
@@ -46,13 +47,25 @@ export class TablesComponent implements OnInit, OnDestroy {
     if (table.status !== 'OCCUPIED') return;
     this.selected.set(table);
     this.tableOrders.set([]);
-    this.showEnc   = false;
-    this.processing = false;
+    this.showEnc      = false;
+    this.processing   = false;
+    this.loadingOrders = true;
+
     this.api.getTableOrders(table.number).subscribe({
-      next: orders => this.tableOrders.set(orders),
-      error: () => this.api.getActiveOrders().subscribe(all =>
-        this.tableOrders.set(all.filter(o => o.tableNumber === table.number))
-      )
+      next: orders => {
+        this.tableOrders.set(orders);
+        this.loadingOrders = false;
+      },
+      error: () => {
+        // Fallback : charger toutes les commandes actives
+        this.api.getActiveOrders().subscribe({
+          next: all => {
+            this.tableOrders.set(all.filter(o => o.tableNumber === table.number));
+            this.loadingOrders = false;
+          },
+          error: () => { this.loadingOrders = false; }
+        });
+      }
     });
   }
 
@@ -63,6 +76,10 @@ export class TablesComponent implements OnInit, OnDestroy {
   close() { this.selected.set(null); this.showEnc = false; }
 
   openEncaissement() {
+    if (this.tableOrders().length === 0) {
+      alert('⚠ Aucune commande trouvée pour cette table.');
+      return;
+    }
     this.showEnc   = true;
     this.payMethod = 'especes';
     this.received  = 0;
@@ -75,48 +92,61 @@ export class TablesComponent implements OnInit, OnDestroy {
   }
 
   confirmerEnc() {
+    // Guards
+    if (this.tableOrders().length === 0) {
+      alert('⚠ Impossible : aucune commande chargée.');
+      return;
+    }
+    if (this.tableTotal <= 0) {
+      alert('⚠ Total à 0 — rechargez les commandes.');
+      return;
+    }
     if (this.payMethod === 'especes' && this.received < this.tableTotal) {
       alert(`⚠ Montant insuffisant.\nTotal : ${this.settings.fmt(this.tableTotal)}`);
       return;
     }
-    const table = this.selected()!;
+
+    const table  = this.selected()!;
     this.processing = true;
 
-    // Sauvegarder en base via API payTable
+    // Appel API payTable → marque toutes les commandes SERVED + libère table en base
     this.api.payTable(table.number, this.payMethod).subscribe({
       next: () => {
-        // Sauvegarder aussi dans historique local
+        // Sauvegarder dans l'historique
         const allItems: any[] = [];
         this.tableOrders().forEach(o => o.items.forEach(i => {
           const found = allItems.find(x => x.name === i.name && x.note === (i.note||''));
           if (found) found.qty += i.quantity;
-          else allItems.push({ id:i.id, name:i.name, emoji:i.emoji, price:i.price, qty:i.quantity, note:i.note||'' });
+          else allItems.push({
+            id: i.id, name: i.name, emoji: i.emoji,
+            price: i.price, qty: i.quantity, note: i.note||''
+          });
         }));
-        this.cart.addToHistory({
+        const entry: HistoryEntry = {
           id:     'F' + Date.now().toString().slice(-6),
           table:  table.number,
           date:   new Date().toLocaleDateString('fr-FR'),
-          time:   new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}),
+          time:   new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'}),
           method: this.payMethod,
           total:  this.tableTotal,
           status: 'paid',
           items:  allItems
-        });
-        // Libérer la table localement
+        };
+        this.cart.addToHistory(entry);
+
+        // Libérer la table localement immédiatement
         this.tables.update(list =>
           list.map(t => t.number === table.number ? { ...t, status: 'FREE' as const } : t)
         );
         this.processing = false;
         this.close();
-        setTimeout(() => this.load(), 800);
+        // Recharger depuis API pour confirmer
+        setTimeout(() => this.load(), 1000);
       },
-      error: () => {
-        // Fallback local si API échoue
-        this.tables.update(list =>
-          list.map(t => t.number === table.number ? { ...t, status: 'FREE' as const } : t)
-        );
+      error: (err) => {
         this.processing = false;
-        this.close();
+        alert(`⚠ Erreur lors de l'encaissement.\nVérifiez la connexion et réessayez.`);
+        console.error('payTable error:', err);
       }
     });
   }

@@ -192,33 +192,20 @@
       </div>
       <div class="enc-body">
         <div class="enc-items">
-          @if (encPending) {
-            @for (item of encPending.items; track item.id) {
-              <div class="enc-row">
-                <div class="enc-row-name">
-                  <span class="enc-row-qty">×{{ item.qty }}</span>
-                  <span>{{ item.emoji }} {{ item.name }}</span>
-                  @if (item.note) { <span class="enc-opt"> · {{ item.note }}</span> }
-                </div>
-                <span>{{ settings.fmt(item.price * item.qty) }}</span>
+          @for (item of cart.items(); track $index) {
+            <div class="enc-row">
+              <div class="enc-row-name">
+                <span class="enc-row-qty">×{{ item.qty }}</span>
+                <span>{{ item.item.emoji }} {{ item.item.name }}</span>
+                @if (itemNote(item)) { <span class="enc-opt"> · {{ itemNote(item) }}</span> }
               </div>
-            }
-          } @else {
-            @for (item of cart.items(); track $index) {
-              <div class="enc-row">
-                <div class="enc-row-name">
-                  <span class="enc-row-qty">×{{ item.qty }}</span>
-                  <span>{{ item.item.emoji }} {{ item.item.name }}</span>
-                  @if (itemNote(item)) { <span class="enc-opt"> · {{ itemNote(item) }}</span> }
-                </div>
-                <span>{{ settings.fmt((item.item.price + (item.withMenu ? cart.menuPrice : 0)) * item.qty) }}</span>
-              </div>
-            }
+              <span>{{ settings.fmt((item.item.price + (item.withMenu ? cart.menuPrice : 0)) * item.qty) }}</span>
+            </div>
           }
         </div>
         <div class="enc-total-bar">
           <span class="enc-total-lbl">Total à payer</span>
-          <span class="enc-total-val">{{ settings.fmt(encTotal()) }}</span>
+          <span class="enc-total-val">{{ settings.fmt(cart.total()) }}</span>
         </div>
         <div class="enc-methods">
           @for (m of payMethods; track m.key) {

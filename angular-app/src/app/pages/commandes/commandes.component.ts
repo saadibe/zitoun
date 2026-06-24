@@ -17,7 +17,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
   sentMsg   = '';
   clock     = '';
 
-  // Modal options article (piment + menu)
+  // Modal options piment/menu
   showOptions  = false;
   optionItem: MenuItem | null = null;
   optPiment    = 'normal';
@@ -26,15 +26,13 @@ export class CommandesComponent implements OnInit, OnDestroy {
   // Modal choix paiement
   showPayChoice = false;
 
-  // Modal encaissement
-  showEnc     = false;
-  payMethod   = 'especes';
-  received    = 0;
+  // Modal encaissement (payer maintenant)
+  showEnc    = false;
+  payMethod  = 'especes';
+  received   = 0;
   change: number | null = null;
-  encPending: HistoryEntry | null = null;
 
   private clockTimer: any;
-  private _pendingPayMethod: string | null = null;
 
   payMethods = [
     { key:'especes', icon:'💵', label:'Espèces' },
@@ -44,9 +42,9 @@ export class CommandesComponent implements OnInit, OnDestroy {
   ];
 
   pimentOpts = [
-    { key:'normal', label:'🌶️ Normal'      },
-    { key:'fort',   label:'🌶️🌶️ Fort'    },
-    { key:'sans',   label:'⚪ Sans piment'  },
+    { key:'normal', label:'🌶️ Normal'     },
+    { key:'fort',   label:'🌶️🌶️ Fort'   },
+    { key:'sans',   label:'⚪ Sans piment' },
   ];
 
   filtered = computed(() => {
@@ -85,10 +83,9 @@ export class CommandesComponent implements OnInit, OnDestroy {
     return (t === 0 || t !== null) && this.cart.count() > 0;
   }
 
-  // ── Clic sur article ─────────────────────────────
+  // ── Clic article ─────────────────────────────────
   addItem(item: MenuItem) {
     if (this.settings.isSandwich(item.category)) {
-      // Sandwich → proposer piment + option menu
       this.optionItem  = item;
       this.optPiment   = 'normal';
       this.optWithMenu = false;
@@ -98,6 +95,9 @@ export class CommandesComponent implements OnInit, OnDestroy {
     }
   }
 
+  selectOpt(key: string) { this.optPiment = key; }
+  toggleMenu()           { this.optWithMenu = !this.optWithMenu; }
+
   confirmOptions() {
     if (!this.optionItem) return;
     this.cart.addItem(this.optionItem, this.optPiment, this.optWithMenu);
@@ -106,56 +106,57 @@ export class CommandesComponent implements OnInit, OnDestroy {
   }
 
   itemNote(item: {piment?:string, withMenu?:boolean}): string {
-    const parts: string[] = [];
-    if (item.piment === 'fort') parts.push('🌶️🌶️ Fort');
-    else if (item.piment === 'sans') parts.push('⚪ Sans piment');
-    if (item.withMenu) parts.push(`🍽️ Menu +${this.settings.fmt(this.cart.menuPrice)}`);
-    return parts.join(' · ');
+    const p: string[] = [];
+    if (item.piment === 'fort')  p.push('🌶️🌶️ Fort');
+    if (item.piment === 'sans')  p.push('⚪ Sans piment');
+    if (item.withMenu) p.push(`🍽️ Menu +${this.settings.fmt(this.cart.menuPrice)}`);
+    return p.join(' · ');
   }
 
-  // ── Envoi ────────────────────────────────────────
+  // ── Bouton envoyer ───────────────────────────────
   send() {
     if (!this.canSend()) return;
-    if (this.cart.table() === 0) { this.openEnc(null); return; }
+    // À emporter → toujours payer maintenant
+    if (this.cart.table() === 0) {
+      this.openEnc();
+      return;
+    }
     this.showPayChoice = true;
   }
 
-  choosePayNow()  { this.showPayChoice = false; this.openEnc(null); }
-
-  choosePayAfter() {
+  // ── Payer maintenant : encaisser puis cuisine ────
+  choosePayNow() {
     this.showPayChoice = false;
-    const table = this.cart.table()!;
-    const items = this.cart.items();
-    const total = this.cart.total();
-    const entry: HistoryEntry = {
-      id: 'F' + Date.now().toString().slice(-6),
-      table, total, method: null, status: 'pending',
-      date: new Date().toLocaleDateString('fr-FR'),
-      time: new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
-      items: items.map(i => ({
-        id: i.item.id, name: i.item.name, emoji: i.item.emoji,
-        price: i.item.price + (i.withMenu ? this.cart.menuPrice : 0),
-        qty: i.qty, note: this.itemNote(i)
-      }))
-    };
-    this.cart.addToHistory(entry);
-    this.execSend(null);
+    this.openEnc();
   }
 
-  openEnc(pending: HistoryEntry | null) {
-    this.encPending = pending;
-    this.showEnc    = true;
-    this.payMethod  = 'especes';
-    this.received   = 0;
-    this.change     = null;
+  openEnc() {
+    this.showEnc   = true;
+    this.payMethod = 'especes';
+    this.received  = 0;
+    this.change    = null;
   }
 
   calcChange() {
-    const total = this.encPending ? this.encPending.total : this.cart.total();
-    this.change = this.received >= total ? this.received - total : null;
+    this.change = this.received >= this.cart.total()
+      ? this.received - this.cart.total() : null;
   }
-  encTotal(): number {
-    return this.encPending ? this.encPending.total : this.cart.total();
+
+  confirmer() {
+    if (this.payMethod === 'especes' && this.received < this.cart.total()) {
+      alert(`⚠ Montant insuffisant.\nTotal : ${this.settings.fmt(this.cart.total())}`);
+      return;
+    }
+    this.showEnc = false;
+    // Envoyer en cuisine ET marquer comme payé
+    this.sendToApi('now', this.payMethod);
+  }
+
+  // ── Payer après manger : cuisine directe ─────────
+  choosePayAfter() {
+    this.showPayChoice = false;
+    // Envoyer en cuisine, paiement différé (à la table)
+    this.sendToApi('after', null);
   }
 
   closeModal(e: MouseEvent) {
@@ -164,70 +165,81 @@ export class CommandesComponent implements OnInit, OnDestroy {
     }
   }
 
-  confirmer() {
-    if (this.payMethod === 'especes' && this.received < this.encTotal()) {
-      alert(`⚠ Montant insuffisant.\nTotal : ${this.settings.fmt(this.encTotal())}`);
-      return;
-    }
-    if (this.encPending) {
-      this.cart.updateHistory(this.encPending.id, { method: this.payMethod, status: 'paid' });
-      this.showEnc = false; this.encPending = null;
-      return;
-    }
+  // ── Envoi API ────────────────────────────────────
+  private sendToApi(when: 'now' | 'after', payMethod: string | null) {
     const table = this.cart.table()!;
     const items = this.cart.items();
     const total = this.cart.total();
-    this.cart.addToHistory({
-      id: 'F' + Date.now().toString().slice(-6),
-      table, total, method: this.payMethod, status: 'paid',
-      date: new Date().toLocaleDateString('fr-FR'),
-      time: new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
-      items: items.map(i => ({
-        id: i.item.id, name: i.item.name, emoji: i.item.emoji,
-        price: i.item.price + (i.withMenu ? this.cart.menuPrice : 0),
-        qty: i.qty, note: this.itemNote(i)
-      }))
-    });
-    this.showEnc = false;
-    this._pendingPayMethod = this.payMethod;
-    this.execSend(this.payMethod);
-  }
-
-  private execSend(payMethod: string | null) {
-    const table = this.cart.table()!;
-    const items = this.cart.items();
     this.sending.set(true);
+
     const payload = {
       tableNumber: table,
       items: items.map(i => ({
         menuItemId: i.item.id,
         quantity:   i.qty,
-        note: this.itemNote(i) + (i.note ? ' | ' + i.note : '')
+        note:       this.itemNote(i) + (i.note ? ' | ' + i.note : '')
       }))
     };
+
     this.api.createOrder(payload).subscribe({
       next: (order) => {
-        this.api.sendToKitchen(order.id).subscribe();
-        // Si paiement immédiat, enregistrer en base
-        if (this._pendingPayMethod) {
-          this.api.payOrder(order.id, this._pendingPayMethod).subscribe();
-          this._pendingPayMethod = null;
-        }
-        this.loadTables();
-        const label = table === 0 ? '🥡 À emporter' : `Table ${table}`;
-        this.sentMsg = `✓ Commande envoyée — ${label} — ${payMethod ? '✅ Encaissé' : '💳 À encaisser'}`;
-        this.cart.clear();
-        this.sending.set(false);
-        setTimeout(() => this.sentMsg = '', 4000);
+        this.api.sendToKitchen(order.id).subscribe({
+          next: () => {
+            if (when === 'now' && payMethod) {
+              // Paiement immédiat → payOrder en base
+              this.api.payOrder(order.id, payMethod).subscribe({
+                next: () => {
+                  this.saveHistory(table, items, total, payMethod, 'paid');
+                  this.finishSend(table, `✅ Encaissé`);
+                },
+                error: () => {
+                  // payOrder a échoué mais commande envoyée
+                  this.saveHistory(table, items, total, payMethod, 'paid');
+                  this.finishSend(table, `✅ Encaissé (local)`);
+                }
+              });
+            } else {
+              // Payer après manger : commande en cuisine, paiement via page Tables
+              this.saveHistory(table, items, total, null, 'pending');
+              this.finishSend(table, `💳 À encaisser à la table`);
+            }
+          },
+          error: () => this.finishSend(table, `✓ Enregistré`)
+        });
       },
       error: () => {
-        if (table !== 0) this.tables.update(l => l.map(t => t.number === table ? {...t, status:'OCCUPIED' as const} : t));
-        this.sentMsg = `✓ Enregistré`;
-        this.cart.clear();
-        this.sending.set(false);
-        setTimeout(() => this.sentMsg = '', 3000);
+        if (table !== 0)
+          this.tables.update(l => l.map(t =>
+            t.number === table ? { ...t, status: 'OCCUPIED' as const } : t
+          ));
+        this.finishSend(table, `✓ Enregistré hors ligne`);
       }
     });
+  }
+
+  private saveHistory(table: number, items: any[], total: number,
+                      method: string|null, status: 'paid'|'pending') {
+    const entry: HistoryEntry = {
+      id:     'F' + Date.now().toString().slice(-6),
+      table,  total, method, status,
+      date:   new Date().toLocaleDateString('fr-FR'),
+      time:   new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
+      items:  items.map(i => ({
+        id: i.item.id, name: i.item.name, emoji: i.item.emoji,
+        price: i.item.price + (i.withMenu ? this.cart.menuPrice : 0),
+        qty: i.qty, note: this.itemNote(i)
+      }))
+    };
+    this.cart.addToHistory(entry);
+  }
+
+  private finishSend(table: number, msg: string) {
+    const label = table === 0 ? '🥡 À emporter' : `Table ${table}`;
+    this.sentMsg = `✓ ${label} — ${msg}`;
+    this.cart.clear();
+    this.sending.set(false);
+    this.loadTables();
+    setTimeout(() => this.sentMsg = '', 4000);
   }
 
   openTicket() {}
