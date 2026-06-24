@@ -1,4 +1,5 @@
 package com.restaurant.service;
+import lombok.RequiredArgsConstructor;
 import com.restaurant.dto.OrderDTO;
 import com.restaurant.model.*;
 import com.restaurant.repository.*;
@@ -9,15 +10,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service public class OrderService {
     private final OrderRepository       orderRepo;
     private final MenuItemRepository    menuRepo;
     private final TableRepository       tableRepo;
     private final SimpMessagingTemplate ws;
-
-    public OrderService(SimpMessagingTemplate ws) {
-        this.ws = ws;
-    }
     private static final DateTimeFormatter FMT =
         DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
