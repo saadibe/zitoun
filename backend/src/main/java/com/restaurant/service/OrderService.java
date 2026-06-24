@@ -63,18 +63,8 @@ import java.util.List;
         Order o = findById(id);
         o.setStatus(status);
         Order saved = orderRepo.save(o);
-        // Libérer la table si toutes commandes SERVED
-        if (status == Order.OrderStatus.SERVED && o.getTableNumber() > 0) {
-            boolean allServed = orderRepo.findActiveOrders().stream()
-                .noneMatch(ord -> ord.getTableNumber().equals(o.getTableNumber()));
-            if (allServed) {
-                tableRepo.findByNumber(o.getTableNumber()).ifPresent(t -> {
-                    t.setStatus(RestaurantTable.TableStatus.FREE);
-                    t.setOccupiedSince(null);
-                    tableRepo.save(t);
-                });
-            }
-        }
+        // NOTE: table libérée UNIQUEMENT par payTable() ou payOrder()
+        // Le statut SERVED signifie "plat servi" (cuisine), pas "encaissé" (caisse)
         try {
             ws.convertAndSend("/topic/orders",  toResponse(saved));
             ws.convertAndSend("/topic/kitchen", toResponse(saved));
@@ -130,17 +120,8 @@ import java.util.List;
         o.setPaymentMethod(paymentMethod);
         o.setPaidAt(java.time.LocalDateTime.now());
         Order saved = orderRepo.save(o);
-        if (o.getTableNumber() != null && o.getTableNumber() > 0) {
-            boolean allServed = orderRepo.findActiveOrders().stream()
-                .noneMatch(ord -> ord.getTableNumber().equals(o.getTableNumber()));
-            if (allServed) {
-                tableRepo.findByNumber(o.getTableNumber()).ifPresent(t -> {
-                    t.setStatus(RestaurantTable.TableStatus.FREE);
-                    t.setOccupiedSince(null);
-                    tableRepo.save(t);
-                });
-            }
-        }
+        // payOrder encaisse une commande mais NE libère PAS la table
+        // Utiliser payTable() pour libérer la table
         try { ws.convertAndSend("/topic/orders", toResponse(saved)); } catch (Exception ignored) {}
         return saved;
     }
