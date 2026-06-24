@@ -6,7 +6,7 @@ services:
     dockerContext: .
     plan: free
     region: frankfurt
-    healthCheckPath: /actuator/health
+    healthCheckPath: /api/menu
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
