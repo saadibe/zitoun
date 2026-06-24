@@ -3,16 +3,13 @@ import { CartItem, MenuItem, HistoryEntry, Order } from '../models';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
-const HISTORY_KEY = 'laperla_history';
-const MAX_HISTORY = 200;
-
 @Injectable({ providedIn: 'root' })
 export class CartService {
   private http = inject(HttpClient);
 
   items   = signal<CartItem[]>([]);
   table   = signal<number | null>(null);
-  history = signal<HistoryEntry[]>(this.loadLocalHistory());
+  history = signal<HistoryEntry[]>([]);
   loading = signal(false);
 
   menuPrice = 2.0;
@@ -26,58 +23,37 @@ export class CartService {
   );
   count = computed(() => this.items().reduce((s, i) => s + i.qty, 0));
 
-  constructor() {
-    // Persister localement à chaque changement
-    effect(() => {
-      try {
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(this.history().slice(0, MAX_HISTORY)));
-      } catch {}
-    });
-  }
-
   setToken(t: string) { this.token = t; }
 
   // Charger l'historique depuis la base de données
   loadHistoryFromApi() {
+    if (!this.token) return;
     this.loading.set(true);
-    const headers = this.token
-      ? new HttpHeaders({ Authorization: `Bearer ${this.token}` })
-      : new HttpHeaders();
+    const headers = new HttpHeaders({ Authorization: `Bearer ${this.token}` });
 
     this.http.get<Order[]>(`${environment.apiUrl}/orders/history`, { headers })
       .subscribe({
         next: orders => {
-          const apiEntries: HistoryEntry[] = orders.map(o => ({
+          const entries: HistoryEntry[] = orders.map(o => ({
             id:     'F' + o.id,
             table:  o.tableNumber || null,
             date:   (o.paidAt || o.updatedAt || o.createdAt || '').split(' ')[0] || '',
             time:   (o.paidAt || o.updatedAt || o.createdAt || '').split(' ')[1] || '',
-            method: o.paymentMethod || 'carte',
+            method: o.paymentMethod || null,
             total:  o.total || 0,
             status: 'paid' as const,
             items:  (o.items || []).map(i => ({
-              id:    i.id, name: i.name, emoji: i.emoji,
-              price: i.price, qty: i.quantity, note: i.note
+              id: i.id, name: i.name, emoji: i.emoji,
+              price: i.price, qty: i.quantity, note: i.note || ''
             }))
           }));
-          // Fusionner avec historique local (local = plus récent)
-          const localIds = new Set(this.history().map(h => h.id));
-          const newFromApi = apiEntries.filter(e => !localIds.has(e.id));
-          this.history.update(h => [...h, ...newFromApi]
-            .sort((a, b) => b.id.localeCompare(a.id))
-            .slice(0, MAX_HISTORY)
-          );
+          // Fusionner avec les entrées pending (non encore en base)
+          const pending = this.history().filter(h => h.status === 'pending');
+          this.history.set([...pending, ...entries]);
           this.loading.set(false);
         },
         error: () => this.loading.set(false)
       });
-  }
-
-  private loadLocalHistory(): HistoryEntry[] {
-    try {
-      const saved = localStorage.getItem(HISTORY_KEY);
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
   }
 
   addItem(item: MenuItem, piment?: string, withMenu?: boolean) {
@@ -91,7 +67,7 @@ export class CartService {
         i.item.id === item.id && i.piment === (piment||'normal') && !!i.withMenu === !!withMenu
           ? { ...i, qty: i.qty + 1 } : i
       );
-      return [...list, { item, qty: 1, note: '', piment: piment || 'normal', withMenu: !!withMenu }];
+      return [...list, { item, qty: 1, note: '', piment: piment||'normal', withMenu: !!withMenu }];
     });
   }
 
@@ -107,16 +83,17 @@ export class CartService {
   setTable(n: number | null) { this.table.set(n); }
   clear() { this.items.set([]); this.table.set(null); }
 
+  // Ajouter une entrée pending (payer après manger - pas encore en base)
   addToHistory(entry: HistoryEntry) {
-    this.history.update(h => [entry, ...h].slice(0, MAX_HISTORY));
+    this.history.update(h => [entry, ...h]);
   }
 
+  // Mettre à jour une entrée (ex: encaissement d'un pending)
   updateHistory(id: string, updates: Partial<HistoryEntry>) {
     this.history.update(h => h.map(e => e.id === id ? { ...e, ...updates } : e));
   }
 
   clearHistory() {
     this.history.set([]);
-    try { localStorage.removeItem(HISTORY_KEY); } catch {}
   }
 }
