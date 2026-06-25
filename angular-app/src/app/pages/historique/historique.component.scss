@@ -21,3 +21,72 @@
   &.pending { background: var(--terra-light); color: var(--terracotta); }
   &.paid    { background: var(--green-dim);   color: var(--green); }
 }
+
+// ── Topbar actions ──────────────────────────────────
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+.btn-service {
+  padding: 8px 14px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--sky), var(--sky2));
+  color: #fff; border: none; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: 'Cairo', sans-serif;
+  &:hover { opacity: .9; }
+  &:disabled { opacity: .5; cursor: not-allowed; }
+}
+
+// ── Modal Fin de Service ────────────────────────────
+.service-modal {
+  background: var(--white); border-radius: 20px;
+  width: min(580px, 96vw); overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,.18);
+  border-top: 5px solid var(--sky);
+}
+.service-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 18px 24px 14px;
+  background: linear-gradient(135deg, var(--sky), var(--sky2));
+}
+.service-title { font-family: 'Tajawal', sans-serif; font-size: 20px; font-weight: 900; color: #fff; }
+.service-date  { font-size: 12px; color: rgba(255,255,255,.75); margin-top: 3px; }
+.svc-close { width: 32px; height: 32px; border: none; border-radius: 8px;
+  background: rgba(255,255,255,.2); color: #fff; font-size: 16px; cursor: pointer;
+  &:hover { background: rgba(255,255,255,.35); } }
+
+.service-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+// Cartes par méthode
+.svc-methods {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px;
+}
+.svc-method-card {
+  border-radius: 14px; padding: 14px 12px; text-align: center;
+  border: 2px solid transparent; display: flex; flex-direction: column; gap: 4px;
+  &.especes { background: #e8f5e9; border-color: #4caf50; }
+  &.carte   { background: #e3f2fd; border-color: #2196f3; }
+  &.cheque  { background: #fff8e1; border-color: #ffc107; }
+  &.mixte   { background: #f3e5f5; border-color: #9c27b0; }
+}
+.svc-m-icon  { font-size: 26px; }
+.svc-m-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--ink2); }
+.svc-m-nb    { font-size: 11px; color: var(--ink3); }
+.svc-m-total { font-family: 'Tajawal', sans-serif; font-size: 18px; font-weight: 900; color: var(--ink1); }
+.svc-empty   { grid-column: 1/-1; text-align: center; padding: 20px; color: var(--ink3); font-size: 13px; }
+
+// Barre total
+.svc-total-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  background: linear-gradient(135deg, var(--sky), var(--sky2));
+  border-radius: 14px; padding: 16px 20px;
+}
+.svc-total-lbl { font-size: 12px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1px; color: rgba(255,255,255,.8); }
+.svc-total-val { font-family: 'Tajawal', sans-serif; font-size: 28px; font-weight: 900; color: #fff; }
+
+// Actions
+.svc-actions { display: flex; gap: 10px; }
+.svc-btn {
+  flex: 1; padding: 12px; border-radius: 12px; font-size: 13px;
+  font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif; border: 2px solid transparent;
+}
+.svc-print    { background: var(--sky); color: #fff; &:hover { opacity: .9; } }
+.svc-close-btn { background: var(--white); color: var(--ink2); border-color: var(--border);
+  &:hover { background: var(--cream); } }

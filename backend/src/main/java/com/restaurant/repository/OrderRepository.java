@@ -31,6 +31,10 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
            "ORDER BY o.createdAt ASC")
     List<Order> findPendingPayment();
 
+    @Query("SELECT o FROM Order o WHERE o.status = com.restaurant.model.Order.OrderStatus.SERVED " +
+           "AND o.paidAt >= :start ORDER BY o.paidAt DESC")
+    List<Order> findServedToday(@Param("start") LocalDateTime start);
+
     @Query("SELECT COALESCE(SUM(o.totalAmount),0) FROM Order o " +
            "WHERE o.createdAt >= :start AND o.status = com.restaurant.model.Order.OrderStatus.SERVED")
     Double sumRevenueToday(@Param("start") LocalDateTime start);

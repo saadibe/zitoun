@@ -1,11 +1,16 @@
 <div class="page-historique">
   <div class="topbar">
     <div><div class="tp-title">📜 Historique</div></div>
-    <button class="hist-clear" (click)="clearHistory()">🗑 Effacer</button>
+    <div class="topbar-actions">
+      <button class="btn-service" (click)="loadServiceStats()" [disabled]="loadingStats()">
+        @if (loadingStats()) { ⏳ } @else { 📊 } Fin de service
+      </button>
+      <button class="hist-clear" (click)="clearHistory()">🗑 Effacer</button>
+    </div>
   </div>
 
   <div class="hist-list">
-    <!-- Factures en attente d'encaissement -->
+    <!-- En attente -->
     @if (pending.length > 0) {
       <div class="hist-section-title pending-title">
         ⏳ En attente d'encaissement ({{ pending.length }})
@@ -23,7 +28,7 @@
       }
     }
 
-    <!-- Factures encaissées -->
+    <!-- Encaissées -->
     @if (paid.length > 0) {
       <div class="hist-section-title">✅ Encaissées ({{ paid.length }})</div>
       @for (entry of paid; track entry.id) {
@@ -45,7 +50,80 @@
   </div>
 </div>
 
-<!-- Modal détail facture -->
+<!-- ════ Modal FIN DE SERVICE ════════════════════════════════ -->
+@if (showService() && serviceStats()) {
+  <div class="modal-ov open" (click)="closeService()">
+    <div class="service-modal" (click)="$event.stopPropagation()">
+
+      <div class="service-header">
+        <div>
+          <div class="service-title">📊 Fin de Service</div>
+          <div class="service-date">{{ serviceStats()!.date }} · {{ serviceStats()!.nbCommandes }} commande{{ serviceStats()!.nbCommandes > 1 ? 's' : '' }}</div>
+        </div>
+        <button class="svc-close" (click)="closeService()">✕</button>
+      </div>
+
+      <div class="service-body">
+        <!-- Méthodes de paiement -->
+        <div class="svc-methods">
+          @if (serviceStats()!.especes.nb > 0) {
+            <div class="svc-method-card especes">
+              <div class="svc-m-icon">💵</div>
+              <div class="svc-m-label">Espèces</div>
+              <div class="svc-m-nb">{{ serviceStats()!.especes.nb }} ticket{{ serviceStats()!.especes.nb > 1 ? 's' : '' }}</div>
+              <div class="svc-m-total">{{ settings.fmt(serviceStats()!.especes.total) }}</div>
+            </div>
+          }
+          @if (serviceStats()!.carte.nb > 0) {
+            <div class="svc-method-card carte">
+              <div class="svc-m-icon">💳</div>
+              <div class="svc-m-label">Carte</div>
+              <div class="svc-m-nb">{{ serviceStats()!.carte.nb }} ticket{{ serviceStats()!.carte.nb > 1 ? 's' : '' }}</div>
+              <div class="svc-m-total">{{ settings.fmt(serviceStats()!.carte.total) }}</div>
+            </div>
+          }
+          @if (serviceStats()!.cheque.nb > 0) {
+            <div class="svc-method-card cheque">
+              <div class="svc-m-icon">📝</div>
+              <div class="svc-m-label">Chèque</div>
+              <div class="svc-m-nb">{{ serviceStats()!.cheque.nb }} ticket{{ serviceStats()!.cheque.nb > 1 ? 's' : '' }}</div>
+              <div class="svc-m-total">{{ settings.fmt(serviceStats()!.cheque.total) }}</div>
+            </div>
+          }
+          @if (serviceStats()!.mixte.nb > 0) {
+            <div class="svc-method-card mixte">
+              <div class="svc-m-icon">🔀</div>
+              <div class="svc-m-label">Mixte</div>
+              <div class="svc-m-nb">{{ serviceStats()!.mixte.nb }} ticket{{ serviceStats()!.mixte.nb > 1 ? 's' : '' }}</div>
+              <div class="svc-m-total">{{ settings.fmt(serviceStats()!.mixte.total) }}</div>
+            </div>
+          }
+          @if (!serviceStats()!.especes.nb && !serviceStats()!.carte.nb && !serviceStats()!.cheque.nb && !serviceStats()!.mixte.nb) {
+            <div class="svc-empty">Aucune vente aujourd'hui</div>
+          }
+        </div>
+
+        <!-- Total journée -->
+        <div class="svc-total-bar">
+          <span class="svc-total-lbl">TOTAL JOURNÉE</span>
+          <span class="svc-total-val">{{ settings.fmt(serviceStats()!.totalJour) }}</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="svc-actions">
+          <button class="svc-btn svc-print" (click)="printServiceReport()">
+            🖨️ Imprimer rapport
+          </button>
+          <button class="svc-btn svc-close-btn" (click)="closeService()">
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ════ Modal détail facture ════════════════════════════════ -->
 @if (selected()) {
   <div class="modal-ov open" (click)="close()">
     <div class="modal-box" style="max-width:500px;padding:0;overflow:hidden" (click)="$event.stopPropagation()">
@@ -61,70 +139,57 @@
         <button (click)="close()" style="border:none;background:none;font-size:18px;cursor:pointer">✕</button>
       </div>
 
-      <!-- Modifier total / nb repas -->
-      <div style="padding:10px 22px;border-bottom:1px solid var(--border);background:var(--ivory);display:flex;flex-direction:column;gap:8px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:12px;font-weight:700;min-width:110px">Modifier total :</span>
-          <input type="number" [(ngModel)]="newTotal" placeholder="Laisser vide"
-            style="flex:1;padding:7px 10px;border-radius:8px;border:2px solid var(--border);outline:none;font-family:Tajawal,sans-serif">
-          <span style="font-size:12px;font-weight:700">{{ settings.settings().currency }}</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:12px;font-weight:700;min-width:110px">Nb repas :</span>
-          <input type="number" [(ngModel)]="newQty" placeholder="Auto"
-            style="flex:1;padding:7px 10px;border-radius:8px;border:2px solid var(--border);outline:none">
-        </div>
-      </div>
-
       <!-- Articles -->
-      <div style="padding:14px 22px;max-height:40vh;overflow-y:auto">
+      <div style="padding:14px 22px;max-height:45vh;overflow-y:auto">
         @for (item of selected()!.items; track item.id) {
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:4px 0;font-size:13px;border-bottom:1px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;font-size:13px;border-bottom:1px solid var(--border)">
             <div>
               <span>{{ item.emoji }} {{ item.name }} ×{{ item.qty }}</span>
               @if (item.note) { <div style="font-size:11px;color:var(--ink3);font-style:italic">{{ item.note }}</div> }
             </div>
-            <span style="font-weight:700;flex-shrink:0">{{ settings.fmt(item.price * item.qty) }}</span>
+            <span style="font-weight:700;flex-shrink:0;margin-left:8px">{{ settings.fmt(item.price * item.qty) }}</span>
           </div>
         }
         <div style="display:flex;justify-content:space-between;font-weight:900;font-size:16px;padding-top:10px">
           <span>TOTAL</span>
-          <span style="color:var(--sky)">{{ settings.fmt(newTotal ? (+newTotal||selected()!.total) : selected()!.total) }}</span>
+          <span style="color:var(--sky)">{{ settings.fmt(selected()!.total) }}</span>
         </div>
       </div>
 
       <!-- Actions -->
       <div style="padding:0 22px 20px;display:flex;flex-direction:column;gap:8px">
-        <!-- Bouton encaisser si pending -->
         @if (selected()!.status === 'pending') {
-          <button (click)="openEncForEntry()" style="width:100%;padding:13px;border-radius:11px;background:linear-gradient(135deg,var(--green),#246b42);color:#fff;border:none;font-size:14px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif">
+          <button (click)="openEncForEntry()"
+            style="width:100%;padding:13px;border-radius:11px;background:linear-gradient(135deg,var(--green),#246b42);color:#fff;border:none;font-size:14px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif">
             💰 Encaisser maintenant
           </button>
         }
         <div style="display:flex;gap:8px">
-          <button (click)="printFacture(false)" style="flex:1;padding:11px;border-radius:11px;background:var(--sky);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif">🖨️ Avec détail</button>
-          <button (click)="printFacture(true)"  style="flex:1;padding:11px;border-radius:11px;background:var(--ink2);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif">📋 Sans détail</button>
+          <button (click)="printTicket(selected()!)"
+            style="flex:1;padding:11px;border-radius:11px;background:var(--sky);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif">
+            🖨️ Imprimer ticket
+          </button>
         </div>
       </div>
     </div>
   </div>
 }
 
-<!-- Modal encaissement depuis historique -->
+<!-- ════ Modal encaissement depuis historique ════════════════ -->
 @if (showEnc && selected()) {
   <div class="modal-ov open" style="z-index:400">
     <div class="modal-box enc-modal">
       <div class="enc-header">
         <div>
           <div class="enc-header-title">💰 Encaissement</div>
-          <div class="enc-sub">{{ selected()!.table ? 'Table '+selected()!.table : 'Emporter' }} · {{ selected()!.id }}</div>
+          <div class="enc-sub">{{ selected()!.table ? 'Table '+selected()!.table : 'Emporter' }} · {{ settings.fmt(selected()!.total) }}</div>
         </div>
         <button class="enc-x" (click)="showEnc=false">✕</button>
       </div>
       <div class="enc-body">
         <div class="enc-total-bar">
           <span class="enc-total-lbl">Total à payer</span>
-          <span class="enc-total-val">{{ settings.fmt(encTotal()) }}</span>
+          <span class="enc-total-val">{{ settings.fmt(selected()!.total) }}</span>
         </div>
         <div class="enc-methods">
           @for (m of payMethods; track m.key) {
@@ -133,20 +198,22 @@
             </button>
           }
         </div>
+        <!-- Calcul rendu monnaie pour espèces (optionnel) -->
         @if (payMethod==='especes') {
           <div class="enc-cash-row">
-            <label>Montant reçu :</label>
-            <input class="enc-input" type="number" [(ngModel)]="received" (input)="calcChange()" placeholder="0">
+            <label>Reçu (optionnel) :</label>
+            <input class="enc-input" type="number" [(ngModel)]="received"
+              (input)="calcChange()" placeholder="0">
             <span>{{ settings.settings().currency }}</span>
           </div>
-          @if (change !== null) {
+          @if (change !== null && change >= 0) {
             <div class="enc-rendu">Rendu : <strong>{{ settings.fmt(change) }}</strong></div>
           }
         }
       </div>
       <div class="enc-footer">
         <button class="enc-cancel" (click)="showEnc=false">Annuler</button>
-        <button class="enc-confirm" (click)="confirmerEnc()">✓ Valider</button>
+        <button class="enc-confirm" (click)="confirmerEncEntry()">✓ Valider</button>
       </div>
     </div>
   </div>
