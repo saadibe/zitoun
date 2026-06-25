@@ -9,79 +9,97 @@ import { PrinterService } from '../../services/printer.service';
   imports: [CommonModule, FormsModule],
   template: `
 <div class="printer-page">
-  <h2 class="pr-title">🖨️ Configuration Imprimante</h2>
-  <p class="pr-sub">Star TSP100LAN — Connexion WiFi directe</p>
+  <h2 class="pr-title">🖨️ Imprimante Star TSP100</h2>
+  <p class="pr-sub">Connexion Bluetooth — Chrome Android requis</p>
 
-  <div class="pr-card">
-    <div class="pr-section">
-      <label class="pr-label">Adresse IP de l'imprimante</label>
-      <div class="pr-hint">
-        Appuyez sur le bouton <strong>FEED</strong> au démarrage de l'imprimante
-        pour imprimer sa configuration réseau et trouver son IP.
+  <!-- Alerte iOS -->
+  @if (isIos) {
+    <div class="pr-alert ios">
+      ⚠️ <strong>Safari iOS ne supporte pas Web Bluetooth.</strong><br>
+      Sur iPad/iPhone, utilisez l'app <strong>Star Mobile Connect</strong>
+      disponible sur l'App Store, puis imprimez depuis cette app.
+    </div>
+  }
+
+  <!-- Chrome OK -->
+  @if (!isIos) {
+    <div class="pr-card">
+      <!-- Statut connexion -->
+      <div class="pr-status-bar" [class.connected]="printer.connected()">
+        <span class="pr-dot"></span>
+        @if (printer.connected()) {
+          ✅ Connectée : <strong>{{ printer.btDeviceName() }}</strong>
+        } @else {
+          ⚪ Non connectée
+        }
       </div>
-      <div class="pr-row">
-        <input class="pr-input" type="text" [(ngModel)]="ipInput"
-          placeholder="ex : 192.168.1.105" />
-        <span class="pr-sep">:</span>
-        <input class="pr-input pr-port" type="number" [(ngModel)]="portInput"
-          placeholder="9100" />
-      </div>
-    </div>
 
-    <div class="pr-section">
-      <button class="pr-btn pr-save" (click)="save()">
-        💾 Enregistrer
+      <!-- Bouton connexion -->
+      <button class="pr-btn pr-connect" (click)="connect()"
+        [disabled]="connecting()">
+        @if (connecting()) { ⏳ Connexion en cours... }
+        @else if (printer.connected()) { 🔄 Reconnecter }
+        @else { 📡 Connecter l'imprimante Bluetooth }
       </button>
-      <button class="pr-btn pr-test" (click)="test()"
-        [disabled]="testing() || !ipInput">
-        @if (testing()) { ⏳ Test en cours... }
-        @else { 🔌 Tester la connexion }
+
+      <!-- Test impression -->
+      <button class="pr-btn pr-test"
+        [disabled]="!printer.connected() || printer.printing()"
+        (click)="test()">
+        @if (printer.printing()) { ⏳ Impression... }
+        @else { 🖨️ Imprimer ticket test }
       </button>
-    </div>
 
-    <div class="pr-status" [class.ok]="lastResult() === 'ok'" [class.err]="lastResult() === 'err'">
-      @if (lastResult() === 'ok') { ✅ Imprimante connectée — ticket test imprimé }
-      @if (lastResult() === 'err') { ❌ {{ printer.lastError() }} }
+      <!-- Erreur -->
+      @if (printer.lastError()) {
+        <div class="pr-error">❌ {{ printer.lastError() }}</div>
+      }
     </div>
-  </div>
+  }
 
+  <!-- Instructions -->
   <div class="pr-card pr-info">
-    <h3>📋 Comment connecter la TSP100LAN</h3>
+    <h3>📋 Comment connecter la TSP100 Bluetooth</h3>
     <ol>
-      <li>Brancher l'imprimante au routeur WiFi via câble Ethernet <em>ou</em> configurer le WiFi avec l'utilitaire Star</li>
-      <li>Allumer l'imprimante en tenant le bouton <strong>FEED</strong> → elle imprime son IP</li>
-      <li>Saisir cette IP ci-dessus et cliquer <strong>Tester</strong></li>
-      <li>Un ticket de test s'imprime → c'est prêt !</li>
+      <li>Allumer l'imprimante Star TSP100</li>
+      <li>Activer le Bluetooth sur la tablette Android</li>
+      <li>Ouvrir <strong>La Perla POS</strong> dans <strong>Chrome</strong> (pas Firefox ni Samsung Internet)</li>
+      <li>Cliquer <strong>"Connecter l'imprimante"</strong> ci-dessus</li>
+      <li>Sélectionner <strong>Star Micronics TSP100</strong> dans la liste</li>
+      <li>Cliquer <strong>"Imprimer ticket test"</strong> pour vérifier</li>
     </ol>
     <div class="pr-note">
-      ⚠️ La tablette et l'imprimante doivent être sur le <strong>même réseau WiFi</strong>.
+      💡 La connexion BT est <strong>mémorisée</strong> pendant la session.
+      Si l'app est fermée, il faudra reconnecter.
     </div>
+
+    @if (isIos) {
+      <div class="pr-note ios-note">
+        🍎 <strong>iPad / iPhone :</strong> Téléchargez
+        <strong>Star Mobile Connect</strong> sur l'App Store.
+        Ouvrez-le, connectez l'imprimante, puis imprimez via le menu Partager.
+      </div>
+    }
   </div>
 </div>
   `,
   styleUrl: './printer-config.component.scss'
 })
 export class PrinterConfigComponent {
-  printer = inject(PrinterService);
+  printer    = inject(PrinterService);
+  connecting = signal(false);
 
-  ipInput   = this.printer.printerIp();
-  portInput = this.printer.printerPort();
+  get isIos(): boolean {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  }
 
-  testing    = signal(false);
-  lastResult = signal<'ok'|'err'|''>('');
-
-  save() {
-    this.printer.saveConfig(this.ipInput.trim(), this.portInput || 9100);
-    this.lastResult.set('');
-    alert(`✅ IP enregistrée : ${this.ipInput}`);
+  async connect() {
+    this.connecting.set(true);
+    await this.printer.connectBluetooth();
+    this.connecting.set(false);
   }
 
   async test() {
-    this.printer.saveConfig(this.ipInput.trim(), this.portInput || 9100);
-    this.testing.set(true);
-    this.lastResult.set('');
-    const ok = await this.printer.testConnection();
-    this.lastResult.set(ok ? 'ok' : 'err');
-    this.testing.set(false);
+    await this.printer.testPrint();
   }
 }
