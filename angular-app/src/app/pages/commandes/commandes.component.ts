@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { CartService } from '../../services/cart.service';
 import { SettingsService } from '../../services/settings.service';
+import { PrinterService, TicketData } from '../../services/printer.service';
 import { MenuItem, RestaurantTable, HistoryEntry } from '../../models';
 
 @Component({ selector:'app-commandes', standalone:true, imports:[CommonModule,FormsModule],
@@ -56,7 +57,8 @@ export class CommandesComponent implements OnInit, OnDestroy {
   constructor(
     public cart: CartService,
     public settings: SettingsService,
-    private api: ApiService
+    private api: ApiService,
+    private printer: PrinterService
   ) {}
 
   ngOnInit() {
@@ -242,5 +244,29 @@ export class CommandesComponent implements OnInit, OnDestroy {
     setTimeout(() => this.sentMsg = '', 4000);
   }
 
-  openTicket() {}
+  async openTicket() {
+    if (!this.canSend()) return;
+
+    const items = this.cart.items();
+    const data: TicketData = {
+      tableNumber:       this.cart.table(),
+      restaurantName:    this.settings.settings().name,
+      restaurantSubtitle: this.settings.settings().subtitle,
+      total:             this.cart.total(),
+      date:              new Date().toLocaleDateString('fr-FR'),
+      time:              new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}),
+      items: items.map(i => ({
+        name:  i.item.name,
+        emoji: i.item.emoji,
+        price: i.item.price + (i.withMenu ? this.cart.menuPrice : 0),
+        qty:   i.qty,
+        note:  this.itemNote(i)
+      }))
+    };
+
+    const ok = await this.printer.printTicket(data);
+    if (!ok) {
+      alert(`⚠ Impression échouée\n${this.printer.lastError()}\n\nConfigurez l\'imprimante dans Admin > Imprimante`);
+    }
+  }
 }

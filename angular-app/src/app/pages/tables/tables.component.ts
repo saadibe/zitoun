@@ -5,6 +5,7 @@ import { ApiService } from '../../services/api.service';
 import { CartService } from '../../services/cart.service';
 import { SettingsService } from '../../services/settings.service';
 import { RestaurantTable, Order, HistoryEntry } from '../../models';
+import { PrinterService, TicketData } from '../../services/printer.service';
 
 @Component({ selector:'app-tables', standalone:true, imports:[CommonModule, FormsModule],
   templateUrl:'./tables.component.html', styleUrl:'./tables.component.scss' })
@@ -31,7 +32,8 @@ export class TablesComponent implements OnInit, OnDestroy {
   constructor(
     private api: ApiService,
     public  settings: SettingsService,
-    private cart: CartService
+    private cart: CartService,
+    private printer: PrinterService
   ) {}
 
   ngOnInit()    { this.load(); this.timer = setInterval(() => this.load(), 10000); }
@@ -133,6 +135,19 @@ export class TablesComponent implements OnInit, OnDestroy {
           items:  allItems
         };
         this.cart.addToHistory(entry);
+
+        // Imprimer le ticket automatiquement
+        const ticketData: TicketData = {
+          tableNumber:        table.number,
+          restaurantName:     this.settings.settings().name,
+          restaurantSubtitle: this.settings.settings().subtitle,
+          total:              this.tableTotal,
+          paymentMethod:      this.payMethod,
+          date:               new Date().toLocaleDateString('fr-FR'),
+          time:               new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}),
+          items:              allItems
+        };
+        this.printer.printTicket(ticketData); // fire and forget
 
         // Libérer la table localement immédiatement
         this.tables.update(list =>

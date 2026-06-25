@@ -14,6 +14,7 @@ export const routes: Routes = [
       { path: 'tables',    data: { page: 'tables'    }, canActivate: [roleGuard], loadComponent: () => import('./pages/tables/tables.component').then(m => m.TablesComponent) },
       { path: 'historique',data: { page: 'historique'}, canActivate: [roleGuard], loadComponent: () => import('./pages/historique/historique.component').then(m => m.HistoriqueComponent) },
       { path: 'admin',     data: { page: 'admin'     }, canActivate: [roleGuard], loadComponent: () => import('./pages/admin/admin.component').then(m => m.AdminComponent) },
+      { path: 'admin/printer', data: { page: 'admin' }, canActivate: [roleGuard], loadComponent: () => import('./pages/admin/printer-config.component').then(m => m.PrinterConfigComponent) },
     ]
   },
   { path: '**', redirectTo: 'login' }
