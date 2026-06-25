@@ -32,6 +32,57 @@
   overflow: hidden;
 }
 
+// ── Tablette (768-1200px) : panier plus compact ──────
+@media (min-width: 769px) and (max-width: 1200px) {
+  .srv-grid {
+    grid-template-columns: 1fr 240px;
+  }
+
+  .o-head {
+    padding: 10px 12px 8px;
+  }
+  .oh-title { font-size: 14px; }
+  .oh-sub   { font-size: 11px; }
+
+  .o-item {
+    padding: 7px 10px;
+    gap: 7px;
+  }
+  .oi-em  { font-size: 18px; }
+  .oi-nm  { font-size: 12px; }
+  .oi-note { font-size: 10px; }
+  .oi-price { font-size: 12px; }
+  .o-qty-btn  { width: 24px; height: 24px; font-size: 14px; }
+  .o-qty-val  { font-size: 12px; }
+
+  .o-foot {
+    padding: 8px 10px 10px;
+    gap: 6px;
+  }
+  .o-tlbl { font-size: 10px; }
+  .o-tval { font-size: 20px; }
+
+  .act-btn {
+    padding: 9px 6px;
+    font-size: 11px;
+    border-radius: 10px;
+  }
+  .act-send { font-size: 12px; }
+
+  .clr-btn { padding: 5px 8px; font-size: 11px; }
+
+  // Menu items : colonnes plus petites
+  .menu-items {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    padding: 10px;
+  }
+  .m-card { padding: 12px 8px 10px; }
+  .mc-em  { font-size: 26px; }
+  .mc-nm  { font-size: 11px; }
+  .mc-pr  { font-size: 12px; }
+}
+
 // ── Panel menu (gauche) ─────────────────────────────
 .menu-panel {
   display: flex;
