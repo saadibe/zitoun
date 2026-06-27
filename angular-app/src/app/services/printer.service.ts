@@ -234,65 +234,52 @@ export class PrinterService {
 
     return `<!DOCTYPE html><html><head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body {
+  html, body {
+    width: 100%;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 26px;
+    font-size: 22px;
     color: #000;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    width: 72mm;
-    margin: 0 auto;
-    padding: 4mm 3mm;
+    padding: 6px 4px;
   }
-  /* En-tête : nom resto + type */
   .header {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     margin-bottom: 5px;
   }
-  .resto-name  { font-size: 30px; font-weight: 900; }
-  .ticket-type { font-size: 26px; font-weight: 900; text-transform: uppercase; }
-  /* Bloc noir table (style Uber) */
+  .resto-name  { font-size: 26px; font-weight: 900; }
+  .ticket-type { font-size: 22px; font-weight: 900; text-transform: uppercase; }
   .black-box {
-    background: #000;
-    color: #fff;
+    background: #000 !important;
+    color: #fff !important;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 7px 10px;
+    padding: 6px 8px;
     margin: 5px 0;
+    -webkit-print-color-adjust: exact;
   }
-  .bb-left  { font-size: 32px; font-weight: 900; }
-  .bb-right { font-size: 30px; font-weight: 900; }
-  /* Méta */
-  .meta { font-size: 22px; color: #000; margin: 4px 0; }
-  /* Séparateurs */
+  .bb-left  { font-size: 28px; font-weight: 900; }
+  .bb-right { font-size: 26px; font-weight: 900; }
+  .meta { font-size: 19px; margin: 3px 0; }
   hr      { border: none; border-top: 2px solid #000; margin: 6px 0; }
-  hr.thin { border-top: 1px solid #aaa; margin: 5px 0; }
-  /* Articles */
-  table { width: 100%; border-collapse: collapse; }
-  .item-row td   { padding: 5px 0 2px; vertical-align: top; }
-  .item-name     { font-size: 28px; font-weight: 700; width: 65%; }
-  .item-price    { font-size: 28px; font-weight: 700; text-align: right; width: 35%; }
-  .item-note     { font-size: 22px; color: #000; padding: 0 0 5px 16px; }
-  /* Total */
-  .subtotal-row td { font-size: 26px; padding: 3px 0; }
-  .total-row td    { font-size: 30px; font-weight: 900; padding: 5px 0; }
-  .lbl { width: 60%; }
-  .amt { text-align: right; width: 40%; }
-  /* Paiement */
-  .payment { font-size: 24px; margin: 4px 0; }
-  /* Pied */
-  .footer { font-size: 24px; text-align: center; margin-top: 10px; }
-  @media print {
-    @page { size: 72mm auto; margin: 0; }
-    body { padding: 2mm 2mm; }
-    .black-box { background: #000 !important; color: #fff !important; }
-  }
+  hr.thin { border-top: 1px solid #999; margin: 5px 0; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .item-row td { padding: 5px 0 2px; vertical-align: top; }
+  .item-name   { font-size: 22px; font-weight: 700; width: 62%; word-wrap: break-word; overflow-wrap: break-word; }
+  .item-price  { font-size: 22px; font-weight: 700; text-align: right; width: 38%; }
+  .item-note   { font-size: 18px; padding: 0 0 5px 10px; }
+  .subtotal-row td { font-size: 21px; padding: 3px 0; }
+  .total-row td    { font-size: 24px; font-weight: 900; padding: 5px 0; }
+  .lbl { width: 55%; }
+  .amt { text-align: right; width: 45%; }
+  .payment { font-size: 19px; margin: 4px 0; }
+  .footer  { font-size: 19px; text-align: center; margin-top: 10px; }
 </style>
 </head><body>
 
