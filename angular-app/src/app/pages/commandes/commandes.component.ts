@@ -179,6 +179,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
       items: items.map(i => ({
         menuItemId: i.item.id,
         quantity:   i.qty,
+        unitPrice:  i.item.price + (i.withMenu ? this.cart.menuPrice : 0),
         note:       this.itemNote(i) + (i.note ? ' | ' + i.note : '')
       }))
     };

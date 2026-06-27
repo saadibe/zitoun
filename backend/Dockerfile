@@ -1,6 +1,6 @@
 # Dockerfile — Zitoun POS Backend
 # Build context = racine du repo
-# cache-bust: v8
+# cache-bust: v9
 
 FROM maven:3.9-eclipse-temurin-21-alpine AS builder
 WORKDIR /app

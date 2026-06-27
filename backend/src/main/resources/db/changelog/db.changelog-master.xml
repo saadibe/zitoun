@@ -18,5 +18,6 @@
     <include file="db/changelog/v11-add-menu-price.xml"/>
     <include file="db/changelog/v12-index-orders.xml"/>
     <include file="db/changelog/v13-payment-fields.xml"/>
+    <include file="db/changelog/v14-orderitem-unitprice.xml"/>
 
 </databaseChangeLog>

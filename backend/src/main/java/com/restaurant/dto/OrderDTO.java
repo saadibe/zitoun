@@ -21,12 +21,15 @@ public class OrderDTO {
         @NotNull private Long menuItemId;
         @Min(1) private Integer quantity;
         private String note;
+        private Double unitPrice;
         public Long getMenuItemId() { return menuItemId; }
         public void setMenuItemId(Long v) { this.menuItemId = v; }
         public Integer getQuantity() { return quantity; }
         public void setQuantity(Integer v) { this.quantity = v; }
         public String getNote() { return note; }
         public void setNote(String v) { this.note = v; }
+        public Double getUnitPrice() { return unitPrice; }
+        public void setUnitPrice(Double v) { this.unitPrice = v; }
     }
 
     public static class StatusUpdate {

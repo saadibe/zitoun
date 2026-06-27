@@ -29,8 +29,11 @@ import java.util.List;
         List<OrderItem> items = req.getItems().stream().map(r -> {
             MenuItem m = menuRepo.findById(r.getMenuItemId())
                 .orElseThrow(() -> new RuntimeException("Article non trouvé: " + r.getMenuItemId()));
+            double price = (r.getUnitPrice() != null && r.getUnitPrice() > 0)
+                ? r.getUnitPrice() : m.getPrice();
             return OrderItem.builder().order(order).menuItem(m)
-                .quantity(r.getQuantity()).note(r.getNote()).build();
+                .quantity(r.getQuantity()).note(r.getNote())
+                .unitPrice(price).build();
         }).toList();
         order.setItems(items);
         Order saved = orderRepo.save(order);
@@ -89,15 +92,14 @@ import java.util.List;
     public OrderDTO.Response toResponse(Order o) {
         double total = o.getItems() == null ? 0 :
             o.getItems().stream()
-                .mapToDouble(i -> i.getMenuItem() != null ?
-                    i.getMenuItem().getPrice() * i.getQuantity() : 0)
+                .mapToDouble(i -> i.getEffectivePrice() * i.getQuantity())
                 .sum();
         List<OrderDTO.ItemResponse> items = o.getItems() == null ? List.of() :
             o.getItems().stream().map(i -> OrderDTO.ItemResponse.builder()
                 .id(i.getId())
                 .name(i.getMenuItem() != null ? i.getMenuItem().getName() : "?")
                 .emoji(i.getMenuItem() != null ? i.getMenuItem().getEmoji() : "")
-                .price(i.getMenuItem() != null ? i.getMenuItem().getPrice() : 0)
+                .price(i.getEffectivePrice())   // prix réel avec options
                 .quantity(i.getQuantity())
                 .note(i.getNote())
                 .build()).toList();
