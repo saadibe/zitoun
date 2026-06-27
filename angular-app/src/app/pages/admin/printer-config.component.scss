@@ -1,97 +1,76 @@
-.printer-page {
-  padding: 20px 24px;
-  max-width: 560px;
-}
+.printer-page { padding: 20px 24px; max-width: 600px; }
 .pr-title { font-family: 'Tajawal', sans-serif; font-size: 20px; font-weight: 800; margin: 0 0 2px; }
 .pr-sub   { font-size: 13px; color: var(--ink3); margin: 0 0 20px; }
-
-.pr-alert {
-  padding: 12px 16px; border-radius: 12px; font-size: 13px;
-  line-height: 1.5; margin-bottom: 16px;
-  &.ios { background: #fff8e1; border: 2px solid #f0c040; color: #856404; }
-}
 
 .pr-card {
   background: var(--white); border-radius: 16px;
   border: 2px solid var(--border); padding: 18px 20px;
-  margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px;
+  margin-bottom: 14px; display: flex; flex-direction: column; gap: 12px;
+}
+.pr-section-title { font-size: 12px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--ink2); }
+
+// Cartes méthodes
+.pr-methods { display: flex; flex-direction: column; gap: 10px; }
+.pr-method-card {
+  border: 2px solid var(--border); border-radius: 12px; padding: 14px 16px;
+  cursor: pointer; transition: all .15s; display: flex; gap: 14px; align-items: flex-start;
+  &:hover { border-color: var(--sky-light); background: var(--sky-pale); }
+  &.selected { border-color: var(--sky); background: var(--sky-pale);
+    .pr-m-name { color: var(--sky); } }
+}
+.pr-m-icon { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
+.pr-m-name { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+.pr-m-desc { font-size: 12px; color: var(--ink3); line-height: 1.5; }
+.pr-badge  {
+  display: inline-block; padding: 2px 7px; border-radius: 10px;
+  font-size: 10px; font-weight: 800; margin-left: 6px; vertical-align: middle;
+  &.rec { background: var(--green-dim); color: var(--green); }
 }
 
-.pr-status-bar {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 14px; border-radius: 10px;
-  background: var(--cream); font-size: 13px;
-  .pr-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: #ccc; flex-shrink: 0;
+// Info cards
+.pr-info {
+  background: var(--cream);
+  &.rawbt-info { background: #f0f7ff; border-color: #90caf9; }
+}
+.pr-info-header { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 4px; }
+.pr-info-icon   { font-size: 28px; flex-shrink: 0; }
+.pr-info-title  { font-size: 14px; font-weight: 800; }
+.pr-info-sub    { font-size: 12px; color: var(--ink3); }
+
+.pr-steps {
+  padding-left: 18px; margin: 0;
+  li { font-size: 13px; margin-bottom: 7px; line-height: 1.5;
+    small { color: var(--ink3); }
   }
-  &.connected {
-    background: var(--green-dim); color: var(--green);
-    .pr-dot { background: var(--green); box-shadow: 0 0 0 3px rgba(46,125,82,.2); }
-  }
-}
-
-.pr-btns { display: flex; flex-direction: column; gap: 8px; }
-
-.pr-btn {
-  padding: 12px 18px; border-radius: 12px; font-size: 13px;
-  font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif;
-  border: 2px solid transparent; transition: all .15s; text-align: center;
-  &:disabled { opacity: .4; cursor: not-allowed; }
-}
-.pr-connect {
-  background: linear-gradient(135deg, var(--sky), var(--sky2));
-  color: #fff; box-shadow: 0 4px 14px rgba(61,122,71,.25);
-  &:hover:not(:disabled) { transform: translateY(-1px); }
-}
-.pr-test {
-  background: var(--white); color: var(--sky); border-color: var(--sky);
-  &:hover:not(:disabled) { background: var(--sky-pale); }
-}
-.pr-release {
-  background: #fff8e1; color: #856404; border-color: #f0c040;
-  &:hover { background: #fff3cd; }
-}
-
-.pr-error {
-  padding: 10px 14px; border-radius: 10px;
-  background: #fff0f0; color: #c0392b;
-  border: 2px solid #e74c3c; font-size: 13px; font-weight: 600;
-}
-.pr-ok {
-  padding: 10px 14px; border-radius: 10px;
-  background: var(--green-dim); color: var(--green);
-  border: 2px solid var(--green); font-size: 13px; font-weight: 600;
-  animation: fadein .2s ease;
-}
-@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
-
-// Partage Uber
-.pr-uber {
-  background: #fff8f0; border-color: #f39c12;
-  h3 { font-size: 14px; font-weight: 800; margin: 0 0 6px; }
-  p  { font-size: 13px; color: var(--ink3); margin: 0 0 10px; }
-}
-.pr-steps { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-.pr-step  {
-  display: flex; align-items: flex-start; gap: 10px; font-size: 13px;
-}
-.pr-step-num {
-  width: 22px; height: 22px; border-radius: 50%;
-  background: #f39c12; color: #fff;
-  font-size: 11px; font-weight: 800;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  margin-top: 1px;
 }
 
 .pr-note {
-  font-size: 12px; border-radius: 8px; padding: 8px 12px; line-height: 1.5;
-  background: #e8f5e9; border: 1.5px solid var(--green); color: #2d5a3a;
+  font-size: 12px; border-radius: 8px; padding: 9px 12px; line-height: 1.5;
+  &.green  { background: var(--green-dim); border: 1.5px solid var(--green); color: #2d5a3a; }
+  &.orange { background: #fff8e1; border: 1.5px solid #f0c040; color: #856404; }
 }
 
-.pr-info {
-  background: var(--cream);
-  h3 { font-size: 14px; font-weight: 800; margin: 0 0 10px; }
-  ol { margin: 0; padding-left: 18px;
-    li { font-size: 13px; margin-bottom: 5px; line-height: 1.5; } }
+// Boutons
+.pr-btn {
+  padding: 13px 20px; border-radius: 12px; font-size: 14px;
+  font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif;
+  border: none; transition: all .15s; text-align: center;
+  &:disabled { opacity: .4; cursor: not-allowed; }
 }
+.pr-test {
+  background: linear-gradient(135deg, var(--sky), var(--sky2));
+  color: #fff; width: 100%; box-shadow: 0 4px 14px rgba(61,122,71,.25);
+  &:hover:not(:disabled) { transform: translateY(-1px); }
+}
+.pr-error {
+  padding: 10px 14px; border-radius: 10px;
+  background: #fff0f0; color: #c0392b; border: 2px solid #e74c3c;
+  font-size: 13px; font-weight: 600;
+}
+.pr-ok {
+  padding: 10px 14px; border-radius: 10px;
+  background: var(--green-dim); color: var(--green); border: 2px solid var(--green);
+  font-size: 13px; font-weight: 700; animation: pop .2s ease;
+}
+@keyframes pop { from { opacity:0; transform:scale(.95); } to { opacity:1; transform:scale(1); } }

@@ -12,114 +12,42 @@ export interface TicketData {
   orderRef?: string;
 }
 
-// ── Méthode d'impression sélectionnée ─────────────────────────────
-export type PrintMethod = 'bluetooth' | 'none';
+// ── Méthode d'impression ───────────────────────────────────────────
+// 'window'  : window.print() via CSS thermique (marche partout)
+// 'rawbt'   : app RawBT Android (Bluetooth Classic natif)
+// 'bluetooth': Web Bluetooth BLE (TSP100III BLE uniquement)
+export type PrintMethod = 'window' | 'rawbt' | 'bluetooth';
 
 @Injectable({ providedIn: 'root' })
 export class PrinterService {
 
-  method      = signal<PrintMethod>(
-    (sessionStorage.getItem('printer_method') as PrintMethod) || 'bluetooth'
+  method   = signal<PrintMethod>(
+    (sessionStorage.getItem('printer_method') as PrintMethod) || 'window'
   );
-  btDeviceName = signal<string>(sessionStorage.getItem('printer_bt_name') || 'Star Micronics');
   connected   = signal<boolean>(false);
   printing    = signal<boolean>(false);
   lastError   = signal<string>('');
+  btDeviceName = signal<string>('');
 
-  // Référence au device BT Web Bluetooth API
+  // BLE
   private btDevice: any = null;
-  private btChar:   any = null;   // BLE characteristic (si BLE)
+  private btChar:   any = null;
 
-  saveConfig(method: PrintMethod, btName: string) {
-    this.method.set(method);
-    this.btDeviceName.set(btName);
-    sessionStorage.setItem('printer_method', method);
-    sessionStorage.setItem('printer_bt_name', btName);
+  saveMethod(m: PrintMethod) {
+    this.method.set(m);
+    sessionStorage.setItem('printer_method', m);
   }
 
-  // ── Vérification support navigateur ──────────────────────────────
-  get bluetoothSupported(): boolean {
-    return !!(navigator as any).bluetooth;
-  }
-
-  // ── Connexion Bluetooth (Web Bluetooth API) ───────────────────────
-  // Fonctionne sur Chrome/Edge Android (pas Safari iOS)
-  async connectBluetooth(): Promise<boolean> {
-    if (!this.bluetoothSupported) {
-      this.lastError.set('Web Bluetooth non supporté sur ce navigateur. Utilisez Chrome sur Android.');
-      return false;
-    }
-
-    try {
-      const bt = (navigator as any).bluetooth;
-
-      // Star TSP100IIBI utilise le service SPP (Serial Port Profile) via BLE
-      // UUID standard Star Micronics BLE : 00001101-0000-1000-8000-00805f9b34fb
-      this.btDevice = await bt.requestDevice({
-        filters: [
-          { namePrefix: 'Star' },
-          { namePrefix: 'TSP100' },
-          { namePrefix: 'mPOP' },
-        ],
-        optionalServices: [
-          '00001101-0000-1000-8000-00805f9b34fb',  // SPP classique
-          '49535343-fe7d-4ae5-8fa9-9fafd205e455',  // Star BLE service
-        ]
-      });
-
-      this.btDeviceName.set(this.btDevice.name || 'Star Micronics');
-      sessionStorage.setItem('printer_bt_name', this.btDevice.name || '');
-
-      const server  = await this.btDevice.gatt.connect();
-      let service: any;
-
-      // Essai service BLE Star
-      try {
-        service   = await server.getPrimaryService('49535343-fe7d-4ae5-8fa9-9fafd205e455');
-        this.btChar = await service.getCharacteristic('49535343-1e4d-4bd9-ba61-23c647249616');
-      } catch {
-        // Fallback SPP
-        service   = await server.getPrimaryService('00001101-0000-1000-8000-00805f9b34fb');
-        this.btChar = await service.getCharacteristic('00001101-0000-1000-8000-00805f9b34fb');
-      }
-
-      this.connected.set(true);
-      this.lastError.set('');
-      return true;
-
-    } catch (e: any) {
-      this.connected.set(false);
-      this.lastError.set(e.message || 'Connexion Bluetooth échouée');
-      return false;
-    }
-  }
-
-  // ── Test impression ───────────────────────────────────────────────
-  async testPrint(): Promise<boolean> {
-    const testData: TicketData = {
-      tableNumber: null,
-      restaurantName: 'La Perla',
-      restaurantSubtitle: 'Saveurs Authentiques de Tunisie',
-      total: 0,
-      date: new Date().toLocaleDateString('fr-FR'),
-      time: new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }),
-      items: [{ name: 'TEST CONNEXION', emoji: '✓', qty: 1, price: 0 }]
-    };
-    return this.printTicket(testData);
-  }
-
-  // ── Impression ticket ─────────────────────────────────────────────
+  // ── Impression principale ──────────────────────────────────────
   async printTicket(data: TicketData): Promise<boolean> {
     this.printing.set(true);
     this.lastError.set('');
-
     try {
-      const bytes = this.buildEscPosBytes(data);
-
-      if (this.method() === 'bluetooth') {
-        await this.sendViaBluetooth(bytes);
+      switch (this.method()) {
+        case 'rawbt':     await this.printViaRawBT(data);     break;
+        case 'bluetooth': await this.printViaBLE(data);       break;
+        default:                this.printViaWindow(data);    break;
       }
-
       this.printing.set(false);
       return true;
     } catch (e: any) {
@@ -129,117 +57,249 @@ export class PrinterService {
     }
   }
 
-  // ── Déconnexion : libère le BT pour Uber Eats ──────────────────
-  disconnect() {
-    try {
-      if (this.btDevice?.gatt?.connected) {
-        this.btDevice.gatt.disconnect();
-      }
-    } catch {}
-    this.btDevice = null;
-    this.btChar   = null;
-    this.connected.set(false);
-    this.lastError.set('');
+  async testPrint(): Promise<boolean> {
+    return this.printTicket({
+      tableNumber: null,
+      restaurantName: 'La Perla',
+      restaurantSubtitle: 'Test impression',
+      total: 12.50,
+      date: new Date().toLocaleDateString('fr-FR'),
+      time: new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}),
+      items: [
+        { name: 'Chapati Thon', emoji: '🥙', qty: 1, price: 6.0, note: 'Fort' },
+        { name: 'Citronnade',   emoji: '🍋', qty: 1, price: 3.5 },
+        { name: 'Menu',         emoji: '🍽️', qty: 1, price: 2.0 },
+      ],
+      paymentMethod: 'especes',
+    });
   }
 
-  // ── Envoi Bluetooth ───────────────────────────────────────────────
-  private async sendViaBluetooth(data: Uint8Array): Promise<void> {
-    // Reconnecter si nécessaire
-    if (!this.btChar || (this.btDevice && !this.btDevice.gatt?.connected)) {
-      const ok = await this.connectBluetooth();
-      if (!ok) throw new Error(this.lastError() || 'Imprimante non connectée');
-    }
+  // ════════════════════════════════════════════════════
+  // MÉTHODE 1 — window.print() avec CSS thermique
+  // Fonctionne sur toutes les tablettes Android/iOS
+  // L'imprimante doit être sélectionnée dans le dialogue d'impression Android
+  // ════════════════════════════════════════════════════
+  private printViaWindow(d: TicketData): void {
+    const html = this.buildHtmlTicket(d);
+    const w = window.open('', '_blank', 'width=320,height=600');
+    if (!w) { throw new Error('Popup bloquée — autorisez les popups pour ce site'); }
+    w.document.write(html);
+    w.document.close();
+    setTimeout(() => { w.print(); }, 300);
+  }
 
-    // Envoyer par chunks de 512 bytes (limite BLE)
+  // ════════════════════════════════════════════════════
+  // MÉTHODE 2 — RawBT (app Android gratuite)
+  // RawBT reçoit les données ESC/POS via Intent Android
+  // et les envoie à l'imprimante Bluetooth Classic
+  // Install : https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter
+  // ════════════════════════════════════════════════════
+  private async printViaRawBT(d: TicketData): Promise<void> {
+    const escpos = this.buildEscPosBase64(d);
+
+    // RawBT accepte les données ESC/POS encodées en base64 via une URL intent
+    // Format : rawbt://base64/<données>
+    const url = `rawbt://base64/${escpos}`;
+
+    // Ouvrir l'intent RawBT
+    window.location.href = url;
+
+    // Donner le temps à l'intent de s'ouvrir
+    await new Promise(r => setTimeout(r, 500));
+  }
+
+  // ════════════════════════════════════════════════════
+  // MÉTHODE 3 — Web Bluetooth BLE
+  // Uniquement pour imprimantes BLE (pas Bluetooth Classic)
+  // TSP100IIBI = Bluetooth Classic → méthode 2 recommandée
+  // ════════════════════════════════════════════════════
+  async connectBluetooth(): Promise<boolean> {
+    const bt = (navigator as any).bluetooth;
+    if (!bt) {
+      this.lastError.set('Web Bluetooth non supporté — utilisez Chrome Android');
+      return false;
+    }
+    try {
+      // UUIDs Star TSP100 BLE
+      this.btDevice = await bt.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: [
+          '49535343-fe7d-4ae5-8fa9-9fafd205e455',   // Star BLE UART
+          '0000180f-0000-1000-8000-00805f9b34fb',   // Battery
+        ]
+      });
+      this.btDeviceName.set(this.btDevice.name || 'Imprimante');
+      const server  = await this.btDevice.gatt.connect();
+      const service = await server.getPrimaryService('49535343-fe7d-4ae5-8fa9-9fafd205e455');
+      this.btChar   = await service.getCharacteristic('49535343-1e4d-4bd9-ba61-23c647249616');
+      this.connected.set(true);
+      this.lastError.set('');
+      return true;
+    } catch (e: any) {
+      this.connected.set(false);
+      this.lastError.set(e.message || 'Connexion BLE échouée');
+      return false;
+    }
+  }
+
+  private async printViaBLE(d: TicketData): Promise<void> {
+    if (!this.btChar || !this.btDevice?.gatt?.connected) {
+      const ok = await this.connectBluetooth();
+      if (!ok) throw new Error(this.lastError());
+    }
+    const bytes = this.buildEscPosBytes(d);
     const CHUNK = 512;
-    for (let i = 0; i < data.length; i += CHUNK) {
-      const chunk = data.slice(i, i + CHUNK);
-      await this.btChar.writeValueWithoutResponse(chunk);
-      // Petite pause entre chunks
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      await this.btChar.writeValueWithoutResponse(bytes.slice(i, i + CHUNK));
       await new Promise(r => setTimeout(r, 20));
     }
   }
 
-  // ── Construction ESC/POS ──────────────────────────────────────────
+  disconnect() {
+    try { if (this.btDevice?.gatt?.connected) this.btDevice.gatt.disconnect(); } catch {}
+    this.btDevice = null; this.btChar = null;
+    this.connected.set(false);
+  }
+
+  // ════════════════════════════════════════════════════
+  // Génération ticket HTML (pour window.print)
+  // ════════════════════════════════════════════════════
+  private buildHtmlTicket(d: TicketData): string {
+    const table = (!d.tableNumber || d.tableNumber === 0) ? '🥡 À Emporter' : `Table ${d.tableNumber}`;
+    const methods: Record<string, string> = {
+      especes:'Espèces', carte:'Carte', cheque:'Chèque', mixte:'Mixte'
+    };
+
+    const rows = d.items.map(i => `
+      <tr>
+        <td class="left">${i.name}${i.note ? `<br><small>${i.note}</small>` : ''}</td>
+        <td class="center">×${i.qty}</td>
+        <td class="right">${(i.price * i.qty).toFixed(2)}</td>
+      </tr>`).join('');
+
+    return `<!DOCTYPE html><html><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    width: 72mm;
+    margin: 0 auto;
+    padding: 4mm 2mm;
+  }
+  .center { text-align: center; }
+  .right  { text-align: right; }
+  .left   { text-align: left; }
+  .name {
+    font-size: 16px; font-weight: bold;
+    text-align: center; text-transform: uppercase;
+    letter-spacing: 2px; margin-bottom: 2px;
+  }
+  .sub  { font-size: 10px; text-align: center; color: #555; margin-bottom: 4px; }
+  .meta { font-size: 10px; text-align: center; margin: 2px 0; }
+  .table-lbl {
+    font-size: 14px; font-weight: bold;
+    text-align: center; margin: 4px 0;
+  }
+  hr { border: none; border-top: 1px dashed #999; margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 2px 1px; vertical-align: top; }
+  td.left   { width: 60%; }
+  td.center { width: 12%; text-align: center; }
+  td.right  { width: 28%; text-align: right; font-weight: bold; }
+  small { font-size: 10px; color: #666; font-style: italic; }
+  .total-row td {
+    font-size: 15px; font-weight: bold;
+    border-top: 2px solid #333;
+    padding-top: 4px;
+  }
+  .method { font-size: 10px; text-align: center; margin-top: 3px; }
+  .footer { font-size: 10px; text-align: center; margin-top: 8px; color: #666; }
+  @media print {
+    @page { size: 72mm auto; margin: 0; }
+    body { padding: 2mm 1mm; }
+  }
+</style>
+</head><body>
+  <div class="name">${d.restaurantName}</div>
+  <div class="sub">${d.restaurantSubtitle}</div>
+  <hr>
+  <div class="meta">${d.date} — ${d.time}</div>
+  <div class="table-lbl">${table}</div>
+  ${d.orderRef ? `<div class="meta">Réf: ${d.orderRef}</div>` : ''}
+  <hr>
+  <table>
+    ${rows}
+    <tr class="total-row">
+      <td class="left" colspan="2">TOTAL</td>
+      <td class="right">${d.total.toFixed(2)} DT</td>
+    </tr>
+  </table>
+  ${d.paymentMethod ? `<div class="method">${methods[d.paymentMethod] ?? d.paymentMethod.toUpperCase()}</div>` : ''}
+  <hr>
+  <div class="footer">Merci de votre visite 🙏<br><b>${d.restaurantName}</b></div>
+  <br><br><br>
+</body></html>`;
+  }
+
+  // ════════════════════════════════════════════════════
+  // Génération ESC/POS bytes (pour BLE et RawBT)
+  // ════════════════════════════════════════════════════
   private buildEscPosBytes(d: TicketData): Uint8Array {
-    const cmds: number[] = [];
-
+    const c: number[] = [];
     const ESC = 0x1B, GS = 0x1D;
-
-    // Init
-    cmds.push(ESC, 0x40);                       // Initialize
-    cmds.push(ESC, 0x61, 0x01);                 // Align center
-
-    // Double hauteur pour le nom
-    cmds.push(ESC, 0x21, 0x10);                 // Double height
-    this.addText(cmds, d.restaurantName + '\n');
-    cmds.push(ESC, 0x21, 0x00);                 // Normal
-    this.addText(cmds, d.restaurantSubtitle + '\n');
-    this.addText(cmds, this.line() + '\n');
-
-    // Date et table
-    cmds.push(ESC, 0x61, 0x00);                 // Align left
     const table = (!d.tableNumber || d.tableNumber === 0) ? 'A EMPORTER' : `TABLE ${d.tableNumber}`;
-    this.addText(cmds, `${d.date}  ${d.time}\n`);
 
-    cmds.push(ESC, 0x21, 0x10);                 // Double height
-    this.addText(cmds, table + '\n');
-    cmds.push(ESC, 0x21, 0x00);                 // Normal
+    c.push(ESC, 0x40);              // Init
+    c.push(ESC, 0x61, 0x01);        // Centre
+    c.push(ESC, 0x21, 0x10);        // Double hauteur
+    this.txt(c, d.restaurantName + '\n');
+    c.push(ESC, 0x21, 0x00);        // Normal
+    this.txt(c, d.restaurantSubtitle + '\n');
+    this.txt(c, '--------------------------------\n');
+    c.push(ESC, 0x61, 0x00);        // Gauche
+    this.txt(c, `${d.date}  ${d.time}\n`);
+    c.push(ESC, 0x21, 0x10);
+    c.push(ESC, 0x61, 0x01);
+    this.txt(c, table + '\n');
+    c.push(ESC, 0x21, 0x00);
+    c.push(ESC, 0x61, 0x00);
+    this.txt(c, '--------------------------------\n');
 
-    if (d.orderRef) this.addText(cmds, `Ref: ${d.orderRef}\n`);
-    this.addText(cmds, this.line() + '\n');
-
-    // Articles
-    for (const item of d.items) {
-      const name  = item.name.length > 20 ? item.name.slice(0, 19) + '.' : item.name;
-      const qty   = `x${item.qty}`;
-      const price = `${(item.price * item.qty).toFixed(2)} DT`;
-      const pad   = 32 - name.length - qty.length - price.length - 2;
-      this.addText(cmds, `${name} ${qty}${' '.repeat(Math.max(1, pad))}${price}\n`);
-      if (item.note?.trim()) {
-        this.addText(cmds, `  > ${item.note.slice(0, 28)}\n`);
-      }
+    for (const i of d.items) {
+      const nm = i.name.length > 18 ? i.name.slice(0,17)+'.' : i.name;
+      const pr = `${(i.price * i.qty).toFixed(2)} DT`;
+      const sp = ' '.repeat(Math.max(1, 32 - nm.length - 2 - pr.length - `x${i.qty}`.length));
+      this.txt(c, `${nm} x${i.qty}${sp}${pr}\n`);
+      if (i.note?.trim()) this.txt(c, `  > ${i.note.slice(0,28)}\n`);
     }
 
-    this.addText(cmds, this.line() + '\n');
+    this.txt(c, '--------------------------------\n');
+    c.push(ESC, 0x21, 0x30);        // Double
+    c.push(ESC, 0x61, 0x00);
+    const tot = `${d.total.toFixed(2)} DT`;
+    this.txt(c, `TOTAL:${' '.repeat(Math.max(1,16-tot.length))}${tot}\n`);
+    c.push(ESC, 0x21, 0x00);
 
-    // Total
-    cmds.push(ESC, 0x61, 0x00);
-    cmds.push(ESC, 0x21, 0x30);                 // Double width + height
-    const totalStr = `${d.total.toFixed(2)} DT`;
-    const totalPad = ' '.repeat(Math.max(1, 32 - 'TOTAL:'.length - totalStr.length));
-    this.addText(cmds, `TOTAL:${totalPad}${totalStr}\n`);
-    cmds.push(ESC, 0x21, 0x00);
-
-    // Mode paiement
-    if (d.paymentMethod) {
-      const modes: Record<string, string> = {
-        especes: 'ESPECES', carte: 'CARTE', cheque: 'CHEQUE', mixte: 'MIXTE'
-      };
-      cmds.push(ESC, 0x61, 0x00);
-      this.addText(cmds, `Mode: ${modes[d.paymentMethod] ?? d.paymentMethod.toUpperCase()}\n`);
-    }
-
-    // Pied
-    this.addText(cmds, this.line() + '\n');
-    cmds.push(ESC, 0x61, 0x01);                 // Center
-    this.addText(cmds, 'Merci de votre visite !\n');
-    this.addText(cmds, 'Saveurs Authentiques de Tunisie\n');
-    this.addText(cmds, '\n\n\n');
-
-    // Coupe partielle
-    cmds.push(GS, 0x56, 0x42, 0x00);            // Partial cut
-
-    return new Uint8Array(cmds);
+    c.push(ESC, 0x61, 0x01);
+    this.txt(c, '\nMerci de votre visite !\n\n\n');
+    c.push(GS, 0x56, 0x42, 0x00);   // Coupe partielle
+    return new Uint8Array(c);
   }
 
-  private addText(cmds: number[], text: string) {
-    for (const ch of text) {
+  private buildEscPosBase64(d: TicketData): string {
+    const bytes = this.buildEscPosBytes(d);
+    let bin = '';
+    bytes.forEach(b => bin += String.fromCharCode(b));
+    return btoa(bin);
+  }
+
+  private txt(c: number[], s: string) {
+    for (const ch of s) {
       const code = ch.charCodeAt(0);
-      // Garder seulement ASCII + latin-1 (ESC/POS standard)
-      cmds.push(code < 256 ? code : 0x3F);      // '?' pour caractères non supportés
+      c.push(code < 256 ? code : 0x3F);
     }
   }
-
-  private line(len = 32): string { return '─'.repeat(len); }
 }
