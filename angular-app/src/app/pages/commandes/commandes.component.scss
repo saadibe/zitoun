@@ -85,7 +85,7 @@
   }
   .oi-em    { font-size: 18px; flex-shrink: 0; }
   .oi-info  { flex: 1; min-width: 0; }
-  .oi-nm    { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .oi-nm    { font-size: 12px; white-space: normal; word-wrap: break-word; }
   .oi-opts  { font-size: 10px; }
   .oi-note  { font-size: 10px; }
   // Contrôles sur la même ligne, à droite
