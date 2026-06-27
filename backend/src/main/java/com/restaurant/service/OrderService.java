@@ -79,6 +79,7 @@ import java.util.List;
     public List<Order> getActive()         { return orderRepo.findActiveOrders(); }
     public List<Order> getHistory()        { return orderRepo.findHistory(); }
     public List<Order> getPendingPayment() { return orderRepo.findPendingPayment(); }
+    public List<Order> getAllRecent()       { return orderRepo.findAllRecent(); }
 
     public List<Order> getByStatus(Order.OrderStatus s) {
         return orderRepo.findByStatusOrderByCreatedAtAsc(s);

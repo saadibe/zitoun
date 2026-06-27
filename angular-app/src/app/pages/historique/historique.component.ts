@@ -38,6 +38,24 @@ export class HistoriqueComponent implements OnInit {
   readonly methodIcons: {[k:string]:string} = {
     especes:'💵', carte:'💳', cheque:'📝', mixte:'🔀'
   };
+
+  readonly statusLabels: {[k:string]:{label:string,color:string}} = {
+    SENT:      { label:'⏳ Envoyée',    color:'#e67e22' },
+    PREPARING: { label:'👨‍🍳 Préparation', color:'#8e44ad' },
+    READY:     { label:'✅ Prête',       color:'#27ae60' },
+    SERVED:    { label:'🍽️ Servie',      color:'#2980b9' },
+    PENDING:   { label:'💳 À encaisser', color:'#c0392b' },
+  };
+
+  getStatusLabel(entry: HistoryEntry): string {
+    if (entry.status === 'paid') return '✅ Encaissée';
+    if (entry.status === 'pending') return '💳 À encaisser';
+    return '⏳ En cours';
+  }
+  getStatusColor(entry: HistoryEntry): string {
+    if (entry.status === 'paid') return '#27ae60';
+    return '#e67e22';
+  }
   payMethods = [
     { key:'especes', icon:'💵', label:'Espèces' },
     { key:'carte',   icon:'💳', label:'Carte'   },
@@ -167,6 +185,25 @@ export class HistoriqueComponent implements OnInit {
         qty:   i.qty,
         note:  i.note
       }))
+    };
+    const ok = await this.printer.printTicket(data);
+    if (!ok) alert('⚠ Impression échouée\n' + this.printer.lastError());
+  }
+
+  async printTicketSimple(h: HistoryEntry) {
+    // Ticket résumé : juste le nombre total de plats sans détail
+    const s = this.settings.settings();
+    const nbPlats = h.items.reduce((sum, i) => sum + i.qty, 0);
+    const data: TicketData = {
+      tableNumber:        h.table ?? null,
+      restaurantName:     s.name,
+      restaurantSubtitle: s.subtitle,
+      total:              h.total,
+      paymentMethod:      h.method ?? null,
+      date:               h.date,
+      time:               h.time,
+      orderRef:           h.id,
+      items:              [{ name: `${nbPlats} plat${nbPlats > 1 ? 's' : ''}`, emoji: '🍽️', price: h.total, qty: 1 }]
     };
     const ok = await this.printer.printTicket(data);
     if (!ok) alert('⚠ Impression échouée\n' + this.printer.lastError());

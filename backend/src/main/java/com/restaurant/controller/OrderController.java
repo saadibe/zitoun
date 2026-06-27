@@ -36,6 +36,12 @@ public class OrderController {
         return orderService.getHistory().stream().map(orderService::toResponse).toList();
     }
 
+    // Toutes les commandes récentes (toutes les pages historique)
+    @GetMapping("/all-recent")
+    public List<OrderDTO.Response> getAllRecent() {
+        return orderService.getAllRecent().stream().map(orderService::toResponse).toList();
+    }
+
     // Commandes en attente de paiement (pour la page Tables / Encaissement)
     @GetMapping("/pending-payment")
     public List<OrderDTO.Response> getPendingPayment() {

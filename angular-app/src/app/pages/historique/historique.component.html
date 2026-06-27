@@ -36,6 +36,7 @@
           <div class="hist-card-top">
             <span class="hist-table">{{ entry.table ? 'Table '+entry.table : '🥡 Emporter' }}</span>
             <span class="hist-date">{{ entry.date }} {{ entry.time }}</span>
+            <span class="hist-badge" [style.color]="getStatusColor(entry)" [style.borderColor]="getStatusColor(entry)">{{ getStatusLabel(entry) }}</span>
             <span class="hist-method">{{ methodIcons[entry.method || ''] }}</span>
             <span class="hist-total">{{ settings.fmt(entry.total) }}</span>
           </div>
@@ -165,9 +166,13 @@
           </button>
         }
         <div style="display:flex;gap:8px">
+          <button (click)="printTicketSimple(selected()!)"
+            style="flex:1;padding:11px;border-radius:11px;background:var(--cream);color:var(--ink2);border:2px solid var(--border);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif">
+            🖨️ Ticket résumé
+          </button>
           <button (click)="printTicket(selected()!)"
             style="flex:1;padding:11px;border-radius:11px;background:var(--sky);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif">
-            🖨️ Imprimer ticket
+            🖨️ Ticket détaillé
           </button>
         </div>
       </div>

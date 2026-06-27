@@ -22,6 +22,7 @@ export class ApiService {
 
   // ── Orders ────────────────────────────────────────
   getServiceStats()  { return this.http.get<any>(`${this.base}/stats/service`,  { headers: this.headers() }); }
+  getAllRecent()      { return this.http.get<Order[]>(`${this.base}/orders/all-recent`, { headers: this.headers() }); }
   getActiveOrders()     { return this.http.get<Order[]>(`${this.base}/orders/active`,          { headers: this.headers() }); }
   getOrderHistory()     { return this.http.get<Order[]>(`${this.base}/orders/history`,         { headers: this.headers() }); }
   getPendingPayment()   { return this.http.get<Order[]>(`${this.base}/orders/pending-payment`, { headers: this.headers() }); }

@@ -25,6 +25,10 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
            "ORDER BY o.updatedAt DESC")
     List<Order> findHistory();
 
+    @Query("SELECT o FROM Order o WHERE o.status != com.restaurant.model.Order.OrderStatus.CANCELLED " +
+           "ORDER BY o.createdAt DESC")
+    List<Order> findAllRecent();
+
     @Query("SELECT o FROM Order o WHERE o.status = com.restaurant.model.Order.OrderStatus.READY " +
            "OR o.status = com.restaurant.model.Order.OrderStatus.SENT " +
            "OR o.status = com.restaurant.model.Order.OrderStatus.PREPARING " +
