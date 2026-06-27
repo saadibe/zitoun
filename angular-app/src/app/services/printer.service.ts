@@ -243,7 +243,7 @@ export class PrinterService {
   body {
     width: 100% !important;
     font-family: Arial Black, Arial, Helvetica, sans-serif;
-    font-size: 9vw;
+    font-size: 6.5vw;
     font-weight: 900;
     color: #000;
     -webkit-print-color-adjust: exact;
@@ -257,8 +257,8 @@ export class PrinterService {
     margin-bottom: 6px !important;
     width: 100% !important;
   }
-  .resto-name  { font-size: 10.5vw; font-weight: 900; }
-  .ticket-type { font-size: 9vw; font-weight: 900; text-transform: uppercase; }
+  .resto-name  { font-size: 9vw; font-weight: 900; }
+  .ticket-type { font-size: 6.5vw; font-weight: 900; text-transform: uppercase; }
   .black-box {
     background: #000 !important;
     color: #fff !important;
@@ -270,24 +270,24 @@ export class PrinterService {
     width: 100% !important;
     -webkit-print-color-adjust: exact;
   }
-  .bb-left  { font-size: 11vw; font-weight: 900; }
-  .bb-right { font-size: 10.5vw; font-weight: 900; }
-  .meta { font-size: 7.5vw; margin: 1vw 0; }
+  .bb-left  { font-size: 9.5vw; font-weight: 900; }
+  .bb-right { font-size: 9vw; font-weight: 900; }
+  .meta { font-size: 6.5vw; margin: 1vw 0; }
   hr      { border: none !important; border-top: 2px solid #000 !important; margin: 7px 0 !important; width: 100% !important; display: block !important; }
   hr.thin     { border-top: 1px solid #999; margin: 5px 0; }
   hr.item-sep { border: none !important; border-top: 1px dashed #555 !important; margin: 2px 0 !important; width: 100% !important; display: block !important; }
   .sep-row td { padding: 0 !important; }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
   .item-row td { padding: 6px 0 3px; vertical-align: top; }
-  .item-name   { font-size: 9vw; font-weight: 900; width: 62%; word-wrap: break-word; overflow-wrap: break-word; }
-  .item-price  { font-size: 9vw; font-weight: 900; text-align: right; width: 38%; }
-  .item-note   { font-size: 7vw; font-weight: 700; padding: 0 0 1vw 2vw; }
-  .subtotal-row td { font-size: 8.5vw; padding: 1vw 0; }
-  .total-row td    { font-size: 10vw; font-weight: 900; padding: 1.5vw 0; }
+  .item-name   { font-size: 6.5vw; font-weight: 900; width: 62%; word-wrap: break-word; overflow-wrap: break-word; }
+  .item-price  { font-size: 6.5vw; font-weight: 900; text-align: right; width: 38%; }
+  .item-note   { font-size: 6vw; font-weight: 700; padding: 0 0 1vw 2vw; }
+  .subtotal-row td { font-size: 6.5vw; padding: 1vw 0; }
+  .total-row td    { font-size: 6.5vw; font-weight: 900; padding: 1.5vw 0; }
   .lbl { width: 55%; }
   .amt { text-align: right; width: 45%; }
-  .payment { font-size: 7.5vw; margin: 1vw 0; }
-  .footer  { font-size: 7.5vw; text-align: center; margin-top: 3vw; }
+  .payment { font-size: 6.5vw; margin: 1vw 0; }
+  .footer  { font-size: 6.5vw; text-align: center; margin-top: 3vw; }
 </style>
 </head><body>
 
