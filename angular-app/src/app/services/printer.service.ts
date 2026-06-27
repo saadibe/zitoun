@@ -91,21 +91,38 @@ export class PrinterService {
   // ════════════════════════════════════════════════════
   // MÉTHODE 2 — RawBT (app Android gratuite)
   // RawBT reçoit les données ESC/POS via Intent Android
-  // et les envoie à l'imprimante Bluetooth Classic
-  // Install : https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter
   // ════════════════════════════════════════════════════
   private async printViaRawBT(d: TicketData): Promise<void> {
     const escpos = this.buildEscPosBase64(d);
-
-    // RawBT accepte les données ESC/POS encodées en base64 via une URL intent
-    // Format : rawbt://base64/<données>
     const url = `rawbt://base64/${escpos}`;
 
-    // Ouvrir l'intent RawBT
-    window.location.href = url;
+    // Vérifier que RawBT est installé en essayant d'ouvrir l'intent
+    // Si l'app n'est pas installée, Android affiche "App introuvable"
+    return new Promise((resolve, reject) => {
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      document.body.appendChild(a);
 
-    // Donner le temps à l'intent de s'ouvrir
-    await new Promise(r => setTimeout(r, 500));
+      // Détecter si la page perd le focus (= RawBT s'est ouvert)
+      let opened = false;
+      const onBlur = () => { opened = true; };
+      window.addEventListener('blur', onBlur);
+
+      a.click();
+      document.body.removeChild(a);
+
+      setTimeout(() => {
+        window.removeEventListener('blur', onBlur);
+        if (opened) {
+          resolve();
+        } else {
+          // La page n'a pas perdu le focus = RawBT ne s'est pas ouvert
+          // Peut-être pas installé ou intent refusé
+          // On résout quand même (Chrome peut bloquer blur)
+          resolve();
+        }
+      }, 1200);
+    });
   }
 
   // ════════════════════════════════════════════════════

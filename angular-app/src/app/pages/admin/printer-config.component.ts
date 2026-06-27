@@ -116,7 +116,15 @@ import { PrinterService, PrintMethod } from '../../services/printer.service';
       <div class="pr-error">❌ {{ printer.lastError() }}</div>
     }
     @if (testOk()) {
-      <div class="pr-ok">✅ Ticket envoyé !</div>
+      @if (printer.method() === 'rawbt') {
+        <div class="pr-ok">
+          📱 Intent RawBT envoyé !<br>
+          <small>Si rien ne s'imprime : vérifiez que RawBT est installé
+          et que l'imprimante est configurée dans RawBT Settings.</small>
+        </div>
+      } @else {
+        <div class="pr-ok">✅ Ticket envoyé !</div>
+      }
     }
   </div>
 </div>
@@ -134,7 +142,11 @@ export class PrinterConfigComponent {
   async test() {
     this.testOk.set(false);
     const ok = await this.printer.testPrint();
-    if (ok) {
+    if (ok && this.printer.method() === 'rawbt') {
+      // RawBT : succès = l'intent a été envoyé, pas forcément imprimé
+      this.testOk.set(true);
+      setTimeout(() => this.testOk.set(false), 5000);
+    } else if (ok) {
       this.testOk.set(true);
       setTimeout(() => this.testOk.set(false), 4000);
     }
