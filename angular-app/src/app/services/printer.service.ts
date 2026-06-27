@@ -16,7 +16,7 @@ export interface TicketData {
 // 'window'  : window.print() via CSS thermique (marche partout)
 // 'rawbt'   : app RawBT Android (Bluetooth Classic natif)
 // 'bluetooth': Web Bluetooth BLE (TSP100III BLE uniquement)
-export type PrintMethod = 'window' | 'rawbt' | 'bluetooth';
+export type PrintMethod = 'window' | 'rawbt' | 'passprnt' | 'bluetooth';
 
 @Injectable({ providedIn: 'root' })
 export class PrinterService {
@@ -44,9 +44,10 @@ export class PrinterService {
     this.lastError.set('');
     try {
       switch (this.method()) {
-        case 'rawbt':     await this.printViaRawBT(data);     break;
-        case 'bluetooth': await this.printViaBLE(data);       break;
-        default:                this.printViaWindow(data);    break;
+        case 'rawbt':     await this.printViaRawBT(data);      break;
+        case 'passprnt':  await this.printViaPassPRNT(data);   break;
+        case 'bluetooth': await this.printViaBLE(data);        break;
+        default:                this.printViaWindow(data);     break;
       }
       this.printing.set(false);
       return true;
@@ -86,6 +87,29 @@ export class PrinterService {
     w.document.write(html);
     w.document.close();
     setTimeout(() => { w.print(); }, 300);
+  }
+
+  // ════════════════════════════════════════════════════
+  // MÉTHODE PassPRNT — App officielle Star Micronics (gratuit)
+  // TSP100IIIBI Bluetooth supporté nativement
+  // Google Play : "Star PassPRNT" par Star Micronics Co.
+  // ════════════════════════════════════════════════════
+  private async printViaPassPRNT(d: TicketData): Promise<void> {
+    // PassPRNT accepte du HTML via son URL scheme
+    // Format : passprnt://?html=<html encodé>&back=<url retour>
+    const html = this.buildHtmlTicket(d);
+    const encoded = encodeURIComponent(html);
+    const backUrl = encodeURIComponent(window.location.href);
+
+    const url = `passprnt://?html=${encoded}&back=${backUrl}`;
+
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => document.body.removeChild(a), 1000);
+
+    await new Promise(r => setTimeout(r, 1000));
   }
 
   // ════════════════════════════════════════════════════
