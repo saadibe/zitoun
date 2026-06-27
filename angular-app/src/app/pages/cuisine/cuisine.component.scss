@@ -1,4 +1,5 @@
-.page-cuisine { display:flex; flex-direction:column; height:100%; overflow:hidden; }
+:host { display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden; }
+.page-cuisine { display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden; }
 .k-refresh {
   padding: 7px 14px; border-radius: 9px;
   border: 2px solid var(--border); background: var(--cream);

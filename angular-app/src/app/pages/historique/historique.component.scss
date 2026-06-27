@@ -1,6 +1,7 @@
-.page-historique { display:flex; flex-direction:column; height:100%; overflow:hidden; }
+:host { display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden; }
+.page-historique { display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden; }
 .hist-clear { padding:7px 14px; border-radius:9px; border:2px solid var(--border); background:var(--cream); font-size:12px; font-weight:700; cursor:pointer; font-family:'Cairo',sans-serif; color:var(--ink3); &:hover{border-color:var(--terracotta);color:var(--terracotta);} }
-.hist-list { flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:10px; background:var(--ivory); }
+.hist-list { flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px 20px; display:flex; flex-direction:column; gap:10px; background:var(--ivory); }
 .hist-empty { text-align:center; color:var(--ink4); padding:40px 0; font-style:italic; }
 .hist-card {
   background:var(--white); border:2px solid var(--border); border-radius:14px;
