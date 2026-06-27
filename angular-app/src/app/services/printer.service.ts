@@ -91,25 +91,33 @@ export class PrinterService {
 
   // ════════════════════════════════════════════════════
   // MÉTHODE PassPRNT — App officielle Star Micronics (gratuit)
-  // TSP100IIIBI Bluetooth supporté nativement
-  // Google Play : "Star PassPRNT" par Star Micronics Co.
+  // Scheme exact : starpassprnt://v1/print/nopreview
+  // Doc : star-m.jp/products/s_print/sdk/passprnt/manual/android
   // ════════════════════════════════════════════════════
   private async printViaPassPRNT(d: TicketData): Promise<void> {
-    // PassPRNT accepte du HTML via son URL scheme
-    // Format : passprnt://?html=<html encodé>&back=<url retour>
-    const html = this.buildHtmlTicket(d);
-    const encoded = encodeURIComponent(html);
-    const backUrl = encodeURIComponent(window.location.href);
+    const html  = this.buildHtmlTicket(d);
+    const back  = encodeURIComponent(window.location.href);
+    const htmlE = encodeURIComponent(html);
 
-    const url = `passprnt://?html=${encoded}&back=${backUrl}`;
+    // Format officiel Star PassPRNT Android
+    // size=2 → 72mm (taille standard ticket thermique)
+    const url = `starpassprnt://v1/print/nopreview?`
+      + `back=${back}`
+      + `&size=2`
+      + `&html=${htmlE}`;
 
+    // Ouvrir via <a> — méthode recommandée par Star dans leur doc JS
     const a = document.createElement('a');
     a.setAttribute('href', url);
+    a.setAttribute('id', 'passprnt-link');
     document.body.appendChild(a);
     a.click();
-    setTimeout(() => document.body.removeChild(a), 1000);
+    setTimeout(() => {
+      const el = document.getElementById('passprnt-link');
+      if (el) document.body.removeChild(el);
+    }, 1500);
 
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 1500));
   }
 
   // ════════════════════════════════════════════════════
