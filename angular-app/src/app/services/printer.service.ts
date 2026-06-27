@@ -223,12 +223,13 @@ export class PrinterService {
     };
     const isFin = d.orderRef === 'FIN DE SERVICE';
 
-    const rows = d.items.map(i => `
+    const rows = d.items.map((i, idx) => `
       <tr class="item-row">
         <td class="item-name"><b>${i.qty} x ${i.name}</b></td>
         <td class="item-price">${(i.price * i.qty).toFixed(2)} €</td>
       </tr>
       ${i.note ? `<tr><td class="item-note" colspan="2">${i.note}</td></tr>` : ''}
+      ${idx < d.items.length - 1 ? `<tr class="sep-row"><td colspan="2"><hr class="item-sep"></td></tr>` : ''}
     `).join('');
 
     return `<!DOCTYPE html><html><head>
@@ -273,7 +274,9 @@ export class PrinterService {
   .bb-right { font-size: 10.5vw; font-weight: 900; }
   .meta { font-size: 7.5vw; margin: 1vw 0; }
   hr      { border: none !important; border-top: 2px solid #000 !important; margin: 7px 0 !important; width: 100% !important; display: block !important; }
-  hr.thin { border-top: 1px solid #999; margin: 5px 0; }
+  hr.thin     { border-top: 1px solid #999; margin: 5px 0; }
+  hr.item-sep { border: none !important; border-top: 1px dashed #555 !important; margin: 2px 0 !important; width: 100% !important; display: block !important; }
+  .sep-row td { padding: 0 !important; }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
   .item-row td { padding: 6px 0 3px; vertical-align: top; }
   .item-name   { font-size: 9vw; font-weight: 900; width: 62%; word-wrap: break-word; overflow-wrap: break-word; }
