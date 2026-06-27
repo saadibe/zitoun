@@ -100,11 +100,13 @@ export class PrinterService {
     const htmlE = encodeURIComponent(html);
 
     // Format officiel Star PassPRNT Android
-    // size=2 → 72mm, popup=false → pas de dialogue drawer/buzzer
+    // popup=false + drawer=none + buzzer=none → aucun dialogue périphérique
     const url = `starpassprnt://v1/print/nopreview?`
       + `back=${back}`
       + `&size=2`
       + `&popup=false`
+      + `&drawer=none`
+      + `&buzzer=none`
       + `&html=${htmlE}`;
 
     // Ouvrir via <a> — méthode recommandée par Star dans leur doc JS
