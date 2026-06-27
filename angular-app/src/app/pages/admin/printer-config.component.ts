@@ -63,10 +63,7 @@ export class PrinterConfigComponent {
   printer = inject(PrinterService);
   testOk  = signal(false);
 
-  constructor() {
-    // Forcer PassPRNT comme seule méthode
-    this.printer.saveMethod('passprnt');
-  }
+
 
   async test() {
     this.testOk.set(false);

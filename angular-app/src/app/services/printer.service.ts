@@ -22,7 +22,7 @@ export type PrintMethod = 'window' | 'rawbt' | 'passprnt' | 'bluetooth';
 export class PrinterService {
 
   method   = signal<PrintMethod>(
-    (sessionStorage.getItem('printer_method') as PrintMethod) || 'window'
+    (sessionStorage.getItem('printer_method') as PrintMethod) || 'passprnt'
   );
   connected   = signal<boolean>(false);
   printing    = signal<boolean>(false);
