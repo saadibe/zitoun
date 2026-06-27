@@ -99,15 +99,13 @@ export class PrinterService {
     const back  = encodeURIComponent(window.location.href);
     const htmlE = encodeURIComponent(html);
 
-    // Format officiel Star PassPRNT Android
-    // size=2 → 72mm, scale=fit → pleine largeur papier
+    // PassPRNT : pas de size → laisse l'app gérer la largeur native
+    // scale=fit → étire sur toute la largeur du papier configuré dans PassPRNT
     const url = `starpassprnt://v1/print/nopreview?`
       + `back=${back}`
-      + `&size=2`
       + `&popup=false`
       + `&drawer=none`
       + `&buzzer=none`
-      + `&scale=fit`
       + `&html=${htmlE}`;
 
     // Ouvrir via <a> — méthode recommandée par Star dans leur doc JS
@@ -240,18 +238,16 @@ export class PrinterService {
   * { margin:0 !important; padding:0 !important; box-sizing:border-box !important; }
   html {
     width: 100% !important;
-    min-width: 100% !important;
   }
   body {
     width: 100% !important;
-    min-width: 100% !important;
     font-family: Arial Black, Arial, Helvetica, sans-serif;
-    font-size: 28px;
+    font-size: 9vw;
     font-weight: 900;
     color: #000;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    padding: 4px 0 !important;
+    padding: 1vw 0 !important;
   }
   .header {
     display: flex !important;
@@ -260,8 +256,8 @@ export class PrinterService {
     margin-bottom: 6px !important;
     width: 100% !important;
   }
-  .resto-name  { font-size: 32px; font-weight: 900; }
-  .ticket-type { font-size: 28px; font-weight: 900; text-transform: uppercase; }
+  .resto-name  { font-size: 10.5vw; font-weight: 900; }
+  .ticket-type { font-size: 9vw; font-weight: 900; text-transform: uppercase; }
   .black-box {
     background: #000 !important;
     color: #fff !important;
@@ -273,22 +269,22 @@ export class PrinterService {
     width: 100% !important;
     -webkit-print-color-adjust: exact;
   }
-  .bb-left  { font-size: 34px; font-weight: 900; }
-  .bb-right { font-size: 32px; font-weight: 900; }
-  .meta { font-size: 24px; margin: 4px 0; }
+  .bb-left  { font-size: 11vw; font-weight: 900; }
+  .bb-right { font-size: 10.5vw; font-weight: 900; }
+  .meta { font-size: 7.5vw; margin: 1vw 0; }
   hr      { border: none !important; border-top: 2px solid #000 !important; margin: 7px 0 !important; width: 100% !important; display: block !important; }
   hr.thin { border-top: 1px solid #999; margin: 5px 0; }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
   .item-row td { padding: 6px 0 3px; vertical-align: top; }
-  .item-name   { font-size: 28px; font-weight: 900; width: 62%; word-wrap: break-word; overflow-wrap: break-word; }
-  .item-price  { font-size: 28px; font-weight: 900; text-align: right; width: 38%; }
-  .item-note   { font-size: 22px; font-weight: 700; padding: 0 0 5px 10px; }
-  .subtotal-row td { font-size: 26px; padding: 4px 0; }
-  .total-row td    { font-size: 30px; font-weight: 900; padding: 6px 0; }
+  .item-name   { font-size: 9vw; font-weight: 900; width: 62%; word-wrap: break-word; overflow-wrap: break-word; }
+  .item-price  { font-size: 9vw; font-weight: 900; text-align: right; width: 38%; }
+  .item-note   { font-size: 7vw; font-weight: 700; padding: 0 0 1vw 2vw; }
+  .subtotal-row td { font-size: 8.5vw; padding: 1vw 0; }
+  .total-row td    { font-size: 10vw; font-weight: 900; padding: 1.5vw 0; }
   .lbl { width: 55%; }
   .amt { text-align: right; width: 45%; }
-  .payment { font-size: 24px; margin: 4px 0; }
-  .footer  { font-size: 24px; text-align: center; margin-top: 12px; }
+  .payment { font-size: 7.5vw; margin: 1vw 0; }
+  .footer  { font-size: 7.5vw; text-align: center; margin-top: 3vw; }
 </style>
 </head><body>
 
