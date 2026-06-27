@@ -100,13 +100,14 @@ export class PrinterService {
     const htmlE = encodeURIComponent(html);
 
     // Format officiel Star PassPRNT Android
-    // popup=false + drawer=none + buzzer=none → aucun dialogue périphérique
+    // size=2 → 72mm, scale=fit → pleine largeur papier
     const url = `starpassprnt://v1/print/nopreview?`
       + `back=${back}`
       + `&size=2`
       + `&popup=false`
       + `&drawer=none`
       + `&buzzer=none`
+      + `&scale=fit`
       + `&html=${htmlE}`;
 
     // Ouvrir via <a> — méthode recommandée par Star dans leur doc JS
@@ -234,41 +235,48 @@ export class PrinterService {
 
     return `<!DOCTYPE html><html><head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html, body {
-    width: 100%;
+  * { margin:0 !important; padding:0 !important; box-sizing:border-box !important; }
+  html {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+  body {
+    width: 100% !important;
+    min-width: 100% !important;
     font-family: Arial Black, Arial, Helvetica, sans-serif;
     font-size: 28px;
     font-weight: 900;
     color: #000;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    padding: 6px 4px;
+    padding: 4px 0 !important;
   }
   .header {
-    display: flex;
+    display: flex !important;
     justify-content: space-between;
     align-items: baseline;
-    margin-bottom: 6px;
+    margin-bottom: 6px !important;
+    width: 100% !important;
   }
   .resto-name  { font-size: 32px; font-weight: 900; }
   .ticket-type { font-size: 28px; font-weight: 900; text-transform: uppercase; }
   .black-box {
     background: #000 !important;
     color: #fff !important;
-    display: flex;
+    display: flex !important;
     justify-content: space-between;
     align-items: center;
-    padding: 7px 10px;
-    margin: 6px 0;
+    padding: 7px 10px !important;
+    margin: 6px 0 !important;
+    width: 100% !important;
     -webkit-print-color-adjust: exact;
   }
   .bb-left  { font-size: 34px; font-weight: 900; }
   .bb-right { font-size: 32px; font-weight: 900; }
   .meta { font-size: 24px; margin: 4px 0; }
-  hr      { border: none; border-top: 2px solid #000; margin: 7px 0; }
+  hr      { border: none !important; border-top: 2px solid #000 !important; margin: 7px 0 !important; width: 100% !important; display: block !important; }
   hr.thin { border-top: 1px solid #999; margin: 5px 0; }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
   .item-row td { padding: 6px 0 3px; vertical-align: top; }
