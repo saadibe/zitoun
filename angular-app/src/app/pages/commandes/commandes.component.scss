@@ -35,101 +35,79 @@
 // ── Tablette (769-1200px) : layout compact ──────────
 @media (min-width: 769px) and (max-width: 1200px) {
 
-  // Panier : 200px = juste assez pour voir le contenu
+  // Panier : 280px — assez large pour voir nom + prix + boutons
   .srv-grid {
-    grid-template-columns: 1fr 200px;
+    grid-template-columns: 1fr 280px;
   }
 
   // ── Menu-bar : plus serré ────────────────────────
   .menu-bar {
-    padding: 8px 10px 8px;
+    padding: 8px 10px;
     gap: 6px;
   }
-  // Boutons de table plus petits
   .tbl-btn {
-    width: 30px;
-    height: 30px;
-    font-size: 11px;
-    border-radius: 7px;
-    &.emporter { width: 36px; font-size: 14px; }
+    width: 32px; height: 32px;
+    font-size: 11px; border-radius: 7px;
+    &.emporter { width: 38px; font-size: 14px; }
   }
   .tbl-lbl { font-size: 10px; }
-  // Catégories : une ligne scrollable sans retour à la ligne
   .cats {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 2px;
+    flex-wrap: nowrap; overflow-x: auto;
+    -webkit-overflow-scrolling: touch; padding-bottom: 2px;
     &::-webkit-scrollbar { display: none; }
   }
   .cat-btn {
-    flex-shrink: 0;
-    padding: 4px 10px;
-    font-size: 11px;
-    white-space: nowrap;
+    flex-shrink: 0; padding: 4px 10px;
+    font-size: 11px; white-space: nowrap;
   }
 
-  // ── Cartes menu : 4 colonnes minimum ────────────
+  // ── Cartes menu ──────────────────────────────────
   .menu-items {
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 8px;
-    padding: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px; padding: 10px;
   }
   .m-card { padding: 10px 6px 8px; }
-  .mc-em  { font-size: 24px; margin-bottom: 5px; }
+  .mc-em  { font-size: 26px; margin-bottom: 5px; }
   .mc-nm  { font-size: 11px; }
   .mc-pr  { font-size: 12px; margin-top: 4px; }
-  .mc-opt-hint { font-size: 9px; }
 
-  // ── Panier : très compact ────────────────────────
-  .o-head {
-    padding: 8px 10px 6px;
-  }
-  .oh-title { font-size: 13px; }
-  .oh-sub   { font-size: 10px; }
-  .clr-btn  { padding: 4px 7px; font-size: 10px; }
+  // ── Items panier : 2 lignes (nom+prix / contrôles) ──
+  .o-head   { padding: 8px 12px 6px; }
+  .oh-title { font-size: 14px; }
+  .oh-sub   { font-size: 11px; }
+  .clr-btn  { padding: 5px 8px; font-size: 11px; }
 
   .o-item {
-    padding: 6px 8px;
-    gap: 5px;
+    flex-wrap: wrap;      // passe sur 2 lignes si besoin
+    padding: 6px 10px;
+    gap: 4px;
+    align-items: center;
   }
-  .oi-em    { font-size: 16px; flex-shrink: 0; }
-  .oi-nm    { font-size: 11px; }
+  .oi-em    { font-size: 18px; flex-shrink: 0; }
+  .oi-info  { flex: 1; min-width: 0; }
+  .oi-nm    { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .oi-opts  { font-size: 10px; }
   .oi-note  { font-size: 10px; }
-  .oi-price { font-size: 11px; }
-  .o-qty-btn  { width: 22px; height: 22px; font-size: 13px; border-radius: 5px; }
-  .o-qty-val  { font-size: 11px; min-width: 16px; }
+  // Contrôles sur la même ligne, à droite
+  .oi-ctrl  { flex-shrink: 0; }
+  .o-qty-btn  { width: 24px; height: 24px; font-size: 14px; border-radius: 6px; }
+  .o-qty-val  { font-size: 12px; min-width: 18px; }
+  .oi-price   { font-size: 12px; font-weight: 800; flex-shrink: 0; min-width: 42px; text-align: right; }
 
-  // ── Pied panier : compact mais toujours visible ──
-  .o-foot {
-    padding: 7px 8px 9px;
-    gap: 5px;
-  }
-  .o-total { gap: 4px; }
-  .o-tlbl  { font-size: 9px; }
-  .o-tval  { font-size: 18px; }
+  // ── Pied panier ──────────────────────────────────
+  .o-foot { padding: 8px 10px 10px; gap: 6px; }
+  .o-tlbl { font-size: 10px; }
+  .o-tval { font-size: 20px; }
 
-  // Boutons en colonne sur tablette pour économiser la hauteur
   .o-acts {
-    flex-direction: column;
-    gap: 5px;
+    flex-direction: column; gap: 5px;
   }
   .act-btn {
-    padding: 8px 4px;
-    font-size: 11px;
-    border-radius: 9px;
-    flex: unset;
-    width: 100%;
+    padding: 9px 6px; font-size: 12px;
+    border-radius: 10px; flex: unset; width: 100%;
   }
-  .act-send {
-    font-size: 12px;
-    flex: unset;
-    order: -1; // Envoyer en premier
-  }
-  .act-print {
-    font-size: 10px;
-  }
+  .act-send { font-size: 13px; order: -1; }
+  .act-print { font-size: 11px; }
 }
 
 // ── Panel menu (gauche) ─────────────────────────────
