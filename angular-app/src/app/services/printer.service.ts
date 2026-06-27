@@ -239,8 +239,9 @@ export class PrinterService {
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body {
     width: 100%;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: Arial Black, Arial, Helvetica, sans-serif;
     font-size: 22px;
+    font-weight: 900;
     color: #000;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
