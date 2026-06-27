@@ -100,10 +100,11 @@ export class PrinterService {
     const htmlE = encodeURIComponent(html);
 
     // Format officiel Star PassPRNT Android
-    // size=2 → 72mm (taille standard ticket thermique)
+    // size=2 → 72mm, popup=false → pas de dialogue drawer/buzzer
     const url = `starpassprnt://v1/print/nopreview?`
       + `back=${back}`
       + `&size=2`
+      + `&popup=false`
       + `&html=${htmlE}`;
 
     // Ouvrir via <a> — méthode recommandée par Star dans leur doc JS
