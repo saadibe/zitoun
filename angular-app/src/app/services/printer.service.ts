@@ -214,15 +214,15 @@ export class PrinterService {
   // Génération ticket HTML (pour window.print)
   // ════════════════════════════════════════════════════
   private buildHtmlTicket(d: TicketData): string {
-    const table = (!d.tableNumber || d.tableNumber === 0) ? '🥡 À Emporter' : `Table ${d.tableNumber}`;
+    const table = (!d.tableNumber || d.tableNumber === 0) ? 'A EMPORTER' : `TABLE ${d.tableNumber}`;
     const methods: Record<string, string> = {
-      especes:'Espèces', carte:'Carte', cheque:'Chèque', mixte:'Mixte'
+      especes:'ESPECES', carte:'CARTE', cheque:'CHEQUE', mixte:'MIXTE'
     };
 
     const rows = d.items.map(i => `
       <tr>
-        <td class="left">${i.name}${i.note ? `<br><small>${i.note}</small>` : ''}</td>
-        <td class="center">×${i.qty}</td>
+        <td class="left">${i.name}${i.note ? `<br><span class="note">${i.note}</span>` : ''}</td>
+        <td class="center">x${i.qty}</td>
         <td class="right">${(i.price * i.qty).toFixed(2)}</td>
       </tr>`).join('');
 
@@ -233,39 +233,39 @@ export class PrinterService {
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
     font-family: 'Courier New', monospace;
-    font-size: 12px;
+    font-size: 28px;
     width: 72mm;
     margin: 0 auto;
-    padding: 4mm 2mm;
+    padding: 3mm 2mm;
   }
   .center { text-align: center; }
   .right  { text-align: right; }
   .left   { text-align: left; }
   .name {
-    font-size: 16px; font-weight: bold;
+    font-size: 34px; font-weight: bold;
     text-align: center; text-transform: uppercase;
-    letter-spacing: 2px; margin-bottom: 2px;
+    letter-spacing: 1px; margin-bottom: 3px;
   }
-  .sub  { font-size: 10px; text-align: center; color: #555; margin-bottom: 4px; }
-  .meta { font-size: 10px; text-align: center; margin: 2px 0; }
+  .sub  { font-size: 22px; text-align: center; margin-bottom: 4px; }
+  .meta { font-size: 22px; text-align: center; margin: 3px 0; }
   .table-lbl {
-    font-size: 14px; font-weight: bold;
-    text-align: center; margin: 4px 0;
+    font-size: 32px; font-weight: bold;
+    text-align: center; margin: 5px 0;
   }
-  hr { border: none; border-top: 1px dashed #999; margin: 4px 0; }
+  hr { border: none; border-top: 2px dashed #555; margin: 5px 0; }
   table { width: 100%; border-collapse: collapse; }
-  td { padding: 2px 1px; vertical-align: top; }
-  td.left   { width: 60%; }
-  td.center { width: 12%; text-align: center; }
-  td.right  { width: 28%; text-align: right; font-weight: bold; }
-  small { font-size: 10px; color: #666; font-style: italic; }
+  td { padding: 3px 1px; vertical-align: top; font-size: 26px; }
+  td.left   { width: 58%; }
+  td.center { width: 10%; text-align: center; }
+  td.right  { width: 32%; text-align: right; font-weight: bold; }
+  .note { font-size: 22px; font-style: italic; }
   .total-row td {
-    font-size: 15px; font-weight: bold;
+    font-size: 32px; font-weight: bold;
     border-top: 2px solid #333;
-    padding-top: 4px;
+    padding-top: 5px;
   }
-  .method { font-size: 10px; text-align: center; margin-top: 3px; }
-  .footer { font-size: 10px; text-align: center; margin-top: 8px; color: #666; }
+  .method { font-size: 24px; text-align: center; margin-top: 4px; font-weight: bold; }
+  .footer { font-size: 22px; text-align: center; margin-top: 8px; }
   @media print {
     @page { size: 72mm auto; margin: 0; }
     body { padding: 2mm 1mm; }
@@ -277,7 +277,8 @@ export class PrinterService {
   <hr>
   <div class="meta">${d.date} — ${d.time}</div>
   <div class="table-lbl">${table}</div>
-  ${d.orderRef ? `<div class="meta">Réf: ${d.orderRef}</div>` : ''}
+  ${d.orderRef && d.orderRef !== 'FIN DE SERVICE' ? `<div class="meta">Ref: ${d.orderRef}</div>` : ''}
+  ${d.orderRef === 'FIN DE SERVICE' ? `<div class="table-lbl">FIN DE SERVICE</div>` : ''}
   <hr>
   <table>
     ${rows}
@@ -288,7 +289,7 @@ export class PrinterService {
   </table>
   ${d.paymentMethod ? `<div class="method">${methods[d.paymentMethod] ?? d.paymentMethod.toUpperCase()}</div>` : ''}
   <hr>
-  <div class="footer">Merci de votre visite 🙏<br><b>${d.restaurantName}</b></div>
+  <div class="footer">Merci de votre visite<br><b>${d.restaurantName}</b></div>
   <br><br><br>
 </body></html>`;
   }
