@@ -227,7 +227,7 @@ export class PrinterService {
     const rows = d.items.map(i => `
       <tr class="item-row">
         <td class="item-name"><b>${i.qty} x ${i.name}</b></td>
-        <td class="item-price">${(i.price * i.qty).toFixed(2)} DT</td>
+        <td class="item-price">${(i.price * i.qty).toFixed(2)} €</td>
       </tr>
       ${i.note ? `<tr><td class="item-note" colspan="2">${i.note}</td></tr>` : ''}
     `).join('');
@@ -240,7 +240,7 @@ export class PrinterService {
   html, body {
     width: 100%;
     font-family: Arial Black, Arial, Helvetica, sans-serif;
-    font-size: 22px;
+    font-size: 28px;
     font-weight: 900;
     color: #000;
     -webkit-print-color-adjust: exact;
@@ -251,36 +251,36 @@ export class PrinterService {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
   }
-  .resto-name  { font-size: 26px; font-weight: 900; }
-  .ticket-type { font-size: 22px; font-weight: 900; text-transform: uppercase; }
+  .resto-name  { font-size: 32px; font-weight: 900; }
+  .ticket-type { font-size: 28px; font-weight: 900; text-transform: uppercase; }
   .black-box {
     background: #000 !important;
     color: #fff !important;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 8px;
-    margin: 5px 0;
+    padding: 7px 10px;
+    margin: 6px 0;
     -webkit-print-color-adjust: exact;
   }
-  .bb-left  { font-size: 28px; font-weight: 900; }
-  .bb-right { font-size: 26px; font-weight: 900; }
-  .meta { font-size: 19px; margin: 3px 0; }
-  hr      { border: none; border-top: 2px solid #000; margin: 6px 0; }
+  .bb-left  { font-size: 34px; font-weight: 900; }
+  .bb-right { font-size: 32px; font-weight: 900; }
+  .meta { font-size: 24px; margin: 4px 0; }
+  hr      { border: none; border-top: 2px solid #000; margin: 7px 0; }
   hr.thin { border-top: 1px solid #999; margin: 5px 0; }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-  .item-row td { padding: 5px 0 2px; vertical-align: top; }
-  .item-name   { font-size: 22px; font-weight: 700; width: 62%; word-wrap: break-word; overflow-wrap: break-word; }
-  .item-price  { font-size: 22px; font-weight: 700; text-align: right; width: 38%; }
-  .item-note   { font-size: 18px; padding: 0 0 5px 10px; }
-  .subtotal-row td { font-size: 21px; padding: 3px 0; }
-  .total-row td    { font-size: 24px; font-weight: 900; padding: 5px 0; }
+  .item-row td { padding: 6px 0 3px; vertical-align: top; }
+  .item-name   { font-size: 28px; font-weight: 900; width: 62%; word-wrap: break-word; overflow-wrap: break-word; }
+  .item-price  { font-size: 28px; font-weight: 900; text-align: right; width: 38%; }
+  .item-note   { font-size: 22px; font-weight: 700; padding: 0 0 5px 10px; }
+  .subtotal-row td { font-size: 26px; padding: 4px 0; }
+  .total-row td    { font-size: 30px; font-weight: 900; padding: 6px 0; }
   .lbl { width: 55%; }
   .amt { text-align: right; width: 45%; }
-  .payment { font-size: 19px; margin: 4px 0; }
-  .footer  { font-size: 19px; text-align: center; margin-top: 10px; }
+  .payment { font-size: 24px; margin: 4px 0; }
+  .footer  { font-size: 24px; text-align: center; margin-top: 12px; }
 </style>
 </head><body>
 
@@ -306,11 +306,11 @@ export class PrinterService {
   <table>
     <tr class="subtotal-row">
       <td class="lbl">Sous-total</td>
-      <td class="amt">${d.total.toFixed(2)} DT</td>
+      <td class="amt">${d.total.toFixed(2)} €</td>
     </tr>
     <tr class="total-row">
       <td class="lbl">Montant payé</td>
-      <td class="amt">${d.total.toFixed(2)} DT</td>
+      <td class="amt">${d.total.toFixed(2)} €</td>
     </tr>
   </table>
 
@@ -349,7 +349,7 @@ export class PrinterService {
 
     for (const i of d.items) {
       const nm = i.name.length > 18 ? i.name.slice(0,17)+'.' : i.name;
-      const pr = `${(i.price * i.qty).toFixed(2)} DT`;
+      const pr = `${(i.price * i.qty).toFixed(2)} €`;
       const sp = ' '.repeat(Math.max(1, 32 - nm.length - 2 - pr.length - `x${i.qty}`.length));
       this.txt(c, `${nm} x${i.qty}${sp}${pr}\n`);
       if (i.note?.trim()) this.txt(c, `  > ${i.note.slice(0,28)}\n`);
@@ -358,7 +358,7 @@ export class PrinterService {
     this.txt(c, '--------------------------------\n');
     c.push(ESC, 0x21, 0x30);        // Double
     c.push(ESC, 0x61, 0x00);
-    const tot = `${d.total.toFixed(2)} DT`;
+    const tot = `${d.total.toFixed(2)} €`;
     this.txt(c, `TOTAL:${' '.repeat(Math.max(1,16-tot.length))}${tot}\n`);
     c.push(ESC, 0x21, 0x00);
 
