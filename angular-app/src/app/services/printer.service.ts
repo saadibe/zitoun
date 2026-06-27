@@ -234,6 +234,10 @@ export class PrinterService {
   body {
     font-family: 'Courier New', monospace;
     font-size: 28px;
+    font-weight: bold;
+    color: #000000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
     width: 72mm;
     margin: 0 auto;
     padding: 3mm 2mm;
@@ -242,33 +246,35 @@ export class PrinterService {
   .right  { text-align: right; }
   .left   { text-align: left; }
   .name {
-    font-size: 34px; font-weight: bold;
+    font-size: 36px; font-weight: 900;
     text-align: center; text-transform: uppercase;
     letter-spacing: 1px; margin-bottom: 3px;
+    color: #000000;
   }
-  .sub  { font-size: 22px; text-align: center; margin-bottom: 4px; }
-  .meta { font-size: 22px; text-align: center; margin: 3px 0; }
+  .sub  { font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 4px; color: #000; }
+  .meta { font-size: 24px; font-weight: bold; text-align: center; margin: 3px 0; color: #000; }
   .table-lbl {
-    font-size: 32px; font-weight: bold;
-    text-align: center; margin: 5px 0;
+    font-size: 34px; font-weight: 900;
+    text-align: center; margin: 5px 0; color: #000;
   }
-  hr { border: none; border-top: 2px dashed #555; margin: 5px 0; }
+  hr { border: none; border-top: 3px solid #000000; margin: 5px 0; }
   table { width: 100%; border-collapse: collapse; }
-  td { padding: 3px 1px; vertical-align: top; font-size: 26px; }
+  td { padding: 3px 1px; vertical-align: top; font-size: 28px; font-weight: bold; color: #000; }
   td.left   { width: 58%; }
   td.center { width: 10%; text-align: center; }
-  td.right  { width: 32%; text-align: right; font-weight: bold; }
-  .note { font-size: 22px; font-style: italic; }
+  td.right  { width: 32%; text-align: right; font-weight: 900; }
+  .note { font-size: 22px; font-weight: bold; font-style: italic; color: #000; }
   .total-row td {
-    font-size: 32px; font-weight: bold;
-    border-top: 2px solid #333;
-    padding-top: 5px;
+    font-size: 34px; font-weight: 900;
+    border-top: 3px solid #000000;
+    padding-top: 5px; color: #000;
   }
-  .method { font-size: 24px; text-align: center; margin-top: 4px; font-weight: bold; }
-  .footer { font-size: 22px; text-align: center; margin-top: 8px; }
+  .method { font-size: 26px; font-weight: 900; text-align: center; margin-top: 4px; color: #000; }
+  .footer { font-size: 24px; font-weight: bold; text-align: center; margin-top: 8px; color: #000; }
   @media print {
     @page { size: 72mm auto; margin: 0; }
     body { padding: 2mm 1mm; }
+    * { color: #000000 !important; -webkit-print-color-adjust: exact !important; }
   }
 </style>
 </head><body>
