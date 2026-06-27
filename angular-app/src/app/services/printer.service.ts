@@ -217,17 +217,20 @@ export class PrinterService {
   // Génération ticket HTML (pour window.print)
   // ════════════════════════════════════════════════════
   private buildHtmlTicket(d: TicketData): string {
-    const table = (!d.tableNumber || d.tableNumber === 0) ? 'A EMPORTER' : `TABLE ${d.tableNumber}`;
+    const isEmporter = !d.tableNumber || d.tableNumber === 0;
+    const tableLabel = isEmporter ? 'A EMPORTER' : `TABLE ${d.tableNumber}`;
     const methods: Record<string, string> = {
-      especes:'ESPECES', carte:'CARTE', cheque:'CHEQUE', mixte:'MIXTE'
+      especes:'Espèces', carte:'Carte bancaire', cheque:'Chèque', mixte:'Mixte'
     };
+    const isFin = d.orderRef === 'FIN DE SERVICE';
 
     const rows = d.items.map(i => `
-      <tr>
-        <td class="left">${i.name}${i.note ? `<br><span class="note">${i.note}</span>` : ''}</td>
-        <td class="center">x${i.qty}</td>
-        <td class="right">${(i.price * i.qty).toFixed(2)}</td>
-      </tr>`).join('');
+      <tr class="item-row">
+        <td class="item-name"><b>${i.qty} x ${i.name}</b></td>
+        <td class="item-price">${(i.price * i.qty).toFixed(2)} DT</td>
+      </tr>
+      ${i.note ? `<tr><td class="item-note" colspan="2">${i.note}</td></tr>` : ''}
+    `).join('');
 
     return `<!DOCTYPE html><html><head>
 <meta charset="UTF-8">
@@ -235,71 +238,100 @@ export class PrinterService {
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    font-family: 'Courier New', monospace;
-    font-size: 28px;
-    font-weight: bold;
-    color: #000000;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 26px;
+    color: #000;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     width: 72mm;
     margin: 0 auto;
-    padding: 3mm 2mm;
+    padding: 4mm 3mm;
   }
-  .center { text-align: center; }
-  .right  { text-align: right; }
-  .left   { text-align: left; }
-  .name {
-    font-size: 36px; font-weight: 900;
-    text-align: center; text-transform: uppercase;
-    letter-spacing: 1px; margin-bottom: 3px;
-    color: #000000;
+  /* En-tête : nom resto + type */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 5px;
   }
-  .sub  { font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 4px; color: #000; }
-  .meta { font-size: 24px; font-weight: bold; text-align: center; margin: 3px 0; color: #000; }
-  .table-lbl {
-    font-size: 34px; font-weight: 900;
-    text-align: center; margin: 5px 0; color: #000;
+  .resto-name  { font-size: 30px; font-weight: 900; }
+  .ticket-type { font-size: 26px; font-weight: 900; text-transform: uppercase; }
+  /* Bloc noir table (style Uber) */
+  .black-box {
+    background: #000;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 10px;
+    margin: 5px 0;
   }
-  hr { border: none; border-top: 3px solid #000000; margin: 5px 0; }
+  .bb-left  { font-size: 32px; font-weight: 900; }
+  .bb-right { font-size: 30px; font-weight: 900; }
+  /* Méta */
+  .meta { font-size: 22px; color: #000; margin: 4px 0; }
+  /* Séparateurs */
+  hr      { border: none; border-top: 2px solid #000; margin: 6px 0; }
+  hr.thin { border-top: 1px solid #aaa; margin: 5px 0; }
+  /* Articles */
   table { width: 100%; border-collapse: collapse; }
-  td { padding: 3px 1px; vertical-align: top; font-size: 28px; font-weight: bold; color: #000; }
-  td.left   { width: 58%; }
-  td.center { width: 10%; text-align: center; }
-  td.right  { width: 32%; text-align: right; font-weight: 900; }
-  .note { font-size: 22px; font-weight: bold; font-style: italic; color: #000; }
-  .total-row td {
-    font-size: 34px; font-weight: 900;
-    border-top: 3px solid #000000;
-    padding-top: 5px; color: #000;
-  }
-  .method { font-size: 26px; font-weight: 900; text-align: center; margin-top: 4px; color: #000; }
-  .footer { font-size: 24px; font-weight: bold; text-align: center; margin-top: 8px; color: #000; }
+  .item-row td   { padding: 5px 0 2px; vertical-align: top; }
+  .item-name     { font-size: 28px; font-weight: 700; width: 65%; }
+  .item-price    { font-size: 28px; font-weight: 700; text-align: right; width: 35%; }
+  .item-note     { font-size: 22px; color: #000; padding: 0 0 5px 16px; }
+  /* Total */
+  .subtotal-row td { font-size: 26px; padding: 3px 0; }
+  .total-row td    { font-size: 30px; font-weight: 900; padding: 5px 0; }
+  .lbl { width: 60%; }
+  .amt { text-align: right; width: 40%; }
+  /* Paiement */
+  .payment { font-size: 24px; margin: 4px 0; }
+  /* Pied */
+  .footer { font-size: 24px; text-align: center; margin-top: 10px; }
   @media print {
     @page { size: 72mm auto; margin: 0; }
-    body { padding: 2mm 1mm; }
-    * { color: #000000 !important; -webkit-print-color-adjust: exact !important; }
+    body { padding: 2mm 2mm; }
+    .black-box { background: #000 !important; color: #fff !important; }
   }
 </style>
 </head><body>
-  <div class="name">${d.restaurantName}</div>
-  <div class="sub">${d.restaurantSubtitle}</div>
+
+  <div class="header">
+    <span class="resto-name">${d.restaurantName}</span>
+    <span class="ticket-type">${isEmporter ? 'EMPORTER' : 'SUR PLACE'}</span>
+  </div>
+
+  <div class="black-box">
+    <span class="bb-left">${tableLabel}</span>
+    <span class="bb-right">${isFin ? 'RECAP' : (d.orderRef ?? d.time)}</span>
+  </div>
+
+  <div class="meta">Le ${d.date} à ${d.time}</div>
+  ${isFin ? '<div style="font-size:28px;font-weight:900;text-align:center;padding:6px 0">★ FIN DE SERVICE ★</div>' : ''}
+
   <hr>
-  <div class="meta">${d.date} — ${d.time}</div>
-  <div class="table-lbl">${table}</div>
-  ${d.orderRef && d.orderRef !== 'FIN DE SERVICE' ? `<div class="meta">Ref: ${d.orderRef}</div>` : ''}
-  ${d.orderRef === 'FIN DE SERVICE' ? `<div class="table-lbl">FIN DE SERVICE</div>` : ''}
-  <hr>
+
+  <table>${rows}</table>
+
+  <hr class="thin">
+
   <table>
-    ${rows}
+    <tr class="subtotal-row">
+      <td class="lbl">Sous-total</td>
+      <td class="amt">${d.total.toFixed(2)} DT</td>
+    </tr>
     <tr class="total-row">
-      <td class="left" colspan="2">TOTAL</td>
-      <td class="right">${d.total.toFixed(2)} DT</td>
+      <td class="lbl">Montant payé</td>
+      <td class="amt">${d.total.toFixed(2)} DT</td>
     </tr>
   </table>
-  ${d.paymentMethod ? `<div class="method">${methods[d.paymentMethod] ?? d.paymentMethod.toUpperCase()}</div>` : ''}
+
+  ${d.paymentMethod ? `<div class="payment">Mode : ${methods[d.paymentMethod] ?? d.paymentMethod}</div>` : ''}
+
   <hr>
-  <div class="footer">Merci de votre visite<br><b>${d.restaurantName}</b></div>
+  <div class="footer">Merci pour votre commande<br><b>${d.restaurantName}</b></div>
   <br><br><br>
+
 </body></html>`;
   }
 
