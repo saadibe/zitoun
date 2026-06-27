@@ -200,19 +200,37 @@ export class HistoriqueComponent implements OnInit {
   }
 
   async printTicketSimple(h: HistoryEntry) {
-    // Ticket résumé : juste le nombre total de plats sans détail
     const s = this.settings.settings();
     const nbPlats = h.items.reduce((sum, i) => sum + i.qty, 0);
+
+    // Construire les lignes résumé : une ligne par article (nom + qty) sans prix individuel
+    const resumeItems = h.items.map(i => ({
+      name:  i.name,
+      emoji: i.emoji,
+      price: 0,           // pas de prix individuel sur ticket résumé
+      qty:   i.qty,
+      note:  i.note
+    }));
+
     const data: TicketData = {
       tableNumber:        h.table ?? null,
       restaurantName:     s.name,
       restaurantSubtitle: s.subtitle,
+      legalName:          s.legalName,
+      address:            s.address,
+      phone:              s.phone,
+      email:              s.email,
+      taxNumber:          s.taxNumber,
+      tvaNumber:          s.tvaNumber,
+      nafCode:            s.nafCode,
+      ticketFooter:       s.ticketFooter,
+      tvaRate:            0,              // pas de TVA sur ticket résumé
       total:              h.total,
       paymentMethod:      h.method ?? null,
       date:               h.date,
       time:               h.time,
       orderRef:           h.id,
-      items:              [{ name: `${nbPlats} plat${nbPlats > 1 ? 's' : ''}`, emoji: '🍽️', price: h.total, qty: 1 }]
+      items:              resumeItems
     };
     const ok = await this.printer.printTicket(data);
     if (!ok) alert('⚠ Impression échouée\n' + this.printer.lastError());

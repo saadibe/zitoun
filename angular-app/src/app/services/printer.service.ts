@@ -236,7 +236,7 @@ export class PrinterService {
     const rows = d.items.map((i, idx) => `
       <tr class="item-row">
         <td class="item-name"><b>${i.qty} x ${i.name}</b></td>
-        <td class="item-price">${(i.price * i.qty).toFixed(2)} €</td>
+        <td class="item-price">${i.price > 0 ? (i.price * i.qty).toFixed(2) + ' €' : ''}</td>
       </tr>
       ${i.note ? `<tr><td class="item-note" colspan="2">${i.note}</td></tr>` : ''}
       ${idx < d.items.length - 1 ? `<tr class="sep-row"><td colspan="2"><hr class="item-sep"></td></tr>` : ''}

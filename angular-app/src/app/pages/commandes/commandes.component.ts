@@ -188,18 +188,15 @@ export class CommandesComponent implements OnInit, OnDestroy {
       next: (order) => {
         this.api.sendToKitchen(order.id).subscribe({
           next: () => {
-            if (when === 'now' && payMethod) {
-              // Payer maintenant : commande visible en cuisine (SENT)
-              // Le paiement est enregistré en local - la commande sera servie par la cuisine
-              this.saveHistory(table, items, total, payMethod, 'paid');
-              // Marquer payée en base sans bloquer la cuisine
-              this.api.payOrder(order.id, payMethod).subscribe();
-              this.finishSend(table, `✅ Encaissé — en préparation cuisine`);
-            } else {
-              // Payer après manger : commande en cuisine, paiement via page Tables
-              this.saveHistory(table, items, total, null, 'pending');
-              this.finishSend(table, `💳 À encaisser`);
-            }
+            // Dans les 2 cas : la commande va en cuisine (SENT)
+            // "Payer maintenant" = mode paiement noté, encaissement via Tables
+            // "Payer après" = paiement différé, encaissement via Tables
+            const status = when === 'now' ? 'paid' as const : 'pending' as const;
+            const msg    = when === 'now'
+              ? `✅ Commande envoyée en cuisine — encaisser via Tables`
+              : `💳 Commande en cuisine — à encaisser`;
+            this.saveHistory(table, items, total, when === 'now' ? payMethod : null, status);
+            this.finishSend(table, msg);
           },
           error: () => this.finishSend(table, `✓ Enregistré`)
         });
