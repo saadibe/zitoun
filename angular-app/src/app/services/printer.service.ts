@@ -10,6 +10,16 @@ export interface TicketData {
   restaurantName: string;
   restaurantSubtitle: string;
   orderRef?: string;
+  // Infos légales
+  address?: string;
+  phone?: string;
+  email?: string;
+  taxNumber?: string;
+  tvaNumber?: string;
+  nafCode?: string;
+  legalName?: string;
+  ticketFooter?: string;
+  tvaRate?: number;
 }
 
 // ── Méthode d'impression ───────────────────────────────────────────
@@ -291,9 +301,23 @@ export class PrinterService {
 </style>
 </head><body>
 
+  <!-- En-tête légal : raison sociale + adresse + contacts -->
+  <div style="text-align:center;margin-bottom:5px">
+    <div class="resto-name">${d.legalName || d.restaurantName}</div>
+    ${d.restaurantName !== d.legalName && d.legalName ? `<div class="meta">${d.restaurantName}</div>` : ''}
+    ${d.restaurantSubtitle ? `<div class="meta">${d.restaurantSubtitle}</div>` : ''}
+    ${d.address   ? `<div class="meta">${d.address}</div>` : ''}
+    ${d.phone     ? `<div class="meta">Tél : ${d.phone}</div>` : ''}
+    ${d.email     ? `<div class="meta">Email : ${d.email}</div>` : ''}
+    ${d.taxNumber ? `<div class="meta">Siret : ${d.taxNumber}</div>` : ''}
+    ${d.tvaNumber ? `<div class="meta">TVA : ${d.tvaNumber}</div>` : ''}
+    ${d.nafCode   ? `<div class="meta">NAF : ${d.nafCode}</div>` : ''}
+  </div>
+
+  <hr>
+
   <div class="header">
-    <span class="resto-name">${d.restaurantName}</span>
-    <span class="ticket-type">${isEmporter ? 'EMPORTER' : 'SUR PLACE'}</span>
+    <span>${isEmporter ? 'A EMPORTER' : 'SUR PLACE'}</span>
   </div>
 
   <div class="black-box">
@@ -302,7 +326,7 @@ export class PrinterService {
   </div>
 
   <div class="meta">Le ${d.date} à ${d.time}</div>
-  ${isFin ? '<div style="font-size:28px;font-weight:900;text-align:center;padding:6px 0">★ FIN DE SERVICE ★</div>' : ''}
+  ${isFin ? '<div style="font-size:8vw;font-weight:900;text-align:center;padding:4px 0">★ FIN DE SERVICE ★</div>' : ''}
 
   <hr>
 
@@ -324,7 +348,23 @@ export class PrinterService {
   ${d.paymentMethod ? `<div class="payment">Mode : ${methods[d.paymentMethod] ?? d.paymentMethod}</div>` : ''}
 
   <hr>
-  <div class="footer">Merci pour votre commande<br><b>${d.restaurantName}</b></div>
+  <!-- TVA si applicable -->
+  ${(d.tvaRate && d.tvaRate > 0) ? `
+  <table style="margin-bottom:4px">
+    <tr class="subtotal-row">
+      <td class="lbl">HT (${d.tvaRate}%)</td>
+      <td class="amt">${(d.total / (1 + (d.tvaRate||0)/100)).toFixed(2)} €</td>
+    </tr>
+    <tr class="subtotal-row">
+      <td class="lbl">TVA</td>
+      <td class="amt">${(d.total - d.total / (1 + (d.tvaRate||0)/100)).toFixed(2)} €</td>
+    </tr>
+  </table>
+  <hr class="thin">` : ''}
+  <div class="footer">
+    ${d.ticketFooter || 'Merci de votre visite'}<br>
+    <b>${d.restaurantName}</b>
+  </div>
   <br><br><br>
 
 </body></html>`;

@@ -8,6 +8,7 @@
     <button class="admin-tab" [class.active]="tab==='categories'" (click)="tab='categories'">🏷️ Catégories</button>
     <button class="admin-tab" [class.active]="tab==='users'"   (click)="tab='users'">👤 Comptes</button>
     <button class="admin-tab" [class.active]="tab==='printer'" (click)="tab='printer'">🖨️ Imprimante</button>
+    <button class="admin-tab" [class.active]="tab==='ticket'"  (click)="tab='ticket'">🏪 Mon Restaurant</button>
   </div>
   <div class="admin-body">
     @if (tab==='settings') {
@@ -110,6 +111,9 @@
     }
     @if (tab==='printer') {
       <app-printer-config />
+    }
+    @if (tab==='ticket') {
+      <app-settings-ticket />
     }
   </div>
 </div>

@@ -1,12 +1,13 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PrinterConfigComponent } from './printer-config.component';
+import { SettingsTicketComponent } from './settings-ticket.component';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { SettingsService } from '../../services/settings.service';
 import { MenuItem, RestaurantSettings } from '../../models';
 
-@Component({ selector:'app-admin', standalone:true, imports:[CommonModule,FormsModule,PrinterConfigComponent],
+@Component({ selector:'app-admin', standalone:true, imports:[CommonModule,FormsModule,PrinterConfigComponent,SettingsTicketComponent],
   templateUrl:'./admin.component.html', styleUrl:'./admin.component.scss' })
 export class AdminComponent implements OnInit {
   menu   = signal<MenuItem[]>([]);

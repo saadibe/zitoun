@@ -13,8 +13,15 @@ export interface RestaurantTable { id: number; number: number; seats: number; st
 export interface RestaurantSettings {
   id: number; name: string; subtitle: string; city: string;
   icon: string; taxNumber: string; currency: string;
-  tvaRate: number; theme: string;
-  menuPrice: number;  // supplément option menu
+  tvaRate: number; theme: string; menuPrice: number;
+  // Infos ticket
+  address?: string;      // adresse complète
+  phone?: string;        // téléphone
+  email?: string;        // email
+  tvaNumber?: string;    // numéro TVA intracommunautaire
+  nafCode?: string;      // code NAF/APE
+  legalName?: string;    // raison sociale
+  ticketFooter?: string; // pied de ticket personnalisable
 }
 export interface Category { id: number; code: string; label: string; emoji: string; sortOrder: number; active: boolean; }
 export interface HistoryEntry {

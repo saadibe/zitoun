@@ -8,7 +8,9 @@ export class SettingsService {
   settings = signal<RestaurantSettings>({
     id: 1, name: 'La Perla', subtitle: 'Saveurs Authentiques de Tunisie',
     city: 'Tunisie', icon: '🌶️', taxNumber: '', currency: 'DT',
-    tvaRate: 10, theme: 'vert', menuPrice: 2.0
+    tvaRate: 10, theme: 'vert', menuPrice: 2.0,
+    address: '', phone: '', email: '', tvaNumber: '', nafCode: '',
+    legalName: '', ticketFooter: 'Merci de votre visite'
   });
   categories = signal<Category[]>([]);
   loaded = signal(false);

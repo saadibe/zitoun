@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+    <changeSet id="v15-settings-ticket-info" author="zitoun">
+        <addColumn tableName="restaurant_settings">
+            <column name="address"       type="VARCHAR(200)" defaultValue=""/>
+            <column name="phone"         type="VARCHAR(20)"  defaultValue=""/>
+            <column name="email"         type="VARCHAR(100)" defaultValue=""/>
+            <column name="tva_number"    type="VARCHAR(50)"  defaultValue=""/>
+            <column name="naf_code"      type="VARCHAR(20)"  defaultValue=""/>
+            <column name="legal_name"    type="VARCHAR(150)" defaultValue=""/>
+            <column name="ticket_footer" type="VARCHAR(300)" defaultValue="Merci de votre visite"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

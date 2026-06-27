@@ -243,13 +243,23 @@ export class CommandesComponent implements OnInit, OnDestroy {
     if (!this.canSend()) return;
 
     const items = this.cart.items();
+    const s = this.settings.settings();
     const data: TicketData = {
-      tableNumber:       this.cart.table(),
-      restaurantName:    this.settings.settings().name,
-      restaurantSubtitle: this.settings.settings().subtitle,
-      total:             this.cart.total(),
-      date:              new Date().toLocaleDateString('fr-FR'),
-      time:              new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}),
+      tableNumber:        this.cart.table(),
+      restaurantName:     s.name,
+      restaurantSubtitle: s.subtitle,
+      legalName:          s.legalName,
+      address:            s.address,
+      phone:              s.phone,
+      email:              s.email,
+      taxNumber:          s.taxNumber,
+      tvaNumber:          s.tvaNumber,
+      nafCode:            s.nafCode,
+      ticketFooter:       s.ticketFooter,
+      tvaRate:            s.tvaRate,
+      total:              this.cart.total(),
+      date:               new Date().toLocaleDateString('fr-FR'),
+      time:               new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}),
       items: items.map(i => ({
         name:  i.item.name,
         emoji: i.item.emoji,

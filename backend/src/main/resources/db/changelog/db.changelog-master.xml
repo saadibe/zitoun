@@ -19,5 +19,6 @@
     <include file="db/changelog/v12-index-orders.xml"/>
     <include file="db/changelog/v13-payment-fields.xml"/>
     <include file="db/changelog/v14-orderitem-unitprice.xml"/>
+    <include file="db/changelog/v15-settings-ticket-info.xml"/>
 
 </databaseChangeLog>
