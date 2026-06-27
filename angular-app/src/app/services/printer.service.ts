@@ -129,6 +129,19 @@ export class PrinterService {
     }
   }
 
+  // ── Déconnexion : libère le BT pour Uber Eats ──────────────────
+  disconnect() {
+    try {
+      if (this.btDevice?.gatt?.connected) {
+        this.btDevice.gatt.disconnect();
+      }
+    } catch {}
+    this.btDevice = null;
+    this.btChar   = null;
+    this.connected.set(false);
+    this.lastError.set('');
+  }
+
   // ── Envoi Bluetooth ───────────────────────────────────────────────
   private async sendViaBluetooth(data: Uint8Array): Promise<void> {
     // Reconnecter si nécessaire
