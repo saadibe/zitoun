@@ -49,7 +49,7 @@ class OrderFlowIntegrationTest {
             orderRepo.deleteAll();
             MenuItem item = new MenuItem();
             item.setName("Chapati Thon"); item.setPrice(6.0);
-            item.setEmoji("🥙"); item.setCategory(String.SANDWICH);
+            item.setEmoji("🥙"); item.setCategory("SANDWICH");
             item.setAvailable(true);
             menuItemId = menuRepo.save(item).getId();
 

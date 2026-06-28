@@ -30,7 +30,7 @@ class OrderRepositoryTest {
 
         chapati = new MenuItem();
         chapati.setName("Chapati Thon"); chapati.setPrice(6.0);
-        chapati.setEmoji("🥙"); chapati.setCategory(String.SANDWICH);
+        chapati.setEmoji("🥙"); chapati.setCategory("SANDWICH");
         chapati.setAvailable(true);
         chapati = menuRepo.save(chapati);
     }
