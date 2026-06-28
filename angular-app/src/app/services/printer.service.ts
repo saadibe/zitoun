@@ -227,152 +227,131 @@ export class PrinterService {
   // ════════════════════════════════════════════════════
   private buildHtmlTicket(d: TicketData): string {
     const isEmporter = !d.tableNumber || d.tableNumber === 0;
-    const tableLabel = isEmporter ? 'A EMPORTER' : `TABLE ${d.tableNumber}`;
-    const methods: Record<string, string> = {
-      especes:'Espèces', carte:'Carte bancaire', cheque:'Chèque', mixte:'Mixte'
+    const tableLabel  = isEmporter ? 'A EMPORTER' : 'TABLE ' + d.tableNumber;
+    const isFin       = d.orderRef === 'FIN DE SERVICE';
+    const tva         = !!(d.tvaRate && d.tvaRate > 0);
+    const totalTTC    = d.total;
+    const totalHT     = tva ? totalTTC / (1 + (d.tvaRate||0) / 100) : totalTTC;
+    const montantTVA  = tva ? totalTTC - totalHT : 0;
+
+    const M: Record<string,string> = {
+      especes:'Espèces', carte:'Carte Bleue', cheque:'Chèque', mixte:'Mixte'
     };
-    const isFin = d.orderRef === 'FIN DE SERVICE';
 
-    const rows = d.items.map((i, idx) => `
-      <tr class="item-row">
-        <td class="item-name"><b>${i.qty} x ${i.name}</b></td>
-        <td class="item-price">${i.price > 0 ? (i.price * i.qty).toFixed(2) + ' €' : ''}</td>
-      </tr>
-      ${i.note ? `<tr><td class="item-note" colspan="2">${i.note}</td></tr>` : ''}
-      ${idx < d.items.length - 1 ? `<tr class="sep-row"><td colspan="2"><hr class="item-sep"></td></tr>` : ''}
-    `).join('');
+    // Construire le HTML par concaténation (pas de backticks imbriqués)
+    const H = (tag: string, cls: string, txt: string) =>
+      '<' + tag + (cls ? ' class="' + cls + '"' : '') + '>' + txt + '</' + tag + '>';
 
-    return `<!DOCTYPE html><html><head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<style>
-  * { margin:0 !important; padding:0 !important; box-sizing:border-box !important; }
-  html {
-    width: 100% !important;
-  }
-  body {
-    width: 100% !important;
-    font-family: Arial Black, Arial, Helvetica, sans-serif;
-    font-size: 6.5vw;
-    font-weight: 900;
-    color: #000;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    padding: 1vw 0 !important;
-  }
-  .header {
-    display: flex !important;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 6px !important;
-    width: 100% !important;
-  }
-  .resto-name  { font-size: 9vw; font-weight: 900; }
-  .ticket-type { font-size: 6.5vw; font-weight: 900; text-transform: uppercase; }
-  .black-box {
-    background: #000 !important;
-    color: #fff !important;
-    display: flex !important;
-    justify-content: space-between;
-    align-items: center;
-    padding: 7px 10px !important;
-    margin: 6px 0 !important;
-    width: 100% !important;
-    -webkit-print-color-adjust: exact;
-  }
-  .bb-left  { font-size: 9.5vw; font-weight: 900; }
-  .bb-right { font-size: 9vw; font-weight: 900; }
-  .meta { font-size: 6.5vw; margin: 1vw 0; }
-  hr      { border: none !important; border-top: 2px solid #000 !important; margin: 7px 0 !important; width: 100% !important; display: block !important; }
-  hr.thin     { border-top: 1px solid #999; margin: 5px 0; }
-  hr.item-sep { border: none !important; border-top: 1px dashed #555 !important; margin: 2px 0 !important; width: 100% !important; display: block !important; }
-  .sep-row td { padding: 0 !important; }
-  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-  .item-row td { padding: 6px 0 3px; vertical-align: top; }
-  .item-name   { font-size: 6.5vw; font-weight: 900; width: 62%; word-wrap: break-word; overflow-wrap: break-word; }
-  .item-price  { font-size: 6.5vw; font-weight: 900; text-align: right; width: 38%; }
-  .item-note   { font-size: 6vw; font-weight: 700; padding: 0 0 1vw 2vw; }
-  .subtotal-row td { font-size: 6.5vw; padding: 1vw 0; }
-  .total-row td    { font-size: 6.5vw; font-weight: 900; padding: 1.5vw 0; }
-  .lbl { width: 55%; }
-  .amt { text-align: right; width: 45%; }
-  .payment { font-size: 6.5vw; margin: 1vw 0; }
-  .footer  { font-size: 6.5vw; text-align: center; margin-top: 3vw; }
-</style>
-</head><body>
+    // Articles
+    let rowsHtml = '';
+    d.items.forEach((i, idx) => {
+      const priceStr = i.price > 0
+        ? (i.price * i.qty).toFixed(2) + ' &euro;'
+        : '';
+      const unitStr  = i.price > 0 ? i.price.toFixed(2) : '0.00';
+      const tvaLetter = tva ? ' B' : '';
+      rowsHtml += '<tr>';
+      rowsHtml += '<td class="art-qty">' + i.qty + '</td>';
+      rowsHtml += '<td class="art-name"><b>' + i.qty + ' ' + i.name + '</b>';
+      if (i.note) rowsHtml += '<br><span class="art-note">' + i.note + '</span>';
+      rowsHtml += '</td>';
+      rowsHtml += '<td class="art-pu">' + (i.price > 0 ? unitStr : '') + '</td>';
+      rowsHtml += '<td class="art-total">' + (i.price > 0 ? (i.price * i.qty).toFixed(2) + tvaLetter : '') + '</td>';
+      rowsHtml += '</tr>';
+      if (idx < d.items.length - 1) {
+        rowsHtml += '<tr><td colspan="4" style="padding:1px 0"><hr style="border:none;border-top:1px dashed #999;margin:2px 0"></td></tr>';
+      }
+    });
 
-  <!-- En-tête légal : raison sociale + adresse + contacts -->
-  <div style="text-align:center;margin-bottom:5px">
-    <div class="resto-name">${d.legalName || d.restaurantName}</div>
-    ${d.restaurantName !== d.legalName && d.legalName ? `<div class="meta">${d.restaurantName}</div>` : ''}
-    ${d.restaurantSubtitle ? `<div class="meta">${d.restaurantSubtitle}</div>` : ''}
-    ${d.address   ? `<div class="meta">${d.address}</div>` : ''}
-    ${d.phone     ? `<div class="meta">Tél : ${d.phone}</div>` : ''}
-    ${d.email     ? `<div class="meta">Email : ${d.email}</div>` : ''}
-    ${d.taxNumber ? `<div class="meta">Siret : ${d.taxNumber}</div>` : ''}
-    ${d.tvaNumber ? `<div class="meta">TVA : ${d.tvaNumber}</div>` : ''}
-    ${d.nafCode   ? `<div class="meta">NAF : ${d.nafCode}</div>` : ''}
-  </div>
+    // Infos en-tête
+    let header = '';
+    header += H('div', 'h-legal', d.legalName || d.restaurantName);
+    if (d.legalName && d.legalName !== d.restaurantName) {
+      header += H('div', 'h-sub', d.restaurantName);
+    }
+    if (d.address)    header += H('div', 'h-info', d.address);
+    if (d.phone)      header += H('div', 'h-info', 'Tel &nbsp;: ' + d.phone);
+    if (d.email)      header += H('div', 'h-info', 'Email : ' + d.email);
+    if (d.taxNumber)  header += H('div', 'h-info', 'Siret : ' + d.taxNumber);
+    const tvaLine = (d.tvaNumber || '') + (d.nafCode ? ' - Naf : ' + d.nafCode : '');
+    if (tvaLine.trim()) header += H('div', 'h-info', 'Tva : ' + tvaLine);
 
-  <hr>
+    // TOTAL TTC block
+    let totalBlock = '';
+    totalBlock += '<div class="total-row">';
+    totalBlock += '<span class="total-lbl">TOTAL TTC</span>';
+    totalBlock += '<span class="total-amt">' + totalTTC.toFixed(2) + '</span>';
+    totalBlock += '</div>';
+    if (tva) {
+      totalBlock += H('div', 'tva-line', 'Dont TVA &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' + montantTVA.toFixed(2));
+      totalBlock += H('div', 'tva-line', 'Total HT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : ' + totalHT.toFixed(2));
+      totalBlock += H('div', 'tva-detail', 'B @' + (d.tvaRate||0) + ',00% ' + totalHT.toFixed(2) + ' HT ' + montantTVA.toFixed(2) + ' TVA ' + totalTTC.toFixed(2) + ' TTC');
+    }
 
-  <div class="header">
-    <span>${isEmporter ? 'A EMPORTER' : 'SUR PLACE'}</span>
-  </div>
+    // Pied de ticket
+    let footer = '';
+    if (d.paymentMethod) {
+      footer += '<div class="pay-row">';
+      footer += '<span>' + (M[d.paymentMethod] || d.paymentMethod) + '</span>';
+      footer += '<span>' + totalTTC.toFixed(2) + ' &euro;</span>';
+      footer += '</div><hr>';
+    }
+    footer += H('div', 'footer-legal', d.date + ' - ' + d.time);
+    if (d.orderRef && !isFin) {
+      footer += H('div', 'footer-legal', 'Document : ' + d.orderRef);
+    }
+    footer += '<hr>';
+    footer += H('div', 'footer-msg', d.ticketFooter || 'Merci de votre visite');
 
-  <div class="black-box">
-    <span class="bb-left">${tableLabel}</span>
-    <span class="bb-right">${isFin ? 'RECAP' : (d.orderRef ?? d.time)}</span>
-  </div>
+    const css = [
+      '* { margin:0 !important; padding:0 !important; box-sizing:border-box !important; }',
+      'html, body { width:100% !important; font-family: Arial Black, Arial, sans-serif; font-size:6vw; font-weight:900; color:#000; -webkit-print-color-adjust:exact; padding:2vw 1vw !important; }',
+      '.h-legal  { font-size:9vw; font-weight:900; text-align:center; text-transform:uppercase; }',
+      '.h-sub    { font-size:7vw; font-weight:700; text-align:center; }',
+      '.h-info   { font-size:5.5vw; font-weight:700; text-align:center; line-height:1.5; }',
+      'hr        { border:none !important; border-top:1.5px solid #000 !important; margin:2vw 0 !important; width:100% !important; display:block !important; }',
+      'hr.dbl    { border-top:3px double #000 !important; }',
+      '.meta-row { display:flex; justify-content:space-between; font-size:5.5vw; font-weight:700; margin:1vw 0 !important; }',
+      '.meta-line{ font-size:5.5vw; font-weight:700; margin:0.5vw 0 !important; }',
+      'table     { width:100%; border-collapse:collapse; table-layout:fixed; }',
+      '.art-qty  { width:6%; font-size:5.5vw; font-weight:700; vertical-align:top; padding:1.5vw 0 !important; display:none; }',
+      '.art-name { width:55%; font-size:5.5vw; font-weight:700; vertical-align:top; padding:1.5vw 1vw !important; word-wrap:break-word; }',
+      '.art-pu   { width:18%; font-size:5.5vw; font-weight:700; text-align:right; vertical-align:top; padding:1.5vw 0 !important; }',
+      '.art-total{ width:21%; font-size:5.5vw; font-weight:700; text-align:right; vertical-align:top; padding:1.5vw 0 !important; }',
+      '.art-note { font-size:5vw; font-weight:700; font-style:italic; }',
+      '.total-row{ display:flex; justify-content:space-between; align-items:baseline; margin:2vw 0 !important; }',
+      '.total-lbl{ font-size:8vw; font-weight:900; }',
+      '.total-amt{ font-size:10vw; font-weight:900; }',
+      '.tva-line { font-size:5.5vw; font-weight:700; margin:0.5vw 0 !important; }',
+      '.tva-detail{ font-size:5vw; font-weight:700; margin:0.5vw 0 !important; }',
+      '.pay-row  { display:flex; justify-content:space-between; font-size:7vw; font-weight:700; padding:1.5vw 0 !important; }',
+      '.footer-legal{ font-size:5vw; font-weight:700; text-align:center; margin:0.5vw 0 !important; }',
+      '.footer-msg  { font-size:6.5vw; font-weight:900; text-align:center; margin:2vw 0 1vw !important; }'
+    ].join(' ');
 
-  <div class="meta">Le ${d.date} à ${d.time}</div>
-  ${isFin ? '<div style="font-size:8vw;font-weight:900;text-align:center;padding:4px 0">★ FIN DE SERVICE ★</div>' : ''}
-
-  <hr>
-
-  <table>${rows}</table>
-
-  <hr class="thin">
-
-  <table>
-    <tr class="subtotal-row">
-      <td class="lbl">Sous-total</td>
-      <td class="amt">${d.total.toFixed(2)} €</td>
-    </tr>
-    <tr class="total-row">
-      <td class="lbl">Montant payé</td>
-      <td class="amt">${d.total.toFixed(2)} €</td>
-    </tr>
-  </table>
-
-  ${d.paymentMethod ? `<div class="payment">Mode : ${methods[d.paymentMethod] ?? d.paymentMethod}</div>` : ''}
-
-  <hr>
-  <!-- TVA si applicable -->
-  ${(d.tvaRate && d.tvaRate > 0) ? `
-  <table style="margin-bottom:4px">
-    <tr class="subtotal-row">
-      <td class="lbl">HT (${d.tvaRate}%)</td>
-      <td class="amt">${(d.total / (1 + (d.tvaRate||0)/100)).toFixed(2)} €</td>
-    </tr>
-    <tr class="subtotal-row">
-      <td class="lbl">TVA</td>
-      <td class="amt">${(d.total - d.total / (1 + (d.tvaRate||0)/100)).toFixed(2)} €</td>
-    </tr>
-  </table>
-  <hr class="thin">` : ''}
-  <div class="footer">
-    ${d.ticketFooter || 'Merci de votre visite'}<br>
-    <b>${d.restaurantName}</b>
-  </div>
-  <br><br><br>
-
-</body></html>`;
+    return '<!DOCTYPE html><html><head>'
+      + '<meta charset="UTF-8">'
+      + '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">'
+      + '<style>' + css + '</style>'
+      + '</head><body>'
+      + header
+      + '<hr class="dbl">'
+      + '<div class="meta-row">'
+      + '<span>' + (isEmporter ? 'A Emporter' : 'Sur place') + '</span>'
+      + (isFin ? '<span>FIN DE SERVICE</span>' : '')
+      + '</div>'
+      + '<div class="meta-line">Nombre De Clients : 1</div>'
+      + '<hr>'
+      + '<table>' + rowsHtml + '</table>'
+      + '<hr class="dbl">'
+      + totalBlock
+      + '<hr>'
+      + footer
+      + '<br><br><br>'
+      + '</body></html>';
   }
 
-  // ════════════════════════════════════════════════════
-  // Génération ESC/POS bytes (pour BLE et RawBT)
-  // ════════════════════════════════════════════════════
+
   private buildEscPosBytes(d: TicketData): Uint8Array {
     const c: number[] = [];
     const ESC = 0x1B, GS = 0x1D;
