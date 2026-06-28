@@ -38,12 +38,12 @@ class OrderServiceTest {
         sandwich = new MenuItem();
         sandwich.setId(1L); sandwich.setName("Chapati Thon");
         sandwich.setPrice(6.0); sandwich.setEmoji("🥙");
-        sandwich.setCategory(MenuItem.Category.SANDWICH); sandwich.setAvailable(true);
+        sandwich.setCategory(String.SANDWICH); sandwich.setAvailable(true);
 
         boisson = new MenuItem();
         boisson.setId(2L); boisson.setName("Citronnade");
         boisson.setPrice(3.5); boisson.setEmoji("🍋");
-        boisson.setCategory(MenuItem.Category.BOISSON); boisson.setAvailable(true);
+        boisson.setCategory(String.BOISSON); boisson.setAvailable(true);
 
         table5 = new RestaurantTable();
         table5.setId(5L); table5.setNumber(5);
