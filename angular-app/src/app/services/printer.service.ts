@@ -303,30 +303,37 @@ export class PrinterService {
     footer += '<hr>';
     footer += H('div', 'footer-msg', d.ticketFooter || 'Merci de votre visite');
 
+    // Taille de base : 6vw pour TOUT le ticket (identique à la photo)
+    // Seul TOTAL TTC est plus grand (9vw) comme sur le ticket Uber/Clyo
+    const F = '6vw';   // taille standard
+    const FG = '9vw';  // taille TOTAL TTC
     const css = [
       '* { margin:0 !important; padding:0 !important; box-sizing:border-box !important; }',
-      'html, body { width:100% !important; font-family: Arial Black, Arial, sans-serif; font-size:6vw; font-weight:900; color:#000; -webkit-print-color-adjust:exact; padding:2vw 1vw !important; }',
-      '.h-legal  { font-size:9vw; font-weight:900; text-align:center; text-transform:uppercase; }',
-      '.h-sub    { font-size:7vw; font-weight:700; text-align:center; }',
-      '.h-info   { font-size:5.5vw; font-weight:700; text-align:center; line-height:1.5; }',
+      'html, body { width:100% !important; font-family: Arial, Helvetica, sans-serif; font-size:' + F + '; font-weight:700; color:#000; -webkit-print-color-adjust:exact; padding:2vw 1vw !important; }',
+      // En-tête : même taille que le reste sauf la raison sociale (légèrement plus grande)
+      '.h-legal  { font-size:7vw; font-weight:900; text-align:center; text-transform:uppercase; }',
+      '.h-sub    { font-size:' + F + '; font-weight:700; text-align:center; }',
+      '.h-info   { font-size:' + F + '; font-weight:700; text-align:center; line-height:1.5; }',
       'hr        { border:none !important; border-top:1.5px solid #000 !important; margin:2vw 0 !important; width:100% !important; display:block !important; }',
       'hr.dbl    { border-top:3px double #000 !important; }',
-      '.meta-row { display:flex; justify-content:space-between; font-size:5.5vw; font-weight:700; margin:1vw 0 !important; }',
-      '.meta-line{ font-size:5.5vw; font-weight:700; margin:0.5vw 0 !important; }',
+      '.meta-row { display:flex; justify-content:space-between; font-size:' + F + '; font-weight:700; margin:1vw 0 !important; }',
+      '.meta-line{ font-size:' + F + '; font-weight:700; margin:0.5vw 0 !important; }',
       'table     { width:100%; border-collapse:collapse; table-layout:fixed; }',
-      '.art-qty  { width:6%; font-size:5.5vw; font-weight:700; vertical-align:top; padding:1.5vw 0 !important; display:none; }',
-      '.art-name { width:55%; font-size:5.5vw; font-weight:700; vertical-align:top; padding:1.5vw 1vw !important; word-wrap:break-word; }',
-      '.art-pu   { width:18%; font-size:5.5vw; font-weight:700; text-align:right; vertical-align:top; padding:1.5vw 0 !important; }',
-      '.art-total{ width:21%; font-size:5.5vw; font-weight:700; text-align:right; vertical-align:top; padding:1.5vw 0 !important; }',
-      '.art-note { font-size:5vw; font-weight:700; font-style:italic; }',
+      '.art-name { width:55%; font-size:' + F + '; font-weight:700; vertical-align:top; padding:1.5vw 1vw !important; word-wrap:break-word; }',
+      '.art-pu   { width:18%; font-size:' + F + '; font-weight:700; text-align:right; vertical-align:top; padding:1.5vw 0 !important; }',
+      '.art-total{ width:27%; font-size:' + F + '; font-weight:700; text-align:right; vertical-align:top; padding:1.5vw 0 !important; }',
+      '.art-note { font-size:' + F + '; font-weight:700; font-style:italic; padding-left:2vw !important; }',
+      // TOTAL TTC : plus grand et gras (comme sur la photo)
       '.total-row{ display:flex; justify-content:space-between; align-items:baseline; margin:2vw 0 !important; }',
-      '.total-lbl{ font-size:8vw; font-weight:900; }',
-      '.total-amt{ font-size:10vw; font-weight:900; }',
-      '.tva-line { font-size:5.5vw; font-weight:700; margin:0.5vw 0 !important; }',
-      '.tva-detail{ font-size:5vw; font-weight:700; margin:0.5vw 0 !important; }',
-      '.pay-row  { display:flex; justify-content:space-between; font-size:7vw; font-weight:700; padding:1.5vw 0 !important; }',
-      '.footer-legal{ font-size:5vw; font-weight:700; text-align:center; margin:0.5vw 0 !important; }',
-      '.footer-msg  { font-size:6.5vw; font-weight:900; text-align:center; margin:2vw 0 1vw !important; }'
+      '.total-lbl{ font-size:' + FG + '; font-weight:900; }',
+      '.total-amt{ font-size:' + FG + '; font-weight:900; }',
+      // TVA : même taille standard
+      '.tva-line { font-size:' + F + '; font-weight:700; margin:0.5vw 0 !important; }',
+      '.tva-detail{ font-size:' + F + '; font-weight:700; margin:0.5vw 0 !important; }',
+      // Mode paiement : même taille
+      '.pay-row  { display:flex; justify-content:space-between; font-size:' + F + '; font-weight:700; padding:1.5vw 0 !important; }',
+      '.footer-legal{ font-size:' + F + '; font-weight:700; text-align:center; margin:0.5vw 0 !important; }',
+      '.footer-msg  { font-size:' + F + '; font-weight:900; text-align:center; margin:2vw 0 1vw !important; }'
     ].join(' ');
 
     return '<!DOCTYPE html><html><head>'
