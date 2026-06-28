@@ -6,7 +6,7 @@ public class MenuItem {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
     @Column(nullable=false) private String name;
     @Column(nullable=false) private Double price;
-    @Enumerated(EnumType.STRING) private String category;
+    private String category;
     private String emoji;
     private boolean available = true;
 
