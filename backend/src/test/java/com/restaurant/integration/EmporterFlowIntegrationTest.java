@@ -1,10 +1,15 @@
 package com.restaurant.integration;
 
 import com.restaurant.model.*;
+import com.restaurant.model.Order;
 import com.restaurant.repository.*;
 import com.restaurant.service.OrderService;
 import com.restaurant.dto.OrderDTO;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -35,7 +40,7 @@ class EmporterFlowIntegrationTest {
             .orElseGet(() -> {
                 MenuItem m = new MenuItem();
                 m.setName("Test Chapati"); m.setEmoji("🥙");
-                m.setPrice(8.0); m.setCategory("SANDWICH"); m.setActive(true);
+                m.setPrice(8.0); m.setCategory("SANDWICH"); m.setAvailable(true);
                 return menuRepo.save(m);
             });
     }

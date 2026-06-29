@@ -1,10 +1,15 @@
 package com.restaurant.integration;
 
 import com.restaurant.model.*;
+import com.restaurant.model.Order;
 import com.restaurant.repository.*;
 import com.restaurant.service.OrderService;
 import com.restaurant.dto.OrderDTO;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,7 +33,7 @@ class FeaturesIntegrationTest {
         return menuRepo.findAll().stream().findFirst().orElseGet(() -> {
             MenuItem m = new MenuItem();
             m.setName("Test"); m.setEmoji("🍕"); m.setPrice(10.0);
-            m.setCategory("PIZZA"); m.setActive(true);
+            m.setCategory("PIZZA"); m.setAvailable(true);
             return menuRepo.save(m);
         });
     }
@@ -101,7 +106,7 @@ class FeaturesIntegrationTest {
     void freeCategory() {
         MenuItem m = new MenuItem();
         m.setName("Pizza Margherita"); m.setEmoji("🍕");
-        m.setPrice(12.0); m.setCategory("PIZZA"); m.setActive(true);
+        m.setPrice(12.0); m.setCategory("PIZZA"); m.setAvailable(true);
         MenuItem saved = menuRepo.save(m);
         assertThat(saved.getCategory()).isEqualTo("PIZZA");
         assertThat(saved.getId()).isNotNull();
