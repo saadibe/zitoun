@@ -90,7 +90,8 @@ export class CommandesComponent implements OnInit, OnDestroy {
 
   // ── Clic article ─────────────────────────────────
   addItem(item: MenuItem) {
-    if (this.settings.isSandwich(item.category)) {
+    // Ouvrir le modal si le produit a des options configurées
+    if (item.hasOptions) {
       this.optionItem  = item;
       this.optPiment   = 'normal';
       this.optWithMenu = false;

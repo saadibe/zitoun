@@ -49,6 +49,20 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  toggleOption(item: MenuItem, field: 'hasOptions'|'hasPiment'|'hasMenu', event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    const updated = { ...item, [field]: checked };
+    // Si on désactive hasOptions, désactiver aussi piment et menu
+    if (field === 'hasOptions' && !checked) {
+      updated.hasPiment = false;
+      updated.hasMenu   = false;
+    }
+    this.api.updateMenuItem(item.id, updated).subscribe({
+      next: () => this.api.getMenu().subscribe(m => this.menu.set(m)),
+      error: () => alert('Erreur mise à jour options')
+    });
+  }
+
   deleteArticle(id: number) {
     if (!confirm('Supprimer cet article ?')) return;
     this.api.deleteMenuItem(id).subscribe(() => this.menu.update(m => m.filter(i => i.id !== id)));

@@ -23,5 +23,6 @@
     <include file="db/changelog/v16-order-enhancements.xml"/>
     <include file="db/changelog/v17-menuitem-image.xml"/>
     <include file="db/changelog/v18-loyalty.xml"/>
+    <include file="db/changelog/v19-menuitem-options.xml"/>
 
 </databaseChangeLog>

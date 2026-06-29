@@ -1,7 +1,10 @@
 export interface MenuItem {
   id: number; name: string; price: number;
   category: string; emoji: string; available: boolean;
-  active?: boolean; hasOptions?: boolean; imageUrl?: string;
+  imageUrl?: string;
+  hasPiment?: boolean;   // option piment activée
+  hasMenu?: boolean;     // option menu activée
+  hasOptions?: boolean;  // a des options (modal)
 }
 export interface CartItem {
   item: MenuItem; qty: number; note: string;

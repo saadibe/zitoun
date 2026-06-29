@@ -126,23 +126,29 @@
         <button class="enc-x" (click)="showOptions=false">✕</button>
       </div>
       <div class="opt-body">
-        <div class="opt-section">
-          <div class="opt-section-title">🌶️ Piment</div>
-          <div class="opt-choices">
-            @for (p of pimentOpts; track p.key) {
-              <button class="opt-choice" [class.sel]="optPiment===p.key" (click)="optPiment=p.key">{{ p.label }}</button>
-            }
+        <!-- Option piment (si activée sur le produit) -->
+        @if (optionItem.hasPiment) {
+          <div class="opt-section">
+            <div class="opt-section-title">🌶️ Piment</div>
+            <div class="opt-choices">
+              @for (p of pimentOpts; track p.key) {
+                <button class="opt-choice" [class.sel]="optPiment===p.key" (click)="optPiment=p.key">{{ p.label }}</button>
+              }
+            </div>
           </div>
-        </div>
-        <div class="opt-section">
-          <div class="opt-section-title">🍽️ Option Menu</div>
-          <div class="opt-choices">
-            <button class="opt-choice" [class.sel]="!optWithMenu" (click)="optWithMenu=false">Seul</button>
-            <button class="opt-choice menu-btn" [class.sel]="optWithMenu" (click)="optWithMenu=true">
-              Menu <span class="opt-extra">+{{ settings.fmt(settings.settings().menuPrice || 2) }}</span>
-            </button>
+        }
+        <!-- Option menu (si activée sur le produit) -->
+        @if (optionItem.hasMenu) {
+          <div class="opt-section">
+            <div class="opt-section-title">🍽️ Option Menu</div>
+            <div class="opt-choices">
+              <button class="opt-choice" [class.sel]="!optWithMenu" (click)="optWithMenu=false">Seul</button>
+              <button class="opt-choice menu-btn" [class.sel]="optWithMenu" (click)="optWithMenu=true">
+                Menu <span class="opt-extra">+{{ settings.fmt(settings.settings().menuPrice || 2) }}</span>
+              </button>
+            </div>
           </div>
-        </div>
+        }
         <div class="opt-summary">
           <span>Total article</span>
           <span class="opt-total">{{ settings.fmt(optionItem.price + (optWithMenu ? (settings.settings().menuPrice || 2) : 0)) }}</span>

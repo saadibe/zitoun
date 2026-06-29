@@ -63,6 +63,26 @@
               <div class="art-info">
                 <div class="art-name">{{ item.name }}</div>
                 <div class="art-meta">{{ item.category }} · {{ settings.fmt(item.price) }}</div>
+                <!-- Toggles options -->
+                <div class="art-options">
+                  <label class="opt-toggle" [class.on]="item.hasOptions">
+                    <input type="checkbox" [checked]="item.hasOptions"
+                      (change)="toggleOption(item, 'hasOptions', $event)">
+                    Options
+                  </label>
+                  @if (item.hasOptions) {
+                    <label class="opt-toggle" [class.on]="item.hasPiment">
+                      <input type="checkbox" [checked]="item.hasPiment"
+                        (change)="toggleOption(item, 'hasPiment', $event)">
+                      🌶️ Piment
+                    </label>
+                    <label class="opt-toggle" [class.on]="item.hasMenu">
+                      <input type="checkbox" [checked]="item.hasMenu"
+                        (change)="toggleOption(item, 'hasMenu', $event)">
+                      🍽️ Menu
+                    </label>
+                  }
+                </div>
               </div>
               <button class="btn-del" (click)="deleteArticle(item.id)">🗑</button>
             </div>

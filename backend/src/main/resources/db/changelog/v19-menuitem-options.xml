@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="v19-menuitem-options" author="zitoun">
+        <addColumn tableName="menu_item">
+            <column name="has_piment"  type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="has_menu"    type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="has_options" type="BOOLEAN" defaultValueBoolean="false"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Migrer les produits existants : activer les options selon la catégorie actuelle -->
+    <changeSet id="v19-migrate-existing-options" author="zitoun">
+        <sql>
+            UPDATE menu_item
+            SET has_piment  = true,
+                has_menu    = true,
+                has_options = true
+            WHERE UPPER(category) SIMILAR TO '%(SANDWICH|SANDWICHS|PLAT|TABOUNA|CHAPATI|PIZZA)%';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

@@ -41,6 +41,10 @@ public class MenuController {
         item.setCategory(updated.getCategory());
         item.setEmoji(updated.getEmoji());
         item.setAvailable(updated.isAvailable());
+        item.setHasPiment(updated.isHasPiment());
+        item.setHasMenu(updated.isHasMenu());
+        item.setHasOptions(updated.isHasOptions());
+        if (updated.getImageUrl() != null) item.setImageUrl(updated.getImageUrl());
         return menuRepo.save(item);
     }
 
