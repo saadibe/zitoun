@@ -14,6 +14,9 @@
 
     <!-- Séquence journalière : index pour requête rapide -->
     <changeSet id="v16-order-date-index" author="zitoun">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="idx_orders_created_at"/></not>
+        </preConditions>
         <createIndex tableName="orders" indexName="idx_orders_created_at">
             <column name="created_at"/>
         </createIndex>
