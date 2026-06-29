@@ -68,6 +68,86 @@ public class StatsController {
             }).toList();
     }
 
+    // Heatmap : affluence par jour × heure sur les 7 derniers jours
+    @GetMapping("/weekly")
+    public List<Map<String,Object>> weekly() {
+        List<Map<String,Object>> result = new java.util.ArrayList<>();
+        for (int day = 6; day >= 0; day--) {
+            LocalDateTime start = LocalDate.now().minusDays(day).atStartOfDay();
+            LocalDateTime end   = start.plusDays(1);
+            List<Order> orders  = orderRepo.findByDayRange(start, end);
+
+            Map<Integer, Integer> byHour = new java.util.TreeMap<>();
+            for (Order o : orders) {
+                int h = o.getCreatedAt().getHour();
+                byHour.merge(h, 1, Integer::sum);
+            }
+
+            List<Map<String,Object>> hours = new java.util.ArrayList<>();
+            byHour.forEach((h, count) -> {
+                Map<String,Object> hm = new java.util.HashMap<>();
+                hm.put("hour", h); hm.put("count", count);
+                hours.add(hm);
+            });
+
+            Map<String,Object> dm = new java.util.HashMap<>();
+            dm.put("date", start.toLocalDate().toString());
+            dm.put("dayName", start.toLocalDate().getDayOfWeek().toString().substring(0,3));
+            dm.put("hours", hours);
+            dm.put("total", orders.size());
+            result.add(dm);
+        }
+        return result;
+    }
+
+    // Comparaison J vs J-7 par heure
+    @GetMapping("/hourly-compare")
+    public Map<String,Object> hourlyCompare() {
+        LocalDateTime startToday   = LocalDate.now().atStartOfDay();
+        LocalDateTime startLastWeek = LocalDate.now().minusDays(7).atStartOfDay();
+        LocalDateTime endLastWeek   = startLastWeek.plusDays(1);
+
+        List<Order> today    = orderRepo.findServedToday(startToday);
+        List<Order> lastWeek = orderRepo.findServedBetween(startLastWeek, endLastWeek);
+
+        Map<Integer, Double> todayByHour = new java.util.TreeMap<>();
+        Map<Integer, Double> weekByHour  = new java.util.TreeMap<>();
+
+        for (Order o : today) {
+            int h = o.getPaidAt() != null ? o.getPaidAt().getHour() : o.getCreatedAt().getHour();
+            todayByHour.merge(h, o.getTotalAmount() != null ? o.getTotalAmount() : 0.0, Double::sum);
+        }
+        for (Order o : lastWeek) {
+            int h = o.getPaidAt() != null ? o.getPaidAt().getHour() : o.getCreatedAt().getHour();
+            weekByHour.merge(h, o.getTotalAmount() != null ? o.getTotalAmount() : 0.0, Double::sum);
+        }
+
+        // Fusionner les heures des deux jours
+        java.util.Set<Integer> hours = new java.util.TreeSet<>();
+        hours.addAll(todayByHour.keySet());
+        hours.addAll(weekByHour.keySet());
+
+        List<Map<String,Object>> result = new java.util.ArrayList<>();
+        for (int h : hours) {
+            Map<String,Object> m = new java.util.HashMap<>();
+            m.put("hour", String.format("%02d:00", h));
+            m.put("today", Math.round(todayByHour.getOrDefault(h, 0.0) * 100.0) / 100.0);
+            m.put("lastWeek", Math.round(weekByHour.getOrDefault(h, 0.0) * 100.0) / 100.0);
+            result.add(m);
+        }
+
+        double totalToday    = today.stream().mapToDouble(o -> o.getTotalAmount() != null ? o.getTotalAmount() : 0).sum();
+        double totalLastWeek = lastWeek.stream().mapToDouble(o -> o.getTotalAmount() != null ? o.getTotalAmount() : 0).sum();
+        double pct = totalLastWeek > 0 ? ((totalToday - totalLastWeek) / totalLastWeek) * 100 : 0;
+
+        Map<String,Object> resp = new java.util.HashMap<>();
+        resp.put("hours", result);
+        resp.put("totalToday", Math.round(totalToday * 100.0) / 100.0);
+        resp.put("totalLastWeek", Math.round(totalLastWeek * 100.0) / 100.0);
+        resp.put("pct", Math.round(pct * 10.0) / 10.0);
+        return resp;
+    }
+
     // Fin de service : récapitulatif par méthode de paiement
     @GetMapping("/service") public Map<String,Object> service() {
         LocalDateTime start = LocalDate.now().atStartOfDay();

@@ -46,6 +46,14 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
            "AND o.paidAt >= :start ORDER BY o.paidAt DESC")
     List<Order> findServedToday(@Param("start") LocalDateTime start);
 
+    @Query("SELECT o FROM Order o WHERE o.status = com.restaurant.model.Order.OrderStatus.SERVED " +
+           "AND o.paidAt >= :start AND o.paidAt < :end ORDER BY o.paidAt DESC")
+    List<Order> findServedBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT o FROM Order o WHERE o.status != com.restaurant.model.Order.OrderStatus.CANCELLED " +
+           "AND o.createdAt >= :start AND o.createdAt < :end ORDER BY o.createdAt DESC")
+    List<Order> findByDayRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
     @Query("SELECT COALESCE(SUM(o.totalAmount),0) FROM Order o " +
            "WHERE o.createdAt >= :start AND o.status = com.restaurant.model.Order.OrderStatus.SERVED")
     Double sumRevenueToday(@Param("start") LocalDateTime start);

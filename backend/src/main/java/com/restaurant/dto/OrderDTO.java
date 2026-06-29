@@ -9,12 +9,15 @@ public class OrderDTO {
         @NotNull @Min(0) private Integer tableNumber;
         @NotEmpty private List<OrderItemRequest> items;
         private String serverName;
+        private String globalNote;
         public Integer getTableNumber() { return tableNumber; }
         public void setTableNumber(Integer v) { this.tableNumber = v; }
         public List<OrderItemRequest> getItems() { return items; }
         public void setItems(List<OrderItemRequest> v) { this.items = v; }
         public String getServerName() { return serverName; }
         public void setServerName(String v) { this.serverName = v; }
+        public String getGlobalNote() { return globalNote; }
+        public void setGlobalNote(String v) { this.globalNote = v; }
     }
 
     public static class OrderItemRequest {
@@ -59,10 +62,8 @@ public class OrderDTO {
         private String globalNote;
         private String cancelledReason;
 
-        public Integer getDailyTicketNumber() { return dailyTicketNumber; }
-        public String getGlobalNote() { return globalNote; }
-        public String getCancelledReason() { return cancelledReason; }
         public static Builder builder() { return new Builder(); }
+
         public static class Builder {
             private Response r = new Response();
             public Builder id(Long v)                    { r.id = v; return this; }
@@ -75,18 +76,25 @@ public class OrderDTO {
             public Builder createdAt(String v)           { r.createdAt = v; return this; }
             public Builder updatedAt(String v)           { r.updatedAt = v; return this; }
             public Builder total(Double v)               { r.total = v; return this; }
+            public Builder dailyTicketNumber(Integer v)  { r.dailyTicketNumber = v; return this; }
+            public Builder globalNote(String v)          { r.globalNote = v; return this; }
+            public Builder cancelledReason(String v)     { r.cancelledReason = v; return this; }
             public Response build()                      { return r; }
         }
-        public Long getId() { return id; }
-        public Integer getTableNumber() { return tableNumber; }
-        public Order.OrderStatus getStatus() { return status; }
-        public String getServerName() { return serverName; }
-        public String getPaymentMethod() { return paymentMethod; }
-        public String getPaidAt() { return paidAt; }
-        public List<ItemResponse> getItems() { return items; }
-        public String getCreatedAt() { return createdAt; }
-        public String getUpdatedAt() { return updatedAt; }
-        public Double getTotal() { return total; }
+
+        public Long getId()                      { return id; }
+        public Integer getTableNumber()          { return tableNumber; }
+        public Order.OrderStatus getStatus()     { return status; }
+        public String getServerName()            { return serverName; }
+        public String getPaymentMethod()         { return paymentMethod; }
+        public String getPaidAt()                { return paidAt; }
+        public List<ItemResponse> getItems()     { return items; }
+        public String getCreatedAt()             { return createdAt; }
+        public String getUpdatedAt()             { return updatedAt; }
+        public Double getTotal()                 { return total; }
+        public Integer getDailyTicketNumber()    { return dailyTicketNumber; }
+        public String getGlobalNote()            { return globalNote; }
+        public String getCancelledReason()       { return cancelledReason; }
     }
 
     public static class ItemResponse {
@@ -97,25 +105,24 @@ public class OrderDTO {
         private Integer quantity;
         private String note;
 
-        public Integer getDailyTicketNumber() { return dailyTicketNumber; }
-        public String getGlobalNote() { return globalNote; }
-        public String getCancelledReason() { return cancelledReason; }
         public static Builder builder() { return new Builder(); }
+
         public static class Builder {
             private ItemResponse r = new ItemResponse();
-            public Builder id(Long v)       { r.id = v; return this; }
-            public Builder name(String v)   { r.name = v; return this; }
-            public Builder emoji(String v)  { r.emoji = v; return this; }
-            public Builder price(Double v)  { r.price = v; return this; }
+            public Builder id(Long v)          { r.id = v; return this; }
+            public Builder name(String v)      { r.name = v; return this; }
+            public Builder emoji(String v)     { r.emoji = v; return this; }
+            public Builder price(Double v)     { r.price = v; return this; }
             public Builder quantity(Integer v) { r.quantity = v; return this; }
-            public Builder note(String v)   { r.note = v; return this; }
-            public ItemResponse build()     { return r; }
+            public Builder note(String v)      { r.note = v; return this; }
+            public ItemResponse build()        { return r; }
         }
-        public Long getId() { return id; }
-        public String getName() { return name; }
-        public String getEmoji() { return emoji; }
-        public Double getPrice() { return price; }
+
+        public Long getId()          { return id; }
+        public String getName()      { return name; }
+        public String getEmoji()     { return emoji; }
+        public Double getPrice()     { return price; }
         public Integer getQuantity() { return quantity; }
-        public String getNote() { return note; }
+        public String getNote()      { return note; }
     }
 }

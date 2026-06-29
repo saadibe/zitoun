@@ -1,50 +1,112 @@
 :host { display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden; }
 
-.stats-page { display:flex; flex-direction:column; flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px; gap:16px; background:var(--ivory); }
-.stats-topbar { display:flex; justify-content:space-between; align-items:center; }
-.st-title    { font-family:'Tajawal',sans-serif; font-size:20px; font-weight:800; }
-.st-refresh  { padding:8px 14px; border-radius:10px; background:var(--sky); color:#fff; border:none; font-size:13px; font-weight:700; cursor:pointer; font-family:'Cairo',sans-serif; }
-.st-loading  { text-align:center; color:var(--ink3); padding:40px; }
+.stats-page {
+  display:flex; flex-direction:column; flex:1; min-height:0;
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+  padding:14px; gap:14px; background:var(--ivory);
+}
+
+// Topbar
+.topbar { display:flex; justify-content:space-between; align-items:center; }
+.tp-title { font-family:'Tajawal',sans-serif; font-size:20px; font-weight:800; }
+.btn-refresh {
+  width:36px; height:36px; border-radius:10px;
+  background:var(--sky); color:#fff; border:none;
+  font-size:16px; cursor:pointer;
+}
 
 // KPI
-.kpi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; }
-.kpi-card {
-  background:var(--white); border-radius:14px; border:2px solid var(--border);
-  padding:16px 14px; text-align:center; display:flex; flex-direction:column; gap:4px;
+.kpi-row {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px;
 }
-.kpi-icon { font-size:24px; }
-.kpi-val  { font-family:'Tajawal',sans-serif; font-size:22px; font-weight:900; color:var(--sky); }
-.kpi-lbl  { font-size:11px; color:var(--ink3); font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+.kpi {
+  background:var(--white); border-radius:12px; border:2px solid var(--border);
+  padding:12px 14px;
+}
+.kpi-lbl  { font-size:11px; color:var(--ink3); font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px; }
+.kpi-val  { font-family:'Tajawal',sans-serif; font-size:20px; font-weight:900; color:var(--ink1); }
+.kpi-trend {
+  font-size:11px; font-weight:700; margin-top:4px; display:inline-block;
+  padding:2px 7px; border-radius:10px;
+  &.up   { background:#EAF3DE; color:#3B6D11; }
+  &.down { background:#FCEBEB; color:#A32D2D; }
+}
+
+// Onglets
+.tabs { display:flex; gap:6px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.tab {
+  flex-shrink:0; padding:7px 14px; border-radius:20px; font-size:12px; font-weight:700;
+  cursor:pointer; font-family:'Cairo',sans-serif; border:2px solid var(--border);
+  background:var(--white); color:var(--ink2); transition:all .15s;
+  &.active { background:var(--sky); color:#fff; border-color:var(--sky); }
+}
 
 // Cards
-.st-card { background:var(--white); border-radius:14px; border:2px solid var(--border); padding:16px; }
-.st-card-title { font-size:14px; font-weight:800; margin-bottom:14px; }
+.card {
+  background:var(--white); border-radius:14px; border:2px solid var(--border);
+  padding:14px 16px;
+}
+.card-title { font-size:13px; font-weight:800; margin-bottom:12px; }
+.card-title-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.legend { display:flex; align-items:center; gap:8px; font-size:11px; color:var(--ink3); }
+.leg-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.leg-row { display:flex; align-items:center; gap:6px; font-size:12px; margin-bottom:6px; }
+.leg-val { margin-left:auto; font-weight:700; font-size:13px; }
 
-// Graphique en barres
-.chart-bars { display:flex; align-items:flex-end; gap:6px; height:120px; overflow-x:auto; }
-.bar-col { display:flex; flex-direction:column; align-items:center; gap:4px; min-width:40px; }
-.bar-amount { font-size:9px; color:var(--ink3); font-weight:700; white-space:nowrap; }
-.bar-wrap { flex:1; width:28px; background:var(--border); border-radius:4px 4px 0 0; display:flex; align-items:flex-end; }
-.bar-fill { width:100%; background:linear-gradient(180deg,var(--sky),var(--sky2)); border-radius:4px 4px 0 0; min-height:4px; transition:height .3s; }
-.bar-label { font-size:9px; color:var(--ink3); white-space:nowrap; }
+// Area chart
+.area-chart { overflow-x:auto; }
+
+// Barchart compare
+.bar-chart {
+  display:flex; align-items:flex-end; gap:4px; height:100px;
+  overflow-x:auto; -webkit-overflow-scrolling:touch;
+}
+.bar-group { display:flex; flex-direction:column; align-items:center; gap:2px; min-width:32px; }
+.bar-group-bars { display:flex; align-items:flex-end; gap:2px; height:90px; }
+.bar { width:12px; border-radius:3px 3px 0 0; min-height:2px; transition:height .3s;
+  &.today    { background:var(--sky); }
+  &.lastweek { background:#C0DD97; }
+}
+.bar-lbl { font-size:8px; color:var(--ink3); white-space:nowrap; }
+
+// Donut
+.donut-row    { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.donut-svg    { flex-shrink:0; }
+.donut-legend { flex:1; min-width:140px; }
+
+// Heatmap
+.heatmap-wrap { overflow-x:auto; }
+.heatmap { border-collapse:collapse; width:100%; }
+.hm-h    { width:32px; }
+.hm-day  { font-size:11px; color:var(--ink3); text-align:center; padding:3px; font-weight:700; }
+.hm-hour { font-size:10px; color:var(--ink3); text-align:right; padding-right:6px; }
+.hm-cell { padding:2px; }
+.hm-box  { height:20px; border-radius:3px; min-width:28px; }
+.hm-legend {
+  display:flex; align-items:center; gap:6px; margin-top:8px; font-size:11px;
+}
+.hm-scale  { display:flex; gap:2px;
+  div { width:16px; height:10px; border-radius:2px; }
+}
 
 // Top articles
-.top-list { display:flex; flex-direction:column; gap:6px; }
-.top-row { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--border); font-size:13px; &:last-child { border:none; } }
-.top-rank { width:22px; height:22px; border-radius:50%; background:var(--sky); color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.top-name { flex:1; font-weight:700; }
-.top-qty  { color:var(--ink3); font-size:12px; }
-.top-total { font-weight:800; color:var(--sky); min-width:60px; text-align:right; }
-
-// Paiements
-.pay-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; }
-.pay-card { border-radius:12px; padding:12px; text-align:center; border:2px solid transparent;
-  &.especes { background:#e8f5e9; border-color:#4caf50; }
-  &.carte   { background:#e3f2fd; border-color:#2196f3; }
-  &.cheque  { background:#fff8e1; border-color:#ffc107; }
-  &.mixte   { background:#f3e5f5; border-color:#9c27b0; }
+.top-list { display:flex; flex-direction:column; gap:10px; }
+.top-row  { display:flex; align-items:center; gap:10px; }
+.top-rank {
+  width:24px; height:24px; border-radius:50%; display:flex; align-items:center;
+  justify-content:center; font-size:11px; font-weight:800; flex-shrink:0;
+  background:var(--cream); color:var(--ink3);
+  &.gold   { background:#FAEEDA; color:#854F0B; }
+  &.silver { background:var(--cream); color:var(--ink2); }
+  &.bronze { background:#FAECE7; color:#993C1D; }
 }
-.pay-icon  { font-size:22px; }
-.pay-label { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin:3px 0; }
-.pay-nb    { font-size:11px; color:var(--ink3); }
-.pay-total { font-family:'Tajawal',sans-serif; font-size:17px; font-weight:900; margin-top:4px; }
+.top-info  { flex:1; min-width:0; }
+.top-name  { font-size:13px; font-weight:700; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.top-bar-wrap { height:6px; background:var(--cream); border-radius:3px; overflow:hidden; }
+.top-bar  { height:100%; background:var(--sky); border-radius:3px; transition:width .4s; }
+.top-stats { display:flex; flex-direction:column; align-items:flex-end; gap:2px; flex-shrink:0; }
+.top-qty  { font-size:11px; color:var(--ink3); }
+.top-total { font-size:13px; font-weight:800; color:var(--sky); }
+
+.empty { text-align:center; color:var(--ink3); padding:24px; font-size:13px; }
+.muted { color:var(--ink3); font-size:11px; }

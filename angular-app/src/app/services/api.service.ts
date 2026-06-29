@@ -26,7 +26,9 @@ export class ApiService {
   cancelOrder(id: number, reason: string) { return this.http.post<any>(`${this.base}/orders/${id}/cancel`, { reason }, { headers: this.headers() }); }
   getStatsToday()    { return this.http.get<any>(`${this.base}/stats/today`, { headers: this.headers() }); }
   getStatsHourly()   { return this.http.get<any>(`${this.base}/stats/hourly`, { headers: this.headers() }); }
-  getStatsTopItems() { return this.http.get<any>(`${this.base}/stats/top-items`, { headers: this.headers() }); }
+  getStatsTopItems()   { return this.http.get<any>(`${this.base}/stats/top-items`,       { headers: this.headers() }); }
+  getStatsCompare()    { return this.http.get<any>(`${this.base}/stats/hourly-compare`,   { headers: this.headers() }); }
+  getStatsWeekly()     { return this.http.get<any[]>(`${this.base}/stats/weekly`,          { headers: this.headers() }); }
   getActiveOrders()     { return this.http.get<Order[]>(`${this.base}/orders/active`,          { headers: this.headers() }); }
   getOrderHistory()     { return this.http.get<Order[]>(`${this.base}/orders/history`,         { headers: this.headers() }); }
   getPendingPayment()   { return this.http.get<Order[]>(`${this.base}/orders/pending-payment`, { headers: this.headers() }); }

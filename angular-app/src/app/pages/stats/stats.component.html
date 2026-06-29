@@ -1,110 +1,222 @@
 <div class="stats-page">
-  <div class="stats-topbar">
-    <div class="st-title">📊 Tableau de bord</div>
-    <button class="st-refresh" (click)="load()">🔄 Actualiser</button>
-  </div>
 
-  @if (loading()) {
-    <div class="st-loading">Chargement...</div>
-  }
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="tp-title">📊 Tableau de bord</div>
+    <button class="btn-refresh" (click)="load()">🔄</button>
+  </div>
 
   <!-- KPI -->
-  <div class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-icon">💰</div>
-      <div class="kpi-val">{{ today() ? fmt(today().revenue) : '—' }}</div>
+  <div class="kpi-row">
+    <div class="kpi">
       <div class="kpi-lbl">CA aujourd'hui</div>
+      <div class="kpi-val">{{ fmt(service()?.totalJour ?? 0) }}</div>
+      @if (compare()) {
+        <div class="kpi-trend" [class.up]="comparePctPositive" [class.down]="!comparePctPositive">
+          {{ comparePct }} vs J-7
+        </div>
+      }
     </div>
-    <div class="kpi-card">
-      <div class="kpi-icon">🧾</div>
-      <div class="kpi-val">{{ service() ? service().nbCommandes : '—' }}</div>
+    <div class="kpi">
       <div class="kpi-lbl">Commandes</div>
+      <div class="kpi-val">{{ service()?.nbCommandes ?? '—' }}</div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-icon">💳</div>
-      <div class="kpi-val">{{ service() && service().nbCommandes > 0 ? fmt(service().totalJour / service().nbCommandes) : '—' }}</div>
+    <div class="kpi">
       <div class="kpi-lbl">Ticket moyen</div>
+      <div class="kpi-val">{{ ticketMoyen > 0 ? fmt(ticketMoyen) : '—' }}</div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-icon">🏃</div>
-      <div class="kpi-val">{{ today() ? today().activeOrders : '—' }}</div>
+    <div class="kpi">
       <div class="kpi-lbl">En cours</div>
+      <div class="kpi-val">{{ today()?.activeOrders ?? '—' }}</div>
     </div>
   </div>
 
-  <!-- CA par heure -->
-  @if (hourly().length > 0) {
-    <div class="st-card">
-      <div class="st-card-title">⏰ CA par heure</div>
-      <div class="chart-bars">
-        @for (h of hourly(); track h.hour) {
-          <div class="bar-col">
-            <div class="bar-amount">{{ fmt(h.total) }}</div>
-            <div class="bar-wrap">
-              <div class="bar-fill" [style.height.%]="barWidth(h.total)"></div>
-            </div>
-            <div class="bar-label">{{ h.hour }}</div>
-          </div>
-        }
+  <!-- Onglets -->
+  <div class="tabs">
+    <button class="tab" [class.active]="activeTab()==='jour'"    (click)="activeTab.set('jour')">📈 Journée</button>
+    <button class="tab" [class.active]="activeTab()==='semaine'" (click)="activeTab.set('semaine')">📅 Semaine</button>
+    <button class="tab" [class.active]="activeTab()==='top'"     (click)="activeTab.set('top')">🏆 Top articles</button>
+  </div>
+
+  <!-- ── Onglet JOURNÉE ─────────────────────────────── -->
+  @if (activeTab() === 'jour') {
+
+    <!-- Graphique en aires CA/heure -->
+    @if (hourly().length > 0) {
+      <div class="card">
+        <div class="card-title">CA par heure</div>
+        <div class="area-chart">
+          <svg viewBox="0 0 580 130" width="100%" style="overflow:visible">
+            <!-- Grille -->
+            <line x1="0" y1="100" x2="580" y2="100" stroke="var(--border)" stroke-width="0.5"/>
+            <line x1="0" y1="60"  x2="580" y2="60"  stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>
+            <line x1="0" y1="20"  x2="580" y2="20"  stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>
+            <!-- Points et ligne -->
+            @for (h of hourly(); track h.hour; let i = $index) {
+              @let x = (i / (hourly().length - 1 || 1)) * 560;
+              @let y = 100 - barH(h.total);
+              <circle [attr.cx]="x + 10" [attr.cy]="y" r="3" fill="var(--sky)"/>
+            }
+            <!-- Labels X -->
+            @for (h of hourly(); track h.hour; let i = $index) {
+              @if (i % 2 === 0) {
+                @let x = (i / (hourly().length - 1 || 1)) * 560;
+                <text [attr.x]="x + 10" y="118" text-anchor="middle" font-size="9" fill="var(--ink3)">{{ h.hour }}</text>
+              }
+            }
+          </svg>
+        </div>
       </div>
-    </div>
+    }
+
+    <!-- Comparaison J vs J-7 -->
+    @if (compare()?.hours?.length > 0) {
+      <div class="card">
+        <div class="card-title-row">
+          <span class="card-title">Comparaison J vs J-7</span>
+          <div class="legend">
+            <span class="leg-dot" style="background:var(--sky)"></span><span>Aujourd'hui</span>
+            <span class="leg-dot" style="background:#C0DD97"></span><span>Il y a 7 jours</span>
+          </div>
+        </div>
+        <div class="bar-chart">
+          @for (h of compare().hours; track h.hour) {
+            <div class="bar-group">
+              <div class="bar-group-bars">
+                <div class="bar today" [style.height.px]="compareBarH(h.today)"></div>
+                <div class="bar lastweek" [style.height.px]="compareBarH(h.lastWeek)"></div>
+              </div>
+              <div class="bar-lbl">{{ h.hour }}</div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Donut paiements -->
+    @if (service()) {
+      <div class="card">
+        <div class="card-title">Répartition paiements</div>
+        <div class="donut-row">
+          <svg viewBox="0 0 100 100" width="110" height="110" class="donut-svg">
+            @let esp = service().especes?.total ?? 0;
+            @let carte = service().carte?.total ?? 0;
+            @let cheq = service().cheque?.total ?? 0;
+            @let mix = service().mixte?.total ?? 0;
+            @let tot = esp + carte + cheq + mix || 1;
+            @let c1 = (esp/tot)*283;
+            @let c2 = (carte/tot)*283;
+            @let c3 = (cheq/tot)*283;
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#C0DD97" stroke-width="14"
+              [attr.stroke-dasharray]="c1 + ' ' + 283"
+              [attr.stroke-dashoffset]="0" transform="rotate(-90 50 50)"/>
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#85B7EB" stroke-width="14"
+              [attr.stroke-dasharray]="c2 + ' ' + 283"
+              [attr.stroke-dashoffset]="-c1" transform="rotate(-90 50 50)"/>
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#FAC775" stroke-width="14"
+              [attr.stroke-dasharray]="c3 + ' ' + 283"
+              [attr.stroke-dashoffset]="-(c1+c2)" transform="rotate(-90 50 50)"/>
+            <text x="50" y="47" text-anchor="middle" font-size="11" font-weight="500" fill="var(--ink1)">{{ fmt(tot) }}</text>
+            <text x="50" y="58" text-anchor="middle" font-size="8" fill="var(--ink3)">total</text>
+          </svg>
+          <div class="donut-legend">
+            @if (service().especes?.nb > 0) {
+              <div class="leg-row"><span class="leg-dot" style="background:#C0DD97"></span>
+                <span>Espèces</span><span class="leg-val">{{ fmt(service().especes.total) }}</span></div>
+            }
+            @if (service().carte?.nb > 0) {
+              <div class="leg-row"><span class="leg-dot" style="background:#85B7EB"></span>
+                <span>Carte</span><span class="leg-val">{{ fmt(service().carte.total) }}</span></div>
+            }
+            @if (service().cheque?.nb > 0) {
+              <div class="leg-row"><span class="leg-dot" style="background:#FAC775"></span>
+                <span>Chèque</span><span class="leg-val">{{ fmt(service().cheque.total) }}</span></div>
+            }
+            @if (service().mixte?.nb > 0) {
+              <div class="leg-row"><span class="leg-dot" style="background:#F5C4B3"></span>
+                <span>Mixte</span><span class="leg-val">{{ fmt(service().mixte.total) }}</span></div>
+            }
+          </div>
+        </div>
+      </div>
+    }
   }
 
-  <!-- Top 10 articles -->
-  @if (topItems().length > 0) {
-    <div class="st-card">
-      <div class="st-card-title">🏆 Top articles aujourd'hui</div>
+  <!-- ── Onglet SEMAINE (heatmap) ───────────────────── -->
+  @if (activeTab() === 'semaine' && weekly().length > 0) {
+    <div class="card">
+      <div class="card-title">Affluence — 7 derniers jours</div>
+      <div class="heatmap-wrap">
+        <table class="heatmap">
+          <thead>
+            <tr>
+              <th class="hm-h"></th>
+              @for (d of weekly(); track d.date) {
+                <th class="hm-day">{{ d.dayName }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (h of weeklyHours(); track h) {
+              <tr>
+                <td class="hm-hour">{{ h }}h</td>
+                @for (d of weekly(); track d.date) {
+                  <td class="hm-cell">
+                    <div class="hm-box"
+                      [style.background]="heatColor(weeklyCount(d, h), weeklyMax())"
+                      [title]="weeklyCount(d, h) + ' commandes'"></div>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div class="hm-legend">
+          <span class="muted">Faible</span>
+          <div class="hm-scale">
+            <div style="background:#E6F1FB"></div>
+            <div style="background:#B5D4F4"></div>
+            <div style="background:#85B7EB"></div>
+            <div style="background:#378ADD"></div>
+            <div style="background:#185FA5"></div>
+            <div style="background:#042C53"></div>
+          </div>
+          <span class="muted">Fort</span>
+        </div>
+      </div>
+    </div>
+    @if (weekly().length === 0) {
+      <div class="empty">Pas encore de données sur 7 jours</div>
+    }
+  }
+
+  <!-- ── Onglet TOP ARTICLES ────────────────────────── -->
+  @if (activeTab() === 'top') {
+    <div class="card">
+      <div class="card-title">Top 10 articles — aujourd'hui</div>
+      @if (topItems().length === 0) {
+        <div class="empty">Aucune vente enregistrée aujourd'hui</div>
+      }
       <div class="top-list">
         @for (item of topItems(); track item.name; let i = $index) {
           <div class="top-row">
-            <span class="top-rank">{{ i + 1 }}</span>
-            <span class="top-name">{{ item.name }}</span>
-            <span class="top-qty">×{{ item.qty }}</span>
-            <span class="top-total">{{ fmt(item.total) }}</span>
+            <div class="top-rank" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
+              {{ i + 1 }}
+            </div>
+            <div class="top-info">
+              <div class="top-name">{{ item.name }}</div>
+              <div class="top-bar-wrap">
+                <div class="top-bar" [style.width.%]="itemBarW(item.qty)"></div>
+              </div>
+            </div>
+            <div class="top-stats">
+              <span class="top-qty">×{{ item.qty }}</span>
+              <span class="top-total">{{ fmt(item.total) }}</span>
+            </div>
           </div>
         }
       </div>
     </div>
   }
 
-  <!-- Répartition par méthode -->
-  @if (service()) {
-    <div class="st-card">
-      <div class="st-card-title">💳 Répartition paiements</div>
-      <div class="pay-grid">
-        @if (service().especes?.nb > 0) {
-          <div class="pay-card especes">
-            <div class="pay-icon">💵</div>
-            <div class="pay-label">Espèces</div>
-            <div class="pay-nb">{{ service().especes.nb }} tickets</div>
-            <div class="pay-total">{{ fmt(service().especes.total) }}</div>
-          </div>
-        }
-        @if (service().carte?.nb > 0) {
-          <div class="pay-card carte">
-            <div class="pay-icon">💳</div>
-            <div class="pay-label">Carte</div>
-            <div class="pay-nb">{{ service().carte.nb }} tickets</div>
-            <div class="pay-total">{{ fmt(service().carte.total) }}</div>
-          </div>
-        }
-        @if (service().cheque?.nb > 0) {
-          <div class="pay-card cheque">
-            <div class="pay-icon">📝</div>
-            <div class="pay-label">Chèque</div>
-            <div class="pay-nb">{{ service().cheque.nb }} tickets</div>
-            <div class="pay-total">{{ fmt(service().cheque.total) }}</div>
-          </div>
-        }
-        @if (service().mixte?.nb > 0) {
-          <div class="pay-card mixte">
-            <div class="pay-icon">🔀</div>
-            <div class="pay-label">Mixte</div>
-            <div class="pay-nb">{{ service().mixte.nb }} tickets</div>
-            <div class="pay-total">{{ fmt(service().mixte.total) }}</div>
-          </div>
-        }
-      </div>
-    </div>
-  }
 </div>
