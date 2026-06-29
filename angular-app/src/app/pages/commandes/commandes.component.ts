@@ -145,12 +145,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
   }
 
   confirmer() {
-    if (this.payMethod === 'especes' && this.received < this.cart.total()) {
-      alert(`⚠ Montant insuffisant.\nTotal : ${this.settings.fmt(this.cart.total())}`);
-      return;
-    }
     this.showEnc = false;
-    // Envoyer en cuisine ET marquer comme payé
     this.sendToApi('now', this.payMethod);
   }
 
@@ -254,6 +249,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
       nafCode:            s.nafCode,
       ticketFooter:       s.ticketFooter,
       tvaRate:            s.tvaRate,
+      currency:           s.currency,
       total:              this.cart.total(),
       date:               new Date().toLocaleDateString('fr-FR'),
       time:               new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}),

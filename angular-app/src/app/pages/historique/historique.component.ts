@@ -182,6 +182,7 @@ export class HistoriqueComponent implements OnInit {
       nafCode:            s.nafCode,
       ticketFooter:       s.ticketFooter,
       tvaRate:            s.tvaRate,
+      currency:           s.currency,
       total:              h.total,
       paymentMethod:      h.method ?? null,
       date:               h.date,

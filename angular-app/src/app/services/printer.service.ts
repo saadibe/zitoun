@@ -10,6 +10,7 @@ export interface TicketData {
   restaurantName: string;
   restaurantSubtitle: string;
   orderRef?: string;
+  currency?: string;     // devise : €, DT, $...
   // Infos légales
   address?: string;
   phone?: string;
