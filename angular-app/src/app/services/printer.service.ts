@@ -107,19 +107,25 @@ export class PrinterService {
   // ════════════════════════════════════════════════════
   private async printViaPassPRNT(d: TicketData): Promise<void> {
     const html  = this.buildHtmlTicket(d);
+
+    // Minifier le HTML pour réduire la taille de l'URL
+    const mini = html
+      .replace(/\s*\n\s*/g, ' ')   // supprimer les sauts de ligne
+      .replace(/\s{2,}/g, ' ')       // supprimer les espaces multiples
+      .replace(/> </g, '><')          // supprimer espaces entre balises
+      .trim();
+
     const back  = encodeURIComponent(window.location.href);
-    const htmlE = encodeURIComponent(html);
+    const htmlE = encodeURIComponent(mini);
 
-    // PassPRNT : pas de size → laisse l'app gérer la largeur native
-    // scale=fit → étire sur toute la largeur du papier configuré dans PassPRNT
-    const url = `starpassprnt://v1/print/nopreview?`
-      + `back=${back}`
-      + `&popup=false`
-      + `&drawer=none`
-      + `&buzzer=none`
-      + `&html=${htmlE}`;
+    const url = 'starpassprnt://v1/print/nopreview?'
+      + 'back=' + back
+      + '&popup=false'
+      + '&drawer=none'
+      + '&buzzer=none'
+      + '&html=' + htmlE;
 
-    // Ouvrir via <a> — méthode recommandée par Star dans leur doc JS
+    // Ouvrir via <a>
     const a = document.createElement('a');
     a.setAttribute('href', url);
     a.setAttribute('id', 'passprnt-link');
