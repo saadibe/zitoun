@@ -42,6 +42,14 @@ public class OrderController {
         return orderService.getAllRecent().stream().map(orderService::toResponse).toList();
     }
 
+    // Annuler une commande
+    @PostMapping("/{id}/cancel")
+    public OrderDTO.Response cancel(@PathVariable Long id,
+                                    @RequestBody(required=false) java.util.Map<String,String> body) {
+        String reason = body != null ? body.getOrDefault("reason", "") : "";
+        return orderService.toResponse(orderService.cancelOrder(id, reason));
+    }
+
     // Commandes en attente de paiement (pour la page Tables / Encaissement)
     @GetMapping("/pending-payment")
     public List<OrderDTO.Response> getPendingPayment() {

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="v16-order-enhancements" author="zitoun">
+        <addColumn tableName="orders">
+            <column name="daily_ticket_number" type="INTEGER"/>
+            <column name="global_note"         type="VARCHAR(500)"/>
+            <column name="cancelled_reason"    type="VARCHAR(200)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Séquence journalière : index pour requête rapide -->
+    <changeSet id="v16-order-date-index" author="zitoun">
+        <createIndex tableName="orders" indexName="idx_orders_created_at">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

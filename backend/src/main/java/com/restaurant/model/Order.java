@@ -37,6 +37,15 @@ public class Order {
     @Column(name="total_amount")
     private Double totalAmount;
 
+    @Column(name="daily_ticket_number")
+    private Integer dailyTicketNumber;   // #001, #002... réinitialisé chaque jour
+
+    @Column(name="global_note", length=500)
+    private String globalNote;           // note globale sur la commande
+
+    @Column(name="cancelled_reason", length=200)
+    private String cancelledReason;      // motif d'annulation
+
     @PrePersist
     void prePersist() {
         createdAt = LocalDateTime.now();
@@ -52,7 +61,7 @@ public class Order {
     private void computeTotal() {
         if (items != null)
             totalAmount = items.stream()
-                .mapToDouble(i -> i.getMenuItem() != null ? i.getMenuItem().getPrice() * i.getQuantity() : 0)
+                .mapToDouble(i -> i.getEffectivePrice() * (i.getQuantity() != null ? i.getQuantity() : 0))
                 .sum();
     }
 
@@ -77,6 +86,12 @@ public class Order {
     public void setUpdatedAt(LocalDateTime v) { this.updatedAt = v; }
     public Double getTotalAmount() { return totalAmount; }
     public void setTotalAmount(Double v) { this.totalAmount = v; }
+    public Integer getDailyTicketNumber() { return dailyTicketNumber; }
+    public void setDailyTicketNumber(Integer v) { this.dailyTicketNumber = v; }
+    public String getGlobalNote() { return globalNote; }
+    public void setGlobalNote(String v) { this.globalNote = v; }
+    public String getCancelledReason() { return cancelledReason; }
+    public void setCancelledReason(String v) { this.cancelledReason = v; }
 
     // Builder pattern manual
     public static Order builder() { return new Order(); }

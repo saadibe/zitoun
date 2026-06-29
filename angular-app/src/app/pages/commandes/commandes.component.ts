@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { CartService } from '../../services/cart.service';
+import { AuthService } from '../../services/auth.service';
 import { SettingsService } from '../../services/settings.service';
 import { PrinterService, TicketData } from '../../services/printer.service';
 import { MenuItem, RestaurantTable, HistoryEntry } from '../../models';
@@ -32,6 +33,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
   payMethod  = 'especes';
   received   = 0;
   change: number | null = null;
+  globalNote = '';   // Note globale commande (allergies, préférences...)
 
   private clockTimer: any;
 
@@ -57,6 +59,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
   constructor(
     public cart: CartService,
     public settings: SettingsService,
+    private auth: AuthService,
     private api: ApiService,
     private printer: PrinterService
   ) {}
@@ -171,6 +174,8 @@ export class CommandesComponent implements OnInit, OnDestroy {
 
     const payload = {
       tableNumber: table,
+      globalNote: this.globalNote,
+      serverName: this.auth.session()?.user || 'Caisse',
       items: items.map(i => ({
         menuItemId: i.item.id,
         quantity:   i.qty,
@@ -226,6 +231,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
     const label = table === 0 ? '🥡 À emporter' : `Table ${table}`;
     this.sentMsg = `✓ ${label} — ${msg}`;
     this.cart.clear();
+    this.globalNote = '';
     this.sending.set(false);
     this.loadTables();
     setTimeout(() => this.sentMsg = '', 4000);

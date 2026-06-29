@@ -1,2 +1,31 @@
 // Shell styles are in global styles.scss
 :host { display: contents; }
+
+// ── Indicateur connexion ──────────────────────────────
+.conn-status {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 16px; font-size: 11px; color: rgba(255,255,255,.6);
+  .conn-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #a6e3a1; flex-shrink: 0;
+    animation: pulse 2s infinite;
+  }
+  .conn-ms { font-size: 10px; opacity: .5; }
+  &.offline {
+    color: #f38ba8;
+    .conn-dot { background: #f38ba8; animation: none; }
+  }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .4; }
+}
+
+// ── Toggle mode sombre ────────────────────────────────
+.theme-toggle {
+  margin: 4px 12px; padding: 6px 12px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.08);
+  color: #fff; font-size: 16px; cursor: pointer; text-align: left;
+  transition: background .15s;
+  &:hover { background: rgba(255,255,255,.15); }
+}

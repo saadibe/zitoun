@@ -29,6 +29,13 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
            "ORDER BY o.createdAt DESC")
     List<Order> findAllRecent();
 
+    @Query("SELECT COALESCE(MAX(o.dailyTicketNumber), 0) FROM Order o WHERE o.createdAt >= :start")
+    Integer findMaxDailyTicketNumber(@Param("start") LocalDateTime start);
+
+    @Query("SELECT o FROM Order o WHERE o.status = com.restaurant.model.Order.OrderStatus.CANCELLED " +
+           "ORDER BY o.updatedAt DESC")
+    List<Order> findCancelled();
+
     @Query("SELECT o FROM Order o WHERE o.status = com.restaurant.model.Order.OrderStatus.READY " +
            "OR o.status = com.restaurant.model.Order.OrderStatus.SENT " +
            "OR o.status = com.restaurant.model.Order.OrderStatus.PREPARING " +

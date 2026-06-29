@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+    <changeSet id="v18-loyalty" author="zitoun">
+        <createTable tableName="loyalty_customer">
+            <column name="id" type="BIGSERIAL"><constraints primaryKey="true"/></column>
+            <column name="name"   type="VARCHAR(100)"><constraints nullable="false"/></column>
+            <column name="phone"  type="VARCHAR(20)"/>
+            <column name="visits" type="INTEGER" defaultValueNumeric="0"/>
+            <column name="total_spent" type="DOUBLE PRECISION" defaultValueNumeric="0"/>
+            <column name="last_visit"  type="TIMESTAMP"/>
+            <column name="created_at"  type="TIMESTAMP"/>
+            <column name="free_tickets_used" type="INTEGER" defaultValueNumeric="0"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

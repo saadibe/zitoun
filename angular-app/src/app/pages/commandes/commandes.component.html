@@ -30,8 +30,12 @@
       </div>
       <div class="menu-items">
         @for (item of filtered(); track item.id) {
-          <div class="m-card" [class.sandwich-card]="settings.isSandwich(item.category)" (click)="addItem(item)">
-            <div class="mc-em">{{ item.emoji }}</div>
+          <div class="m-card" [class.has-img]="item.imageUrl" [class.sandwich-card]="settings.isSandwich(item.category)" (click)="addItem(item)">
+            @if (item.imageUrl) {
+          <img class="mc-img" [src]="item.imageUrl" [alt]="item.name" loading="lazy">
+        } @else {
+          <div class="mc-em">{{ item.emoji }}</div>
+        }
             <div class="mc-nm">{{ item.name }}</div>
             <div class="mc-pr">{{ settings.fmt(item.price) }}</div>
             @if (settings.isSandwich(item.category)) {
@@ -84,7 +88,11 @@
           <span class="o-tlbl">Total</span>
           <span class="o-tval">{{ settings.fmt(cart.total()) }}</span>
         </div>
-        <div class="o-acts">
+        <!-- Note globale commande -->
+      <input class="o-note-global" [(ngModel)]="globalNote"
+        placeholder="🗒️ Note (allergie, préférence...)"
+        [attr.disabled]="!canSend() ? '' : null">
+      <div class="o-acts">
           <button class="act-btn act-print" [disabled]="!canSend()" (click)="openTicket()">🖨️ Ticket</button>
           <button class="act-btn act-send" [disabled]="!canSend()||sending()" (click)="send()">
             {{ sending() ? '⏳ Envoi...' : '🍳 Envoyer' }}

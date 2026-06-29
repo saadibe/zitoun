@@ -55,7 +55,13 @@ public class OrderDTO {
         private String createdAt;
         private String updatedAt;
         private Double total;
+        private Integer dailyTicketNumber;
+        private String globalNote;
+        private String cancelledReason;
 
+        public Integer getDailyTicketNumber() { return dailyTicketNumber; }
+        public String getGlobalNote() { return globalNote; }
+        public String getCancelledReason() { return cancelledReason; }
         public static Builder builder() { return new Builder(); }
         public static class Builder {
             private Response r = new Response();
@@ -91,6 +97,9 @@ public class OrderDTO {
         private Integer quantity;
         private String note;
 
+        public Integer getDailyTicketNumber() { return dailyTicketNumber; }
+        public String getGlobalNote() { return globalNote; }
+        public String getCancelledReason() { return cancelledReason; }
         public static Builder builder() { return new Builder(); }
         public static class Builder {
             private ItemResponse r = new ItemResponse();

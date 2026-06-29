@@ -1,0 +1,110 @@
+<div class="stats-page">
+  <div class="stats-topbar">
+    <div class="st-title">📊 Tableau de bord</div>
+    <button class="st-refresh" (click)="load()">🔄 Actualiser</button>
+  </div>
+
+  @if (loading()) {
+    <div class="st-loading">Chargement...</div>
+  }
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-val">{{ today() ? fmt(today().revenue) : '—' }}</div>
+      <div class="kpi-lbl">CA aujourd'hui</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🧾</div>
+      <div class="kpi-val">{{ service() ? service().nbCommandes : '—' }}</div>
+      <div class="kpi-lbl">Commandes</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">💳</div>
+      <div class="kpi-val">{{ service() && service().nbCommandes > 0 ? fmt(service().totalJour / service().nbCommandes) : '—' }}</div>
+      <div class="kpi-lbl">Ticket moyen</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🏃</div>
+      <div class="kpi-val">{{ today() ? today().activeOrders : '—' }}</div>
+      <div class="kpi-lbl">En cours</div>
+    </div>
+  </div>
+
+  <!-- CA par heure -->
+  @if (hourly().length > 0) {
+    <div class="st-card">
+      <div class="st-card-title">⏰ CA par heure</div>
+      <div class="chart-bars">
+        @for (h of hourly(); track h.hour) {
+          <div class="bar-col">
+            <div class="bar-amount">{{ fmt(h.total) }}</div>
+            <div class="bar-wrap">
+              <div class="bar-fill" [style.height.%]="barWidth(h.total)"></div>
+            </div>
+            <div class="bar-label">{{ h.hour }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Top 10 articles -->
+  @if (topItems().length > 0) {
+    <div class="st-card">
+      <div class="st-card-title">🏆 Top articles aujourd'hui</div>
+      <div class="top-list">
+        @for (item of topItems(); track item.name; let i = $index) {
+          <div class="top-row">
+            <span class="top-rank">{{ i + 1 }}</span>
+            <span class="top-name">{{ item.name }}</span>
+            <span class="top-qty">×{{ item.qty }}</span>
+            <span class="top-total">{{ fmt(item.total) }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Répartition par méthode -->
+  @if (service()) {
+    <div class="st-card">
+      <div class="st-card-title">💳 Répartition paiements</div>
+      <div class="pay-grid">
+        @if (service().especes?.nb > 0) {
+          <div class="pay-card especes">
+            <div class="pay-icon">💵</div>
+            <div class="pay-label">Espèces</div>
+            <div class="pay-nb">{{ service().especes.nb }} tickets</div>
+            <div class="pay-total">{{ fmt(service().especes.total) }}</div>
+          </div>
+        }
+        @if (service().carte?.nb > 0) {
+          <div class="pay-card carte">
+            <div class="pay-icon">💳</div>
+            <div class="pay-label">Carte</div>
+            <div class="pay-nb">{{ service().carte.nb }} tickets</div>
+            <div class="pay-total">{{ fmt(service().carte.total) }}</div>
+          </div>
+        }
+        @if (service().cheque?.nb > 0) {
+          <div class="pay-card cheque">
+            <div class="pay-icon">📝</div>
+            <div class="pay-label">Chèque</div>
+            <div class="pay-nb">{{ service().cheque.nb }} tickets</div>
+            <div class="pay-total">{{ fmt(service().cheque.total) }}</div>
+          </div>
+        }
+        @if (service().mixte?.nb > 0) {
+          <div class="pay-card mixte">
+            <div class="pay-icon">🔀</div>
+            <div class="pay-label">Mixte</div>
+            <div class="pay-nb">{{ service().mixte.nb }} tickets</div>
+            <div class="pay-total">{{ fmt(service().mixte.total) }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

@@ -237,6 +237,58 @@ export class HistoriqueComponent implements OnInit {
     if (!ok) alert('⚠ Impression échouée\n' + this.printer.lastError());
   }
 
+  cancelReason = '';
+  showCancelModal = false;
+  cancelTargetId: string | null = null;
+
+  openCancel(entry: HistoryEntry) {
+    this.cancelTargetId = entry.id;
+    this.cancelReason   = '';
+    this.showCancelModal = true;
+  }
+
+  confirmCancel() {
+    if (!this.cancelTargetId) return;
+    const numId = parseInt(this.cancelTargetId.replace('F', ''));
+    this.api.cancelOrder(numId, this.cancelReason).subscribe({
+      next: () => {
+        this.showCancelModal = false;
+        this.cart.loadHistoryFromApi();
+      },
+      error: (e) => alert('Annulation impossible : ' + (e.error?.message || e.message || 'Erreur'))
+    });
+  }
+
+  exportCsv() {
+    const rows = this.cart.history();
+    if (!rows.length) { alert('Aucune donnée à exporter'); return; }
+
+    const s = this.settings.settings();
+    const headers = ['ID','Date','Heure','Table','Articles','Total','Mode','Statut'];
+    const lines   = rows.map(r => [
+      r.id,
+      r.date,
+      r.time,
+      r.table ? 'Table ' + r.table : 'Emporter',
+      r.items.map(i => i.qty + 'x ' + i.name).join(' | '),
+      r.total.toFixed(2) + ' ' + s.currency,
+      r.method || '',
+      r.status === 'paid' ? 'Encaissé' : 'En attente'
+    ]);
+
+    const csv = [headers, ...lines]
+      .map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';'))
+      .join('\n');
+
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'laperla_' + new Date().toISOString().split('T')[0] + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   clearHistory() {
     if (confirm("Effacer tout l'historique local ?")) this.cart.clearHistory();
   }

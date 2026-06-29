@@ -26,6 +26,7 @@ import java.util.List;
             .serverName(req.getServerName())
             .status(Order.OrderStatus.PENDING)
             .build();
+        if (req.getGlobalNote() != null) order.setGlobalNote(req.getGlobalNote());
         List<OrderItem> items = req.getItems().stream().map(r -> {
             MenuItem m = menuRepo.findById(r.getMenuItemId())
                 .orElseThrow(() -> new RuntimeException("Article non trouvé: " + r.getMenuItemId()));
@@ -36,6 +37,10 @@ import java.util.List;
                 .unitPrice(price).build();
         }).toList();
         order.setItems(items);
+        // Assigner numéro de ticket journalier
+        LocalDateTime startOfDay = java.time.LocalDate.now().atStartOfDay();
+        int nextNum = orderRepo.findMaxDailyTicketNumber(startOfDay) + 1;
+        order.setDailyTicketNumber(nextNum);
         Order saved = orderRepo.save(order);
         // Mettre la table en OCCUPIED
         if (req.getTableNumber() != null && req.getTableNumber() > 0) {
@@ -80,6 +85,19 @@ import java.util.List;
     public List<Order> getHistory()        { return orderRepo.findHistory(); }
     public List<Order> getPendingPayment() { return orderRepo.findPendingPayment(); }
     public List<Order> getAllRecent()       { return orderRepo.findAllRecent(); }
+
+    @Transactional
+    public Order cancelOrder(Long id, String reason) {
+        Order o = findById(id);
+        if (o.getStatus() == Order.OrderStatus.SERVED)
+            throw new RuntimeException("Impossible d'annuler une commande déjà servie");
+        o.setStatus(Order.OrderStatus.CANCELLED);
+        o.setCancelledReason(reason);
+        Order saved = orderRepo.save(o);
+        try { ws.convertAndSend("/topic/orders", toResponse(saved)); } catch (Exception ignored) {}
+        try { ws.convertAndSend("/topic/kitchen", toResponse(saved)); } catch (Exception ignored) {}
+        return saved;
+    }
 
     public List<Order> getByStatus(Order.OrderStatus s) {
         return orderRepo.findByStatusOrderByCreatedAtAsc(s);

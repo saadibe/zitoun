@@ -500,3 +500,21 @@
 }
 .opt-total   { font-family: 'Tajawal', sans-serif; font-size: 20px; font-weight: 900; color: var(--sky); }
 .comp-footer { display: flex; gap: 8px; padding: 12px 20px 20px; }
+
+// ── Photos plats ──────────────────────────────────────
+.mc-img {
+  width: 56px; height: 56px; border-radius: 10px;
+  object-fit: cover; margin-bottom: 6px;
+}
+.m-card.has-img { padding: 8px 6px 8px; }
+
+// ── Note globale commande ────────────────────────────
+.o-note-global {
+  width: 100%; padding: 7px 10px;
+  border-radius: 9px; border: 1.5px solid var(--border);
+  background: var(--ivory); font-size: 12px;
+  font-family: 'Cairo', sans-serif; outline: none; color: var(--ink1);
+  &::placeholder { color: var(--ink4); }
+  &:focus { border-color: var(--sky); }
+  &:disabled { opacity: .4; }
+}

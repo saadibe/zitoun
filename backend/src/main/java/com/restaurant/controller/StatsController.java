@@ -21,6 +21,53 @@ public class StatsController {
         return s;
     }
 
+    // Stats par heure
+    @GetMapping("/hourly")
+    public List<Map<String,Object>> hourly() {
+        LocalDateTime start = LocalDate.now().atStartOfDay();
+        List<Order> orders = orderRepo.findServedToday(start);
+        Map<Integer, Double> byHour = new java.util.TreeMap<>();
+        for (Order o : orders) {
+            int h = o.getPaidAt() != null ? o.getPaidAt().getHour() : o.getCreatedAt().getHour();
+            byHour.merge(h, o.getTotalAmount() != null ? o.getTotalAmount() : 0.0, Double::sum);
+        }
+        List<Map<String,Object>> result = new java.util.ArrayList<>();
+        byHour.forEach((h, total) -> {
+            Map<String,Object> m = new java.util.HashMap<>();
+            m.put("hour", String.format("%02d:00", h));
+            m.put("total", Math.round(total * 100.0) / 100.0);
+            result.add(m);
+        });
+        return result;
+    }
+
+    // Top articles
+    @GetMapping("/top-items")
+    public List<Map<String,Object>> topItems() {
+        LocalDateTime start = LocalDate.now().atStartOfDay();
+        List<Order> orders = orderRepo.findServedToday(start);
+        Map<String, long[]> byItem = new java.util.LinkedHashMap<>();
+        for (Order o : orders) {
+            if (o.getItems() == null) continue;
+            for (var item : o.getItems()) {
+                String name = item.getMenuItem() != null ? item.getMenuItem().getName() : "?";
+                byItem.computeIfAbsent(name, k -> new long[]{0, 0});
+                byItem.get(name)[0] += item.getQuantity();
+                byItem.get(name)[1] += Math.round(item.getEffectivePrice() * item.getQuantity() * 100);
+            }
+        }
+        return byItem.entrySet().stream()
+            .sorted((a, b) -> Long.compare(b.getValue()[0], a.getValue()[0]))
+            .limit(10)
+            .map(e -> {
+                Map<String,Object> m = new java.util.HashMap<>();
+                m.put("name", e.getKey());
+                m.put("qty", e.getValue()[0]);
+                m.put("total", e.getValue()[1] / 100.0);
+                return m;
+            }).toList();
+    }
+
     // Fin de service : récapitulatif par méthode de paiement
     @GetMapping("/service") public Map<String,Object> service() {
         LocalDateTime start = LocalDate.now().atStartOfDay();
