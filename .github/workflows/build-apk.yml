@@ -3,6 +3,9 @@ name: Build Android APK
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'angular-app/**'
+      - '.github/workflows/build-apk.yml'
   workflow_dispatch:
 
 jobs:
@@ -17,46 +20,56 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: angular-app/package-lock.json
 
-      - name: Setup Java 17
+      - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Capacitor
+      - name: Install npm dependencies
+        working-directory: angular-app
         run: npm install
 
-      - name: Add Android platform
-        run: npx cap add android || echo "Already added"
+      - name: Build Angular (production)
+        working-directory: angular-app
+        run: npm run build
 
-      - name: Sync Capacitor
+      - name: Sync Capacitor (copy web build into native project)
+        working-directory: angular-app
         run: npx cap sync android
 
-      - name: Generate release keystore
+      - name: Generate debug keystore (stable across builds)
+        working-directory: angular-app/android
         run: |
-          keytool -genkey -v \
-            -keystore android/app/release.keystore \
-            -alias laperla \
-            -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass laperla123 -keypass laperla123 \
-            -dname "CN=La Perla, OU=POS, O=Restaurant, L=Tunis, S=Tunis, C=TN"
+          if [ ! -f app/release.keystore ]; then
+            keytool -genkey -v \
+              -keystore app/release.keystore \
+              -alias laperla \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass laperla123 -keypass laperla123 \
+              -dname "CN=La Perla, OU=POS, O=Restaurant, L=Tunis, S=Tunis, C=TN"
+          fi
 
       - name: Build APK (debug)
+        working-directory: angular-app/android
         run: |
-          cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
 
-      - name: Upload APK
+      - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
           name: LaPerla-POS-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: angular-app/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
 
-      - name: Show download link
-        run: echo "✅ APK disponible dans les Artifacts de ce workflow"
+      - name: Summary
+        run: |
+          echo "✅ Build terminé avec succès"
+          echo "📦 Télécharger l'APK : onglet Actions de ce repo → ce run → section Artifacts → LaPerla-POS-APK"
