@@ -197,6 +197,10 @@ export class CommandesComponent implements OnInit, OnDestroy {
               ? `✅ Commande envoyée en cuisine — encaisser via Tables`
               : `💳 Commande en cuisine — à encaisser`;
             this.saveHistory(table, items, total, when === 'now' ? payMethod : null, status);
+
+            // Impression automatique du ticket — pas besoin de cliquer manuellement
+            this.printAuto(table, items, total, when === 'now' ? payMethod : null, order.dailyTicketNumber);
+
             this.finishSend(table, msg);
           },
           error: () => this.finishSend(table, `✓ Enregistré`)
@@ -210,6 +214,41 @@ export class CommandesComponent implements OnInit, OnDestroy {
         this.finishSend(table, `✓ Enregistré hors ligne`);
       }
     });
+  }
+
+  // ── Impression automatique après envoi (sans clic) ────
+  private printAuto(table: number, items: any[], total: number,
+                    payMethod: string|null, ticketNum?: number) {
+    const s = this.settings.settings();
+    const data: TicketData = {
+      tableNumber:        table,
+      restaurantName:     s.name,
+      restaurantSubtitle: s.subtitle,
+      legalName:          s.legalName,
+      address:            s.address,
+      phone:              s.phone,
+      email:              s.email,
+      taxNumber:          s.taxNumber,
+      tvaNumber:          s.tvaNumber,
+      nafCode:            s.nafCode,
+      ticketFooter:       s.ticketFooter,
+      tvaRate:            s.tvaRate,
+      currency:           s.currency,
+      total:              total,
+      paymentMethod:      payMethod,
+      orderRef:           ticketNum ? '#' + ticketNum : undefined,
+      date:               new Date().toLocaleDateString('fr-FR'),
+      time:               new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}),
+      items: items.map(i => ({
+        name:  i.item.name,
+        emoji: i.item.emoji,
+        price: i.item.price + (i.withMenu ? this.cart.menuPrice : 0),
+        qty:   i.qty,
+        note:  this.itemNote(i)
+      }))
+    };
+    // Fire and forget — ne bloque pas l'UI, pas d'alerte si échec
+    this.printer.printTicket(data).catch(() => {});
   }
 
   private saveHistory(table: number, items: any[], total: number,

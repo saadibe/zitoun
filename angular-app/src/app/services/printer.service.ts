@@ -125,7 +125,7 @@ export class PrinterService {
       + '&buzzer=none'
       + '&html=' + htmlE;
 
-    // Ouvrir via <a>
+    // Ouvrir via <a> — déclenche l'intent Android puis revient via back=
     const a = document.createElement('a');
     a.setAttribute('href', url);
     a.setAttribute('id', 'passprnt-link');
@@ -134,9 +134,10 @@ export class PrinterService {
     setTimeout(() => {
       const el = document.getElementById('passprnt-link');
       if (el) document.body.removeChild(el);
-    }, 1500);
+    }, 400);
 
-    await new Promise(r => setTimeout(r, 1500));
+    // Court délai pour laisser l'intent partir, sans bloquer l'UI plus que nécessaire
+    await new Promise(r => setTimeout(r, 300));
   }
 
   // ════════════════════════════════════════════════════
