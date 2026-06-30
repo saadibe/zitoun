@@ -44,32 +44,41 @@ jobs:
         working-directory: angular-app
         run: npx cap sync android
 
-      - name: Generate debug keystore (stable across builds)
+      # ── Signature stable : même keystore à chaque build ────────────
+      # Le keystore est stocké en secret GitHub (base64), jamais dans le repo.
+      # Sans ça, Android refuse d'installer une mise à jour par-dessus
+      # une version précédente signée différemment.
+      - name: Decode release keystore
         working-directory: angular-app/android
         run: |
-          if [ ! -f app/release.keystore ]; then
-            keytool -genkey -v \
-              -keystore app/release.keystore \
-              -alias laperla \
-              -keyalg RSA -keysize 2048 -validity 10000 \
-              -storepass laperla123 -keypass laperla123 \
-              -dname "CN=La Perla, OU=POS, O=Restaurant, L=Tunis, S=Tunis, C=TN"
-          fi
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > app/release.keystore
 
-      - name: Build APK (debug)
+      # ── Numéro de version auto-incrémenté ───────────────────────────
+      # Utilise le numéro de run GitHub (toujours croissant) comme
+      # versionCode : garantit que chaque nouvel APK est reconnu par
+      # Android comme une mise à jour, jamais comme un doublon.
+      - name: Build signed release APK
         working-directory: angular-app/android
+        env:
+          KEYSTORE_PATH: release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: laperla
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease --no-daemon \
+            -PappVersionCode=${{ github.run_number }} \
+            -PappVersionName="1.0.${{ github.run_number }}"
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: LaPerla-POS-APK
-          path: angular-app/android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 30
+          name: LaPerla-POS-APK-v1.0.${{ github.run_number }}
+          path: angular-app/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 90
 
       - name: Summary
         run: |
-          echo "✅ Build terminé avec succès"
-          echo "📦 Télécharger l'APK : onglet Actions de ce repo → ce run → section Artifacts → LaPerla-POS-APK"
+          echo "✅ Build terminé — version 1.0.${{ github.run_number }}"
+          echo "📦 Télécharger : onglet Actions → ce run → Artifacts → LaPerla-POS-APK-v1.0.${{ github.run_number }}"
+          echo "📲 Installer cet APK par-dessus une version précédente met à jour l'app sans perte de données"
