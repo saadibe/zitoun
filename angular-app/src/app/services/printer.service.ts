@@ -1,4 +1,6 @@
 import { Injectable, signal } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
+import { CapacitorThermalPrinter } from 'capacitor-thermal-printer';
 
 export interface TicketData {
   tableNumber: number | null;
@@ -24,16 +26,19 @@ export interface TicketData {
 }
 
 // ── Méthode d'impression ───────────────────────────────────────────
-// 'window'  : window.print() via CSS thermique (marche partout)
-// 'rawbt'   : app RawBT Android (Bluetooth Classic natif)
+// 'native'   : plugin Capacitor natif (Bluetooth Classic SPP direct, AUCUN aller-retour)
+// 'window'   : window.print() via CSS thermique (marche partout, navigateur)
+// 'rawbt'    : app RawBT Android (Bluetooth Classic via intent)
+// 'passprnt' : app Star PassPRNT (Bluetooth Classic via intent)
 // 'bluetooth': Web Bluetooth BLE (TSP100III BLE uniquement)
-export type PrintMethod = 'window' | 'rawbt' | 'passprnt' | 'bluetooth';
+export type PrintMethod = 'native' | 'window' | 'rawbt' | 'passprnt' | 'bluetooth';
 
 @Injectable({ providedIn: 'root' })
 export class PrinterService {
 
   method   = signal<PrintMethod>(
-    (sessionStorage.getItem('printer_method') as PrintMethod) || 'passprnt'
+    (sessionStorage.getItem('printer_method') as PrintMethod)
+    || (Capacitor.isNativePlatform() ? 'native' : 'passprnt')
   );
   connected   = signal<boolean>(false);
   printing    = signal<boolean>(false);
@@ -43,6 +48,7 @@ export class PrinterService {
   // BLE
   private btDevice: any = null;
   private btChar:   any = null;
+  private nativeAddress: string | null = sessionStorage.getItem('printer_native_address');
 
   saveMethod(m: PrintMethod) {
     this.method.set(m);
@@ -55,6 +61,7 @@ export class PrinterService {
     this.lastError.set('');
     try {
       switch (this.method()) {
+        case 'native':    await this.printViaNative(data);     break;
         case 'rawbt':     await this.printViaRawBT(data);      break;
         case 'passprnt':  await this.printViaPassPRNT(data);   break;
         case 'bluetooth': await this.printViaBLE(data);        break;
@@ -228,6 +235,130 @@ export class PrinterService {
     try { if (this.btDevice?.gatt?.connected) this.btDevice.gatt.disconnect(); } catch {}
     this.btDevice = null; this.btChar = null;
     this.connected.set(false);
+    if (Capacitor.isNativePlatform()) {
+      try { CapacitorThermalPrinter.disconnect(); } catch {}
+    }
+  }
+
+  // ════════════════════════════════════════════════════
+  // MÉTHODE NATIVE — App Capacitor (Android/iOS)
+  // Bluetooth Classic SPP direct via SDK Rongta — AUCUN
+  // intent vers une app tierce, AUCUN aller-retour visuel.
+  // L'adresse MAC de l'imprimante est mémorisée dans
+  // sessionStorage après le premier appairage.
+  // ════════════════════════════════════════════════════
+
+  /** Scanne les imprimantes Bluetooth Classic à proximité (Android natif uniquement) */
+  async scanNativeDevices(onFound: (devices: {name:string, address:string}[]) => void): Promise<void> {
+    if (!Capacitor.isNativePlatform()) {
+      this.lastError.set('Le scan natif ne fonctionne que dans l\'app installée, pas dans le navigateur');
+      return;
+    }
+    CapacitorThermalPrinter.addListener('discoverDevices', (data: any) => {
+      onFound(data.devices || data || []);
+    });
+    await CapacitorThermalPrinter.startScan();
+  }
+
+  async stopNativeScan(): Promise<void> {
+    if (!Capacitor.isNativePlatform()) return;
+    try { await CapacitorThermalPrinter.stopScan(); } catch {}
+  }
+
+  /** Connecte l'imprimante par son adresse MAC Bluetooth et mémorise l'adresse */
+  async connectNative(address: string): Promise<boolean> {
+    if (!Capacitor.isNativePlatform()) {
+      this.lastError.set('Connexion native indisponible hors de l\'app installée');
+      return false;
+    }
+    try {
+      const device = await CapacitorThermalPrinter.connect({ address });
+      if (!device) {
+        this.connected.set(false);
+        this.lastError.set('Connexion impossible — vérifiez que l\'imprimante est allumée et appairée');
+        return false;
+      }
+      this.nativeAddress = address;
+      sessionStorage.setItem('printer_native_address', address);
+      this.btDeviceName.set(device.name || 'Star TSP100');
+      this.connected.set(true);
+      this.lastError.set('');
+      return true;
+    } catch (e: any) {
+      this.connected.set(false);
+      this.lastError.set(e?.message || 'Connexion native échouée');
+      return false;
+    }
+  }
+
+  /** Reconnecte automatiquement à la dernière imprimante mémorisée */
+  private async ensureNativeConnected(): Promise<boolean> {
+    if (this.connected()) return true;
+    const saved = sessionStorage.getItem('printer_native_address') || this.nativeAddress;
+    if (!saved) {
+      this.lastError.set('Aucune imprimante configurée — allez dans Admin > Imprimante');
+      return false;
+    }
+    return this.connectNative(saved);
+  }
+
+  /** Impression directe — appelée depuis printTicket(), zéro aller-retour visuel */
+  private async printViaNative(d: TicketData): Promise<void> {
+    const ok = await this.ensureNativeConnected();
+    if (!ok) throw new Error(this.lastError() || 'Imprimante non connectée');
+
+    const isEmporter = !d.tableNumber || d.tableNumber === 0;
+    const tableLabel = isEmporter ? 'A EMPORTER' : `TABLE ${d.tableNumber}`;
+    const methods: Record<string,string> = {
+      especes:'Espèces', carte:'Carte Bleue', cheque:'Chèque', mixte:'Mixte'
+    };
+
+    let builder = CapacitorThermalPrinter.begin()
+      .align('center')
+      .bold()
+      .doubleWidth()
+      .text((d.legalName || d.restaurantName) + '\n')
+      .clearFormatting();
+
+    if (d.restaurantSubtitle) builder = builder.text(d.restaurantSubtitle + '\n');
+    if (d.address)   builder = builder.text(d.address + '\n');
+    if (d.phone)      builder = builder.text('Tel : ' + d.phone + '\n');
+    if (d.taxNumber)  builder = builder.text('Siret : ' + d.taxNumber + '\n');
+
+    builder = builder
+      .text('--------------------------------\n')
+      .align('left')
+      .bold()
+      .text(tableLabel + '\n')
+      .clearFormatting()
+      .text(d.date + ' ' + d.time + '\n')
+      .text('--------------------------------\n');
+
+    for (const item of d.items) {
+      const priceStr = item.price > 0 ? (item.price * item.qty).toFixed(2) + ' €' : '';
+      builder = builder.text(item.qty + ' x ' + item.name);
+      if (priceStr) builder = builder.align('right').text(priceStr);
+      builder = builder.align('left').text('\n');
+      if (item.note?.trim()) builder = builder.text('  ' + item.note + '\n');
+    }
+
+    builder = builder
+      .text('--------------------------------\n')
+      .bold()
+      .doubleHeight()
+      .text('TOTAL: ' + d.total.toFixed(2) + ' €\n')
+      .clearFormatting();
+
+    if (d.paymentMethod) {
+      builder = builder.text((methods[d.paymentMethod] || d.paymentMethod) + '\n');
+    }
+
+    builder = builder
+      .align('center')
+      .text('\n' + (d.ticketFooter || 'Merci de votre visite') + '\n\n')
+      .cutPaper();
+
+    await builder.write();
   }
 
   // ════════════════════════════════════════════════════
