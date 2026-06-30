@@ -16,12 +16,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Verify required secrets are configured
+        run: |
+          if [ -z "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "::error::Le secret ANDROID_KEYSTORE_BASE64 n'est pas configuré."
+            echo "Va sur Settings > Secrets and variables > Actions et ajoute-le."
+            exit 1
+          fi
+          if [ -z "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" ]; then
+            echo "::error::Le secret ANDROID_KEYSTORE_PASSWORD n'est pas configuré."
+            echo "Va sur Settings > Secrets and variables > Actions et ajoute-le."
+            exit 1
+          fi
+          echo "✅ Secrets présents, poursuite du build"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: angular-app/package-lock.json
 
       - name: Setup Java 21
         uses: actions/setup-java@v4
