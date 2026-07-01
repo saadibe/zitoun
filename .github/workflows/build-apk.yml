@@ -23,11 +23,6 @@ jobs:
             echo "Va sur Settings > Secrets and variables > Actions et ajoute-le."
             exit 1
           fi
-          if [ -z "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" ]; then
-            echo "::error::Le secret ANDROID_KEYSTORE_PASSWORD n'est pas configuré."
-            echo "Va sur Settings > Secrets and variables > Actions et ajoute-le."
-            exit 1
-          fi
           echo "✅ Secrets présents, poursuite du build"
 
       - name: Setup Node.js
@@ -76,9 +71,9 @@ jobs:
         working-directory: angular-app/android
         env:
           KEYSTORE_PATH: release.keystore
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEYSTORE_PASSWORD: laperla2024
           KEY_ALIAS: laperla
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: laperla2024
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon \
