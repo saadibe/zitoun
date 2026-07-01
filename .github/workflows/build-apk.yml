@@ -63,7 +63,10 @@ jobs:
       - name: Decode release keystore
         working-directory: angular-app/android
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > app/release.keystore
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" \
+            | tr -d ' \n\r\t' \
+            | base64 -d > app/release.keystore
+          ls -la app/release.keystore
 
       # ── Numéro de version auto-incrémenté ───────────────────────────
       # Utilise le numéro de run GitHub (toujours croissant) comme
